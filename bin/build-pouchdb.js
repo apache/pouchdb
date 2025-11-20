@@ -23,7 +23,7 @@ var writeFile = buildUtils.writeFile;
 var pkg = require('../packages/node_modules/pouchdb/package.json');
 var version = pkg.version;
 
-var builtInModules = require('builtin-modules');
+var builtInModules = require('./builtin-modules');
 var external = Object.keys(require('../package.json').dependencies)
   .concat(builtInModules);
 
