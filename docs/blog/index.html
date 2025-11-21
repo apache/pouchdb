@@ -9,10 +9,10 @@ pagination:
   alias: posts
 permalink: "blog/{% if pagination.pageNumber > 0 %}page{{ pagination.pageNumber | plus:1 }}/{% endif %}"
 ---
+
 <div class="band">
 <article class='container'>
 <div class='row'>
-
 <div class='col-md-8'>
 {% for post in posts %}
 
