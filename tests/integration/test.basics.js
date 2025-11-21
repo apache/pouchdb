@@ -1339,5 +1339,23 @@ adapters.forEach(function (adapter) {
         }).should.throw(Error, 'Invalid plugin: got "pouchdb-adapter-memory", expected an object or a function');
       });
     }
+
+    it('#9094 should update total_rows when doc is put with an attachment', async () => {
+      // given
+      const db = new PouchDB(dbs.name);
+      await db.put({ _id:'foo', _attachments:{ 'simple.txt':{ content_type:'text/plain', data:'helo' } } });
+      const { rows, total_rows } = await db.allDocs();
+      rows.length.should.equal(1);
+      total_rows.should.equal(1);
+    });
+
+    it('#9094 should update total_rows when doc is posted with an attachment', async () => {
+      // given
+      const db = new PouchDB(dbs.name);
+      await db.post({ _attachments:{ 'simple.txt':{ content_type:'text/plain', data:'helo' } } });
+      const { rows, total_rows } = await db.allDocs();
+      rows.length.should.equal(1);
+      total_rows.should.equal(1);
+    });
   });
 });
