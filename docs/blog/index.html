@@ -2,30 +2,34 @@
 layout: default
 title: Blog
 edit: false
+pagination:
+  data: collections.posts
+  size: 5
+  reverse: true
+  alias: posts
+permalink: "blog/{% if pagination.pageNumber > 0 %}page{{ pagination.pageNumber | plus:1 }}/{% endif %}"
 ---
-
 <div class="band">
 <article class='container'>
 <div class='row'>
-<div class='col-md-8'>
-{% for post in paginator.posts %}
 
-<a class='h3' href='{{ site.baseurl }}{{ post.url }}'>{{ post.title }}</a>
+<div class='col-md-8'>
+{% for post in posts %}
+
+<a class='h3' href='{{ site.baseurl }}{{ post.url }}'>{{ post.data.title }}</a>
 {% include post_details.html %}
 
 {% endfor %}
 <ul class='pagination'>
-  <li {% if paginator.page == 1 %}class='disabled'{% endif %}><a href='{{paginator.previous_page_path | replace:'/index.html','' }}/'>&laquo;</a></li>
-  {% for page in (1..paginator.total_pages) %}
-    {% if page == paginator.page %}
-    <li class='active'><a>{{page}}</a></li>
-    {% elsif page == 1 %}
-    <li><a href='/blog/'>{{page}}</a></li>
+  <li {% if page.url == pagination.href.first %}class='disabled'{% endif %}><a href='{{pagination.href.previous | replace:'/index.html','' }}/'>&laquo;</a></li>
+  {% for _ in pagination.pages %}
+    {% if page.url == pagination.hrefs[forloop.index0] %}
+    <li class='active'><a>{{forloop.index}}</a></li>
     {% else %}
-    <li><a href='/blog/page{{page}}/'>{{page}}</a></li>
+    <li><a href='{{pagination.hrefs[forloop.index0]}}'>{{forloop.index}}</a></li>
     {% endif %}
   {% endfor %}
-  <li {% if paginator.page == paginator.total_pages %} class='disabled' {% endif %}><a href='{{paginator.next_page_path}}/'>&raquo;</a></li>
+  <li {% if page.url == pagination.href.last %} class='disabled' {% endif %}><a href='{{pagination.href.next}}/'>&raquo;</a></li>
 </ul>
 </div>
 </div>

@@ -3,7 +3,6 @@ tmp*
 /node_modules
 docs/_site
 docs/static/css
-docs/.jekyll-cache
 npm-debug.log
 npm-debug.log.*
 *~

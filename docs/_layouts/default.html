@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page.title }}</title>
+    <title>{{ title }}</title>
     <link rel="alternate" title="{{ site.description }}" type="application/rss+xml" href="/feed.xml">
     <link rel="stylesheet" href="{{ site.baseurl }}/static/css/pouchdb.css" />
     <link rel="me" href="https://fosstodon.org/@pouchdb" />
@@ -69,14 +69,14 @@
 
         <div class="container">
 
-          <h1 class="margin-bottom-none">{{ page.title }}</h1>
-          {% if page.edit != false %}
+          <h1 class="margin-bottom-none">{{ title }}</h1>
+          {% if edit != false %}
             <span class="h1 margin-bottom-none">
               {% include edit_button.html %}
             </span>
           {% endif %}
-          {% if page.sub_title %}
-            <h4>{{ page.sub_title}}</h4>
+          {% if sub_title %}
+            <h4>{{ sub_title}}</h4>
           {% endif %}
 
         </div>
