@@ -1,3 +1,7 @@
+---
+name: Issue
+about: General issue or bug
+---
 <!--
      Hello! 👋
      Thank you for opening an issue on PouchDB.
