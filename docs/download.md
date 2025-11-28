@@ -61,7 +61,7 @@ PouchDB is hosted at these CDNs:
 
 {% include anchor.html class="h3" title="Past releases" hash="past-releases" %}
 
-For past releases and changelog, check out the [Github releases page](https://github.com/pouchdb/pouchdb/releases).
+For past releases and changelog, check out the [Github releases page](https://github.com/apache/pouchdb/releases).
 
 {% include anchor.html class="h3" title="Plugins" hash="plugins" %}
 
@@ -71,5 +71,5 @@ For third-party plugins, see the [plugins page](/external.html).
 
 For custom builds and first-party plugins, see the [custom builds]({{ site.baseurl }}/custom.html) page.
 
-[latest]: https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb-{{ site.version }}.js
-[latest-min]: https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb-{{ site.version }}.min.js
+[latest]: https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb-{{ site.version }}.js
+[latest-min]: https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb-{{ site.version }}.min.js

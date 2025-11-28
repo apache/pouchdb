@@ -58,7 +58,7 @@ new PouchDB('mydb', {size: 50}); // request 50 MB with a popup
 new PouchDB('mydb'); // implicitly request 5 MB, no popup until you exceed 5MB
 ```
 
-This does not affect any backend other than Web SQL. Chrome, Android, and Opera do not show the popup. On PhoneGap/Cordova apps, you can also use the [SQLite plugin][sqlite] to get around this problem. Here's [more information about storage quotas](http://www.html5rocks.com/en/tutorials/offline/quota-research) and [details on the Safari/iOS bug](https://github.com/pouchdb/pouchdb/issues/2347).
+This does not affect any backend other than Web SQL. Chrome, Android, and Opera do not show the popup. On PhoneGap/Cordova apps, you can also use the [SQLite plugin][sqlite] to get around this problem. Here's [more information about storage quotas](http://www.html5rocks.com/en/tutorials/offline/quota-research) and [details on the Safari/iOS bug](https://github.com/apache/pouchdb/issues/2347).
 
 {% include anchor.html class="h3" title="PouchDB throws 404 (Object Not Found) for '_local' document" hash="404__local_document" %}
 
@@ -96,15 +96,15 @@ In the above example, `db` refers to a database object you created using `new Po
 
 {% include anchor.html class="h3" title="Database size limitation of ~5MB on iOS with Cordova/Phone Gap" hash="size_limitation_5mb" %}
 
-If you're storing large amounts of data, such as PNG attachments, the [SQLite plugin][sqlite] is again your friend. (See [issue #1260](https://github.com/pouchdb/pouchdb/issues/1260) for details.)
+If you're storing large amounts of data, such as PNG attachments, the [SQLite plugin][sqlite] is again your friend. (See [issue #1260](https://github.com/apache/pouchdb/issues/1260) for details.)
 
 {% include anchor.html class="h3" title="CouchDB returns a 404 for GETs from a CouchApp" hash="404_get_couchapp" %}
 
-Certain URL rewrites are broken by PouchDB's cache-busting; try adding `{cache : false}` to the PouchDB constructor. (See [issue #1233](https://github.com/pouchdb/pouchdb/issues/1233) for details.)
+Certain URL rewrites are broken by PouchDB's cache-busting; try adding `{cache : false}` to the PouchDB constructor. (See [issue #1233](https://github.com/apache/pouchdb/issues/1233) for details.)
 
 {% include anchor.html class="h3" title="Uncaught TypeError: object is not a function" hash="typeerror_object_is_not_a_function" %}
 
-Did you include the [es6-promise shim library](https://github.com/jakearchibald/es6-promise)?  Not every browser implements ES6 Promises correctly. (See [issue #1747](https://github.com/pouchdb/pouchdb/issues/1747) for details.)
+Did you include the [es6-promise shim library](https://github.com/jakearchibald/es6-promise)?  Not every browser implements ES6 Promises correctly. (See [issue #1747](https://github.com/apache/pouchdb/issues/1747) for details.)
 
 {% include anchor.html class="h3" title="SyntaxError: Parse error (Cordova on Android)" hash="cordova_android_parse_error" %}
 
@@ -152,7 +152,7 @@ JSON.parse(JSON.stringify(myDocument));
 
 If the object you get out is the same as the object you put in, then you are storing the right kind of object.
 
-Note that this also means that you cannot store `Date`s in your document. You must convert them to strings or numbers first. `Date`s will be stored as-is in IndexedDB, but in the other adapters and in CouchDB, they will be automatically converted to ISO string format, e.g. `'2015-01-01T12:00:00.000Z'`. This can caused unwanted results. See [#2351](https://github.com/pouchdb/pouchdb/issues/2351) and [#2158](https://github.com/pouchdb/pouchdb/issues/2158) for details.
+Note that this also means that you cannot store `Date`s in your document. You must convert them to strings or numbers first. `Date`s will be stored as-is in IndexedDB, but in the other adapters and in CouchDB, they will be automatically converted to ISO string format, e.g. `'2015-01-01T12:00:00.000Z'`. This can caused unwanted results. See [#2351](https://github.com/apache/pouchdb/issues/2351) and [#2158](https://github.com/apache/pouchdb/issues/2158) for details.
 
 {% include anchor.html class="h3" title="DOM Exception 18 in Android pre-Kitkat WebView" hash="android_pre_kitkat" %}
 
@@ -262,7 +262,7 @@ WebPack needs to be configured to recognize how to load json files. Simply, inst
 ```js
 module: {
     loaders: [
-        // https://github.com/pouchdb/pouchdb/issues/3319
+        // https://github.com/apache/pouchdb/issues/3319
         {
             test: /\.json$/,
             loader: "json-loader"
