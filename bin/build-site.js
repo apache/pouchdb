@@ -17,14 +17,6 @@ const POUCHDB_LESS = resolvePath('docs/src/less/pouchdb/pouchdb.less');
 
 process.chdir('docs');
 
-async function checkJekyll() {
-  try {
-    await exec('bundle check');
-  } catch (err) {
-    throw new Error('Jekyll is not installed.  You need to do: npm run install-jekyll');
-  }
-}
-
 async function buildCSS() {
   fs.mkdirSync(__dirname + '/../docs/static/css', { recursive:true });
   const cmd = [ resolvePath('node_modules/less/bin/lessc'), POUCHDB_LESS ].join(' ');
@@ -34,9 +26,9 @@ async function buildCSS() {
   console.log('Updated:', POUCHDB_CSS);
 }
 
-async function buildJekyll() {
-  await exec('bundle exec jekyll build');
-  console.log('=> Rebuilt jekyll');
+async function buildEleventy() {
+  await exec('npx @11ty/eleventy');
+  console.log('=> Rebuilt eleventy');
 
   highlightEs6();
   console.log('=> Highlighted ES6');
@@ -83,9 +75,8 @@ function onError(err) {
 
 function buildEverything() {
   return Promise.resolve()
-    .then(checkJekyll)
     .then(buildCSS)
-    .then(buildJekyll)
+    .then(buildEleventy)
     .catch(onError);
 }
 
@@ -100,14 +91,14 @@ if (!process.env.BUILD) {
   // Simpler ways of blacklisting certain paths here would be very welcome.
   fs.readdirSync('.')
     .forEach(path => {
-      if (path === '_site' || path.startsWith('Gemfile')) {
+      if (path === '_site') {
         return;
       }
 
       if (fs.statSync(path).isDirectory()) {
-        watchGlob(`${path}/**`, buildJekyll);
+        watchGlob(`${path}/**`, buildEleventy);
       } else {
-        watchGlob(path, buildJekyll);
+        watchGlob(path, buildEleventy);
       }
     });
 

@@ -97,16 +97,7 @@ Now when you visit https://github.com/myfork/pouchdb there should be a button th
 Building PouchDB Documentation
 --------------------------------------
 
-The source for the website http://pouchdb.com is stored inside the `docs` directory of the PouchDB repository, you can make changes and submit pull requests as with any other patch. To build and view the website locally you will need to have the Ruby development package installed.
-On Ubuntu this is done with:
-
-    $ sudo apt install -y ruby-dev
-
-You then neet to install [jekyll](http://jekyllrb.com/) and a few other gems. Jekyll is installed using [bundler](http://bundler.io/) so you need to install that first.
-On Ubuntu you will need root permissions to do this so prefix the ```gem``` command with ```sudo```
-
-    $ [sudo] gem install bundler
-    $ npm run install-jekyll
+The source for the website http://pouchdb.com is stored inside the `docs` directory of the PouchDB repository, you can make changes and submit pull requests as with any other patch.
 
 If you haven't already done so, you'll also need to run `npm install` to pull in packages for the dev server:
 
@@ -117,10 +108,6 @@ Now you can build the site and start the dev server with:
     $ npm run build-site
 
 You should now find the documentation at http://127.0.0.1:4000
-
-You can also build and run the documentation with docker:
-
-    $ npm run dev-site-with-docker
 
 Writing a PouchDB Blog Post
 --------------------------------------

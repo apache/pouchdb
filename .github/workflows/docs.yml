@@ -28,11 +28,5 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/install-node-package
         with:
-          node-version: 22
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7
-          bundler-cache: true
-      - run: sudo gem install bundler -v 2.1.4
-      - run: npm run install-jekyll
+          node-version: 24
       - run: BUILD=1 npm run build-site
