@@ -18,12 +18,22 @@ const POUCHDB_LESS = resolvePath('docs/src/less/pouchdb/pouchdb.less');
 process.chdir('docs');
 
 async function buildCSS() {
-  fs.mkdirSync(__dirname + '/../docs/static/css', { recursive:true });
-  const cmd = [ resolvePath('node_modules/less/bin/lessc'), POUCHDB_LESS ].join(' ');
-  const { stdout } = await exec(cmd);
-  const minifiedCss = cssmin(stdout);
-  fs.writeFileSync(POUCHDB_CSS, minifiedCss);
-  console.log('Updated:', POUCHDB_CSS);
+  try {
+    const targetDir = __dirname + '/../docs/static/css';
+    fs.mkdirSync(targetDir, { recursive:true });
+    [
+      'prism.css',
+      'prism-solarizedlight.css',
+    ].forEach(f => fs.copyFileSync(`../node_modules/prismjs/themes/${f}`, `${targetDir}/${f}`));
+    const cmd = [ resolvePath('node_modules/less/bin/lessc'), POUCHDB_LESS ].join(' ');
+    const { stdout } = await exec(cmd);
+    const minifiedCss = cssmin(stdout);
+    fs.writeFileSync(POUCHDB_CSS, minifiedCss);
+    console.log('Updated:', POUCHDB_CSS);
+  } catch (err) {
+    console.log('Error building css:', err);
+    throw err;
+  }
 }
 
 async function buildEleventy() {
@@ -103,7 +113,7 @@ if (!process.env.BUILD) {
     });
 
 
-  watchGlob('static/src/*/*.less', buildCSS);
+  watchGlob('src/less/**', buildCSS);
 
   http_server.createServer({root: '_site', cache: '-1'}).listen(4000);
   console.log('Server address: http://localhost:4000');
