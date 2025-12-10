@@ -10,7 +10,6 @@
 {% assign post_author = author %}
 {% assign post_gravatar = '' %}
 
-<ol>
 {% for a in authors %}
   {% if a.name == author %}
     {% if a.twitter %}
@@ -21,7 +20,6 @@
     {% endif %}
   {% endif %}
 {% endfor %}
-</ol>
 
 {% if modified_date %}
   {% capture modified_date %}<strong>Updated:</strong> {{ modified_date | date_to_long_string }}<br>{% endcapture %}
