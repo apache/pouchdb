@@ -20,14 +20,14 @@ it's because you need to enable [CORS](https://developer.mozilla.org/en-US/docs/
 
 You can enable CORS in CouchDB using `curl` or the Futon web interface, but we've saved you some time by making a Node script called [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb). Just run:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ npm install -g add-cors-to-couchdb
 $ add-cors-to-couchdb
 {% endhighlight %}
 
 Or if your database is not at `127.0.0.1:5984`:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ add-cors-to-couchdb http://me.example.com \
     -u myusername -p mypassword
 {% endhighlight %}
@@ -88,7 +88,7 @@ By default, all EventEmitters have 10 listeners, and if you exceed that limit, e
 
 If you're sure it's not a memory leak, though, you can increase the limit by doing:
 
-{% highlight javascript %}
+{% highlight "javascript" %}
 db.setMaxListeners(20);  // or 30 or 40 or however many you need
 {% endhighlight %}
 

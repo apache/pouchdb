@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Create index" hash="create_index" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex(index [, callback])
 {% endhighlight %}
 
@@ -18,7 +18,7 @@ Create an index if it doesn't exist, or do nothing if it already exists.
 #### Example Usage:
 
 {% include code/start.html id="create_idx" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo']
@@ -31,7 +31,7 @@ db.createIndex({
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.createIndex({
     index: {
@@ -45,7 +45,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo']
@@ -62,20 +62,20 @@ db.createIndex({
 
 If the index was created, you'll see:
 
-{% highlight js %}
+{% highlight "js" %}
 { "result": "created" }
 {% endhighlight %}
 
 Or if the index already exists:
 
-{% highlight js %}
+{% highlight "js" %}
 { "result": "exists" }
 {% endhighlight %}
 
 You can also create an index on multiple fields:
 
 {% include code/start.html id="create_idx2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo', 'bar', 'baz']
@@ -88,7 +88,7 @@ db.createIndex({
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.createIndex({
     index: {
@@ -102,7 +102,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo', 'bar', 'baz']
@@ -118,7 +118,7 @@ db.createIndex({
 Or an index on deep fields:
 
 {% include code/start.html id="create_idx3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['person.address.zipcode']
@@ -131,7 +131,7 @@ db.createIndex({
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.createIndex({
     index: {
@@ -145,7 +145,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['person.address.zipcode']
@@ -161,7 +161,7 @@ db.createIndex({
 You can also specify additional options, if you want more control over how your index is created:
 
 {% include code/start.html id="create_idx4" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo', 'bar'],
@@ -177,7 +177,7 @@ db.createIndex({
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx4" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.createIndex({
     index: {
@@ -194,7 +194,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx4" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['foo', 'bar'],
@@ -224,7 +224,7 @@ instead of the native indexes, negating all index performance gains from the
 {% include alert/end.html%}
 
 {% include code/start.html id="create_idx5" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['year', 'title'],
@@ -240,7 +240,7 @@ db.createIndex({
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx5" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = db.createIndex({
     index: {
@@ -257,7 +257,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="create_idx5" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.createIndex({
   index: {
     fields: ['year', 'title'],
@@ -283,7 +283,7 @@ db.createIndex({
 
 When a PouchDB instance updates an index, it emits `indexing` events that include information about the progress of the index update task.
 
-{% highlight js %}
+{% highlight "js" %}
 const db = new PouchDB('my-docs');
 
 db.on('indexing', function (event) {

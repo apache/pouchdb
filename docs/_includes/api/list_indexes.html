@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="List indexes" hash="list_indexes" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.getIndexes([callback])
 {% endhighlight %}
 
@@ -19,7 +19,7 @@ special `_all_docs` index, i.e. the default index on the `_id` field.
 #### Example Usage:
 
 {% include code/start.html id="get_idxs" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getIndexes(function (err, result) {
   if (err) { return console.log(err); }
   // handle result
@@ -28,7 +28,7 @@ db.getIndexes(function (err, result) {
 {% include code/end.html %}
 
 {% include code/start.html id="get_idxs" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.getIndexes();
 } catch (err) {
@@ -38,7 +38,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="get_idxs" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getIndexes().then(function (result) {
   // handle result
 }).catch(function (err) {
@@ -49,7 +49,7 @@ db.getIndexes().then(function (result) {
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "indexes": [
     {
