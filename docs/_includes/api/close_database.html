@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Close a database" hash="close_database"%}
 
-{% highlight js %}
+{% highlight "js" %}
 db.close([callback])
 {% endhighlight %}
 
@@ -9,7 +9,7 @@ Close the database, this closes any open connection to the underlying storage an
 #### Example Usage
 
 {% include code/start.html id="close_db" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.close(function () {
   // success
 });
@@ -18,14 +18,14 @@ db.close(function () {
 
 {% include code/start.html id="close_db" type="async" %}
 
-{% highlight js %}
+{% highlight "js" %}
 await db.close();
 {% endhighlight %}
 {% include code/end.html %}
 
 {% include code/start.html id="close_db" type="promise" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.close().then(function () {
   // success
 });

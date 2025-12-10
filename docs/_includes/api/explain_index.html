@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Explain index" hash="explain_index" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.explain(request [, callback])
 {% endhighlight %}
 
@@ -18,7 +18,7 @@ Explain the query plan for a given query
 #### Example Usage:
 
 {% include code/start.html id="explain_idx" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.explain({
   selector: {
     name: 'Mario',
@@ -34,7 +34,7 @@ db.explain({
 {% include code/end.html %}
 
 {% include code/start.html id="explain_idx" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const explanation = await db.explain({
     selector: {
@@ -51,7 +51,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="explain_idx" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.explain({
   selector: {
     name: 'Mario',
@@ -69,7 +69,7 @@ db.explain({
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "dbname": "database-name"
   "index": {

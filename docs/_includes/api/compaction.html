@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Compact the database" hash="compaction" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.compact([options], [callback])
 {% endhighlight %}
 
@@ -15,7 +15,7 @@ Also see [auto-compaction](#create_database), which runs compaction automaticall
 #### Example Usage:
 
 {% include code/start.html id="compact" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.compact(function (err, result) {
   if (err) { return console.log(err); }
   // handle result
@@ -24,7 +24,7 @@ db.compact(function (err, result) {
 {% include code/end.html %}
 
 {% include code/start.html id="compact" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.compact();
 } catch (err) {
@@ -34,7 +34,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="compact" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.compact().then(function (result) {
   // handle result
 }).catch(function (err) {
@@ -44,6 +44,6 @@ db.compact().then(function (result) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 { "ok" : "true" }
 {% endhighlight %}

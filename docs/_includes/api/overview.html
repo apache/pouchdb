@@ -5,7 +5,7 @@ PouchDB has an asynchronous API, supporting [callbacks](http://docs.nodejitsu.co
 
 Most of the API is exposed as:
 
-{% highlight js %}
+{% highlight "js" %}
 db.doSomething(args..., [options], [callback])
 {% endhighlight %}
 
@@ -15,7 +15,7 @@ db.doSomething(args..., [options], [callback])
 
 Callbacks use the standard Node.js idiom of:
 
-{% highlight js %}
+{% highlight "js" %}
 function(error, result) { /* ... */ }
 {% endhighlight %}
 
@@ -35,7 +35,7 @@ If you don't specify a `callback`, then the API returns a [promise][]. In [suppo
 
 To use a custom promise implementation with PouchDB, you must redefine a global `Promise` object before loading PouchDB:
 
-{% highlight html %}
+{% highlight "html" %}
 <script>window.Promise = MyCustomPromiseLibrary;</script>
 <script src="path/to/pouchdb.js"></script>
 {% endhighlight %}
@@ -46,7 +46,7 @@ Another option is to use `async`/`await` pattern instead of promises chain (ie. 
 
 Note that the samples for `async`/`await` in the API documentation assume that your code is inside an async function. So for instance:
 
-{% highlight js %}
+{% highlight "js" %}
 async function myFunction() {
   // your code goes in here
 }

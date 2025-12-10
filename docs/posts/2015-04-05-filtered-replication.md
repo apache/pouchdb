@@ -31,7 +31,7 @@ To reproduce the examples you’ll need PouchDB v3.4.0, which contains some bugf
 
 The first step in implementing your server-side filtering solution is to create the design document. This is an example:
 
-{% highlight js %}
+{% highlight "js" %}
 {
    "_id": "_design/app",
    "filters": {
@@ -61,7 +61,7 @@ We'll come back to this design document later. Now it's time to implement our cl
 * `filter`: can take either the string corresponding to the filter function (see example below), or a JS function (for client-side filtering).
 * `query_params`: takes a JS object. This object is what we find in the `req.query` object inside the design document function. Just what we need!
 
-{% highlight js %}
+{% highlight "js" %}
 localDB.sync(remoteDB, {
   live: true,
   retry: true,
@@ -96,7 +96,7 @@ In PouchDB, this corresponds to `put()`ing a document with `_deleted: true`, rat
 
 The next gotcha deserves a bit more space. I find it very counter-intuitive, and my guess is that you'll feel the same. Since you're interested in two-way replication, you want the client to not only read data, but write data as well. What you expect is that saves on the local database will get replicated to the remote database. Let's look at some code:
 
-{% highlight js %}
+{% highlight "js" %}
 this.save = function (foobar) {
   return localDB.get(foobar._id).then(function (doc) {
     doc.someNiceField = foobar.someNiceField;
@@ -109,7 +109,7 @@ In ORM parlance, this is a "connected scenario" update. You retrieve the documen
 
 If you followed this post step-by-step, however, this won't work. Why? To make two-way filtered replication work, the design document needs to be in both the remote database and the local database. To do this, we might decide to simply replicate the design document alongside the other documents. Hence our design document becomes:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "_id": "_design/app",
   "filters": {

@@ -24,7 +24,7 @@ Prefer video tutorials? This guide is available in video format:
 
 We will start with a template of the project where all the data related functions have been replaced with empty stubs. Download and unzip [pouchdb-getting-started-todo.zip](https://github.com/pouchdb/pouchdb-getting-started-todo/archive/master.zip). When dealing with XHR and IndexedDB you are better off running web pages from a server as opposed to a filesystem. To do this you can run:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ cd pouchdb-getting-started-todo
 $ python -m SimpleHTTPServer  # for Python 2
 $ python -m http.server       # for Python 3
@@ -40,7 +40,7 @@ It's also a good idea to open your browser's console so you can see any errors o
 
 Open `index.html` and include PouchDB in the app by adding a script tag:
 
-{% highlight html %}
+{% highlight "html" %}
 <script src="https://cdn.jsdelivr.net/npm/pouchdb@{{site.version}}/dist/pouchdb.min.js"></script>
 <script src="js/base.js"></script>
 <script src="js/app.js"></script>
@@ -52,7 +52,7 @@ PouchDB is now installed in your app and ready to use! (In production, you shoul
 
 The rest of the work will be done inside `app.js`. We will start by creating a database to enter your todos. To create a database simply instantiate a new PouchDB object with the name of the database:
 
-{% highlight js %}
+{% highlight "js" %}
 // EDITING STARTS HERE (you don't need to edit anything above this line)
 
 const db = new PouchDB('todos');
@@ -65,7 +65,7 @@ You don't need to create a schema for the database. After giving it a name, you 
 
 The first thing we shall do is start writing items to the database. The main input will call `addTodo` with the current text when the user presses `Enter`. We can complete this function with the following code:
 
-{% highlight js %}
+{% highlight "js" %}
 function addTodo(text) {
   const todo = {
     _id: new Date().toISOString(),
@@ -88,7 +88,7 @@ The `callback` function will be called once the document has been written (or fa
 
 We have included a helper function `redrawTodosUI` that takes an array of todos to display, so all we need to do is read the todos from the database. Here we will simply read all the documents using `db.allDocs`. The `include_docs` option tells PouchDB to give us the data within each document, and the `descending` option tells PouchDB how to order the results based on their `_id` field, giving us newest first.
 
-{% highlight js %}
+{% highlight "js" %}
 function showTodos() {
   db.allDocs({include_docs: true, descending: true}, function(err, doc) {
     redrawTodosUI(doc.rows);
@@ -102,7 +102,7 @@ Once you have included this code, you should be able to refresh the page to see 
 
 We don't want to refresh the page to see new items. More typically you would update the UI manually when you write data to it, however, in PouchDB you may be syncing data remotely, so you want to make sure you update whenever the remote data changes. To do this we will call `db.changes` which subscribes to updates to the database, wherever they come from. You can enter this code between the `remoteCouch` and `addTodo` declaration:
 
-{% highlight js %}
+{% highlight "js" %}
 const remoteCouch = false;
 
 db.changes({
@@ -120,7 +120,7 @@ So every time an update happens to the database, we redraw the UI to show the ne
 
 When the user checks a checkbox, the `checkboxChanged` function will be called, so we'll fill in the code to edit the object and call `db.put`:
 
-{% highlight js %}
+{% highlight "js" %}
 function checkboxChanged(todo, event) {
   todo.completed = event.target.checked;
   db.put(todo);
@@ -135,7 +135,7 @@ You can test that this works by checking a todo item and refreshing the page. It
 
 To delete an object you can call db.remove with the object.
 
-{% highlight js %}
+{% highlight "js" %}
 function deleteButtonPressed(todo) {
   db.remove(todo);
 }
@@ -147,7 +147,7 @@ Similar to editing a document, both the `_id` and `_rev` properties are required
 
 `todoBlurred` is called when the user edits a document. Here we'll delete the document if the user has entered a blank title, and we'll update it otherwise.
 
-{% highlight js %}
+{% highlight "js" %}
 function todoBlurred(todo, event) {
   const trimmedText = event.target.value.trim();
   if (!trimmedText) {
@@ -169,14 +169,14 @@ To replicate directly with CouchDB, you need to make sure CORS is enabled. Only 
 
 You can enable CORS in CouchDB using `curl` or the Futon web interface, but we've saved you some time by making a Node script called [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb). Just run:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ npm install -g add-cors-to-couchdb
 $ add-cors-to-couchdb
 {% endhighlight %}
 
 Or if your database is not at `127.0.0.1:5984`:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ add-cors-to-couchdb http://me.example.com -u myusername -p mypassword
 {% endhighlight %}
 
@@ -188,7 +188,7 @@ You can check that CORS is now enabled by visiting [http://localhost:5984/_utils
 
 Now we will have the todo list sync. Back in `app.js` we need to specify the address of the remote database. Remember to replace `user`, `pass` and `myname.example.com` with the credentials of your own CouchDB instance:
 
-{% highlight js %}
+{% highlight "js" %}
 // EDITING STARTS HERE (you don't need to edit anything above this line)
 
 const db = new PouchDB('todos');
@@ -197,7 +197,7 @@ const remoteCouch = 'http://user:pass@myname.example.com/todos';
 
 Then we can implement the sync function like so:
 
-{% highlight js %}
+{% highlight "js" %}
 function sync() {
   syncDom.setAttribute('data-sync-state', 'syncing');
   const opts = {live: true};

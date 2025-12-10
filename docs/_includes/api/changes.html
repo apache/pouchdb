@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Listen to database changes" hash="changes" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes(options)
 {% endhighlight %}
 
@@ -41,7 +41,7 @@ All options default to `false` unless otherwise specified.
 
 #### Example Usage:
 
-{% highlight js %}
+{% highlight "js" %}
 const changes = db.changes({
   since: 'now',
   live: true,
@@ -58,7 +58,7 @@ changes.cancel(); // whenever you want to cancel
 {% endhighlight %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "id":"somestuff",
   "seq":21,
@@ -83,7 +83,7 @@ changes.cancel(); // whenever you want to cancel
 
 Example response in the `'change'` listener (using `{include_docs: true}`):
 
-{% highlight js %}
+{% highlight "js" %}
 { id: 'doc1',
   changes: [ { rev: '1-9152679630cc461b9477792d93b83eae' } ],
   doc: {
@@ -96,7 +96,7 @@ Example response in the `'change'` listener (using `{include_docs: true}`):
 
 Example response in the `'change'` listener when a doc was deleted:
 
-{% highlight js %}
+{% highlight "js" %}
 { id: 'doc2',
   changes: [ { rev: '2-9b50a4b63008378e8d0718a9ad05c7af' } ],
   doc: { _id: 'doc2',
@@ -110,7 +110,7 @@ Example response in the `'change'` listener when a doc was deleted:
 
 Example response in the `'complete'` listener:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "results": [
     {
@@ -147,7 +147,7 @@ callback/promise style, and it will be treated as a single-shot request, which
 returns a list of the changes (i.e. what the `'complete'` event emits):
 
 {% include code/start.html id="changes1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   limit: 10,
   since: 0
@@ -159,7 +159,7 @@ db.changes({
 {% include code/end.html %}
 
 {% include code/start.html id="changes1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.changes({
     limit: 10,
@@ -172,7 +172,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="changes1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   limit: 10,
   since: 0
@@ -186,7 +186,7 @@ db.changes({
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "results": [{
     "id": "0B3358C1-BA4B-4186-8795-9024203EB7DD",
@@ -242,7 +242,7 @@ The named functions can either be specified with `'designdoc_id/function_name'` 
 
 In these examples, we'll work with some mammals. Let's imagine our docs are:
 
-{% highlight js %}
+{% highlight "js" %}
 [
   {_id: 'a', name: 'Kangaroo', type: 'marsupial'},
   {_id: 'b', name: 'Koala', type: 'marsupial'},
@@ -258,7 +258,7 @@ Here are 5 examples using the 5 different systems.
 
 Filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   filter: function (doc) {
     return doc.type === 'marsupial';
@@ -270,7 +270,7 @@ db.changes({
 
 Filter documents with `_id`s `['a', 'c']`.
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   doc_ids: ['a', 'c']
 });
@@ -280,7 +280,7 @@ db.changes({
 
 First `put()` a design document:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/mydesign',
   filters: {
@@ -293,7 +293,7 @@ First `put()` a design document:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   filter: 'mydesign/myfilter'
 });
@@ -305,7 +305,7 @@ This is the most powerful way to filter, because it allows you to pass in arbitr
 
 First `put()` a design document:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/myfilter',
   filters: {
@@ -318,7 +318,7 @@ First `put()` a design document:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   filter: 'myfilter',
   query_params: {type: 'marsupial'}
@@ -335,7 +335,7 @@ Any documents that `emit()` anything will be considered to have passed this filt
 
 First `put()` a design document:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/mydesign',
   views: {
@@ -350,7 +350,7 @@ First `put()` a design document:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.changes({
   filter: '_view',
   view: 'mydesign/myview'

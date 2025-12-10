@@ -1,5 +1,6 @@
 const markdownIt = require('markdown-it');
-const syntaxHighlight = require('@11ty/eleventy-plugin-syntaxhighlight');
+const Prism = require('prismjs');
+const loadLanguages = require('prismjs/components/');
 
 module.exports = eleventyConfig => {
   eleventyConfig.addPassthroughCopy('static');
@@ -23,7 +24,12 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('markdown', content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
 
-  eleventyConfig.addPlugin(syntaxHighlight);
+  eleventyConfig.addPairedShortcode('hightlight', function(content, lang) {
+    loadLanguages([lang]);
+    const html = Prism.highlight(content.trim(), Prism.languages[lang], lang);
+
+    return `<figure class="highlight"><pre><code class="language-${lang}">${html}</code></pre></figure>`;
+  });
 
   return {
     dir: {

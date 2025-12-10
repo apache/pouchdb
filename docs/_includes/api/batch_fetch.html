@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Fetch a batch of documents" hash="batch_fetch" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs([options], [callback])
 {% endhighlight %}
 
@@ -33,7 +33,7 @@ All options default to `false` unless otherwise specified.
 #### Example Usage:
 
 {% include code/start.html id="all_docs" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true
@@ -45,7 +45,7 @@ db.allDocs({
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.allDocs({
     include_docs: true,
@@ -58,7 +58,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true
@@ -72,7 +72,7 @@ db.allDocs({
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "offset": 0,
   "total_rows": 1,
@@ -109,7 +109,7 @@ In the response, you have three things:
 You can use `startkey`/`endkey` to find all docs in a range:
 
 {% include code/start.html id="all_docs_2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true,
@@ -123,7 +123,7 @@ db.allDocs({
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs_2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.allDocs({
     include_docs: true,
@@ -138,7 +138,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs_2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true,
@@ -159,7 +159,7 @@ This will return all docs with `_id`s between `'bar'` and `'quux'`.
 You can do prefix search in `allDocs()` &ndash; i.e. "give me all the documents whose `_id`s start with `'foo'`" &ndash; by using the special high Unicode character `'\ufff0'`:
 
 {% include code/start.html id="all_docs_3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true,
@@ -173,7 +173,7 @@ db.allDocs({
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs_3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.allDocs({
     include_docs: true,
@@ -188,7 +188,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="all_docs_3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.allDocs({
   include_docs: true,
   attachments: true,
