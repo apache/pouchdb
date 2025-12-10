@@ -21,10 +21,10 @@ async function buildCSS() {
   try {
     const targetDir = __dirname + '/../docs/static/css';
     fs.mkdirSync(targetDir, { recursive:true });
-    [
-      'prism.css',
-      'prism-solarizedlight.css',
-    ].forEach(f => fs.copyFileSync(`../node_modules/prismjs/themes/${f}`, `${targetDir}/${f}`));
+    //[
+    //  'prism.css',
+    //  'prism-solarizedlight.css',
+    //].forEach(f => fs.copyFileSync(`../node_modules/prismjs/themes/${f}`, `${targetDir}/${f}`));
     const cmd = [ resolvePath('node_modules/less/bin/lessc'), POUCHDB_LESS ].join(' ');
     const { stdout } = await exec(cmd);
     const minifiedCss = cssmin(stdout);
