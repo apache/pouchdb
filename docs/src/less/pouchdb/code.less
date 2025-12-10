@@ -10,19 +10,28 @@ pre {
 }
 
 @duck-egg: #66d9ef;
+@martian-green: #a6e22e;
 @mustard: #e6db74;
 @purple: #ae81ff;
 @pinky: #f92672;
 @soft-green: #6eca97;
+@wet-slate: #3f3f3f;
 @whitish: #f8f8f2;
 
-pre.language-js { background-color:rgb(63, 63, 63); color:@soft-green }
+.language-html { background-color:@wet-slate; color:@soft-green }
+.language-js,.language-javascript { background-color:@wet-slate; color:@soft-green }
+.token.attr-name   { color:@martian-green }
+.token.attr-value  { color:@mustard }
+.token.tag .token.attr-value .attr-equals  { color:@martian-green }
+.token.tag .token.attr-value .token.punctuation  { color:@mustard }
 .token.class-name  { color:@soft-green }
 .token.function    { color:@soft-green }
 .token.keyword     { color:@duck-egg }
 .token.number      { color:@purple }
 .token.operator    { color:@pinky }
 .token.property + .token.operator { color:@whitish }
-.token.property    { color:#a6e22e }
+.token.property    { color:@martian-green }
 .token.punctuation { color:@whitish }
 .token.string      { color:@mustard }
+.token.tag         { color:@pinky }
+.token.tag .token.punctuation { color:@pinky }
