@@ -80,9 +80,9 @@ db.replicate.to('https://example.com/mydb');
   <div class="container">
     <h3>Latest</h3>
         <div class="row">
-{% for post in site.posts limit:2 %}
+{% for post in collections.posts limit:2 %}
 <div class="col-md-6">
-  <p class="margin-bottom-none"><a class='h4' href='{{ site.baseurl }}{{ post.url }}'>{{ post.title }}</a></p>
+  <p class="margin-bottom-none"><a class='h4' href='{{ site.baseurl }}{{ post.url }}'>{{ post.data.title }}</a></p>
 {% include post_details.html %}
   </div>
 {% endfor %}
