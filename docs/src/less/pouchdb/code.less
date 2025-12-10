@@ -15,11 +15,14 @@ pre {
 @purple: #ae81ff;
 @pinky: #f92672;
 @soft-green: #6eca97;
-@wet-slate: #3f3f3f;
+@dry-slate: #3f3f3f;
 @whitish: #f8f8f2;
 
-.language-html { background-color:@wet-slate; color:@soft-green }
-.language-js,.language-javascript { background-color:@wet-slate; color:@soft-green }
+.language-bash { background-color:@dry-slate; color:@whitish }
+.language-bash .token.parameter.variable { color:@pinky }
+
+.language-html { background-color:@dry-slate; color:@soft-green }
+.language-js,.language-javascript { background-color:@dry-slate; color:@soft-green }
 .token.attr-name   { color:@martian-green }
 .token.attr-value  { color:@mustard }
 .token.tag .token.attr-value .attr-equals  { color:@martian-green }
