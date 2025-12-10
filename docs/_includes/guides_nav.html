@@ -4,5 +4,5 @@
     {% if guide.data.nav %}
         {% assign title = guide.data.nav %}
     {% endif %}
-    {% include nav_item.html path=guide.data.url text=title %}
+    {% include nav_item.html path=guide.url text=title %}
 {% endfor %}
