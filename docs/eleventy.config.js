@@ -24,7 +24,7 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('markdown', content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
 
-  eleventyConfig.addPairedShortcode('hightlight', function(content, lang) {
+  eleventyConfig.addPairedShortcode('highlight', function(content, lang) {
     loadLanguages([lang]);
     const html = Prism.highlight(content.trim(), Prism.languages[lang], lang);
 
