@@ -96,7 +96,8 @@ function resolvePath(projectLocalPath) {
 
 if (!process.env.BUILD) {
   const http_server = require('http-server');
-  const watchGlob = require('glob-watcher');
+  const globWatcher = require('glob-watcher');
+  const watchGlob = (path, fn) => globWatcher(path, () => fn().catch(console.log));
 
   // Simpler ways of blacklisting certain paths here would be very welcome.
   fs.readdirSync('.')

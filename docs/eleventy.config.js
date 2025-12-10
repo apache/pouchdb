@@ -23,9 +23,7 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('markdown', content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
 
-  eleventyConfig.addPlugin(syntaxHighlight, {
-    lineSeparator: '\n',
-  });
+  eleventyConfig.addPlugin(syntaxHighlight);
 
   return {
     dir: {

@@ -144,7 +144,6 @@ function addCodeCopyButtons() {
   document
     .querySelectorAll('pre.language-js')
     .forEach(codeElement => {
-      console.log('codeElement:', codeElement);
       codeElement.style.position = 'relative';
 
       const btn = addButton('📎', codeElement);

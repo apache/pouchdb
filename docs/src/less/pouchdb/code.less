@@ -9,12 +9,20 @@ pre {
   padding-right: @pre-padding;
 }
 
-pre.language-js { background-color:rgb(63, 63, 63); color:#6eca97 }
-.token.class-name  { color:#6eca97 }
-.token.function    { color:#6eca97 }
-.token.keyword     { color:#66d9ef }
-.token.number      { color:#ae81ff }
-.token.operator    { color:#f92672 }
+@duck-egg: #66d9ef;
+@mustard: #e6db74;
+@purple: #ae81ff;
+@pinky: #f92672;
+@soft-green: #6eca97;
+@whitish: #f8f8f2;
+
+pre.language-js { background-color:rgb(63, 63, 63); color:@soft-green }
+.token.class-name  { color:@soft-green }
+.token.function    { color:@soft-green }
+.token.keyword     { color:@duck-egg }
+.token.number      { color:@purple }
+.token.operator    { color:@pinky }
+.token.property + .token.operator { color:@whitish }
 .token.property    { color:#a6e22e }
-.token.punctuation { color:#f8f8f2 }
-.token.string      { color:#e6db74 }
+.token.punctuation { color:@whitish }
+.token.string      { color:@mustard }

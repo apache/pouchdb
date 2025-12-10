@@ -13,6 +13,7 @@ title: PouchDB, the JavaScript Database that Syncs!
         <a href="{{ site.baseurl }}/learn.html" class="btn btn-primary btn-lg btn-block-xs">Learn more</a>
       </div>
       <div class='col-sm-6'>
+
 {% highlight js %}
 const db = new PouchDB('dbname');
 
