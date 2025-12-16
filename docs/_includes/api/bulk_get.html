@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Document bulk get" hash="bulk_get" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.bulkGet(options, [callback])
 {% endhighlight %}
 
@@ -21,7 +21,7 @@ Given a set of document/revision IDs, returns the document bodies (and, optional
 #### Example Usage:
 
 {% include code/start.html id="bulkget1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkGet({
   docs: [
     { id: "existing-doc", rev: "1-b2e54331db828310f3c772d6e042ac9c"},
@@ -36,7 +36,7 @@ db.bulkGet({
 {% include code/end.html %}
 
 {% include code/start.html id="bulkget1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.bulkGet({
       docs: [
@@ -52,7 +52,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="bulkget1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkGet({
     docs: [
       { id: "doc-that-exists", rev: "1-967a00dff5e02add41819138abb3284d"},
@@ -68,7 +68,7 @@ db.bulkGet({
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "results": [
   {

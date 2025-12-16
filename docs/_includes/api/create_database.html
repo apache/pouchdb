@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Create a database" hash="create_database" %}
 
-{% highlight js %}
+{% highlight "js" %}
 new PouchDB([name], [options])
 {% endhighlight %}
 
@@ -38,7 +38,7 @@ This method creates a database or opens an existing one. If you use a URL like `
 [levelup_options]: https://github.com/rvagg/node-levelup/#options
 
 #### Example Usage:
-{% highlight js %}
+{% highlight "js" %}
 const db = new PouchDB('dbname');
 // or
 const db = new PouchDB('http://localhost:5984/dbname');
@@ -46,13 +46,13 @@ const db = new PouchDB('http://localhost:5984/dbname');
 
 Create an in-memory Pouch (must install `pouchdb-adapter-memory` first):
 
-{% highlight js %}
+{% highlight "js" %}
 const db = new PouchDB('dbname', {adapter: 'memory'});
 {% endhighlight %}
 
 Create a remote PouchDB with special fetch options:
 
-{% highlight js %}
+{% highlight "js" %}
 const db = new PouchDB('http://example.com/dbname', {
   fetch: function (url, opts) {
     opts.headers.set('X-Some-Special-Header', 'foo');

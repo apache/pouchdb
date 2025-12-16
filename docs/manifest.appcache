@@ -5,11 +5,11 @@ CACHE MANIFEST
 # rev {{ site.time }}
 
 CACHE:
-{% for page in site.pages %}{% if page.url != '/manifest.appcache' %}{{ page.url | replace:'index.html','' }}{% endif %}
+{% for page in collections.pages %}{% if page.url != '/manifest.appcache' %}{{ page.url | replace:'index.html','' }}{% endif %}
 {% endfor %}
-{% for page in site.guides %}{{ page.url | replace:'index.html','' }}
+{% for page in collections.guides %}{{ page.url | replace:'index.html','' }}
 {% endfor %}
-{% for page in site.posts %}{{ page.url | replace:'index.html','' }}
+{% for page in collections.posts %}{{ page.url | replace:'index.html','' }}
 {% endfor %}
 
 /static/css/pouchdb.css

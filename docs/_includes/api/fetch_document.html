@@ -1,7 +1,7 @@
 
 {% include anchor.html edit="true" title="Fetch a document" hash="fetch_document"%}
 
-{% highlight js %}
+{% highlight "js" %}
 db.get(docId, [options], [callback])
 {% endhighlight %}
 
@@ -23,7 +23,7 @@ All options default to `false` unless otherwise specified.
 #### Example Usage:
 
 {% include code/start.html id="get1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc', function(err, doc) {
   if (err) { return console.log(err); }
   // handle doc
@@ -32,7 +32,7 @@ db.get('mydoc', function(err, doc) {
 {% include code/end.html %}
 
 {% include code/start.html id="get1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const doc = await db.get('mydoc');
 } catch (err) {
@@ -42,7 +42,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="get1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc').then(function (doc) {
   // handle doc
 }).catch(function (err) {
@@ -52,7 +52,7 @@ db.get('mydoc').then(function (doc) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "_id": "mydoc",
   "_rev": "1-A6157A5EA545C99B00FF904EEF05FD9F"

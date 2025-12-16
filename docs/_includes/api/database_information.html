@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Get database information" hash="database_information" %} 
 
-{% highlight js %}
+{% highlight "js" %}
 db.info([callback])
 {% endhighlight %}
 
@@ -9,7 +9,7 @@ Get information about a database.
 #### Example Usage:
 
 {% include code/start.html id="dbinfo" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.info(function(err, info) {
   if (err) { return console.log(err); }
   // handle result
@@ -18,7 +18,7 @@ db.info(function(err, info) {
 {% include code/end.html %}
 
 {% include code/start.html id="dbinfo" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.info();
 } catch (err) {
@@ -28,7 +28,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="dbinfo" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.info().then(function (result) {
   // handle result
 }).catch(function (err) {
@@ -38,7 +38,7 @@ db.info().then(function (result) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "db_name": "test",
   "doc_count": 4,

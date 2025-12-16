@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Purge a document rev" hash="purge" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.purge(docId, rev)
 {% endhighlight %}
 
@@ -23,7 +23,7 @@ Using Purge with any other adapter will return an error.
 #### Example Usage:
 
 {% include code/start.html id="purge1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.purge('mydoc', '6-3a24009a9525bde9e4bfa8a99046b00d',
   function (err, result) {
     if (err) { return console.log(err); }
@@ -33,7 +33,7 @@ db.purge('mydoc', '6-3a24009a9525bde9e4bfa8a99046b00d',
 {% include code/end.html %}
 
 {% include code/start.html id="purge1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.purge('mydoc', '6-3a24009a9525bde9e4bfa8a99046b00d');
   // handle result
@@ -44,7 +44,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="purge1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.purge('mydoc', '6-3a24009a9525bde9e4bfa8a99046b00d')
   .then(function (result) {
     // handle result
@@ -56,7 +56,7 @@ db.purge('mydoc', '6-3a24009a9525bde9e4bfa8a99046b00d')
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
   {
     "ok": true,
     "deletedRevs": [

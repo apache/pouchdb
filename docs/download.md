@@ -6,7 +6,7 @@ sidebar: nav.html
 
 {% include anchor.html class="h3" title="Quick Start" hash="file" %}
 
-{% highlight html %}
+{% highlight "html" %}
 <script src="https://cdn.jsdelivr.net/npm/pouchdb@{{site.version}}/dist/pouchdb.min.js"></script>
 <script>
   const db = new PouchDB('my_database');
@@ -24,11 +24,11 @@ If you are using PouchDB in Internet Explorer a [Promise](https://www.npmjs.com/
 
 PouchDB can be installed through [npm](https://npmjs.com):
 
-{% highlight bash %}npm install --save pouchdb{% endhighlight %}
+{% highlight "bash" %}npm install --save pouchdb{% endhighlight %}
 
 After installing, call `require()` to use it:
 
-{% highlight javascript %}
+{% highlight "javascript" %}
 const PouchDB = require('pouchdb');
 const db = new PouchDB('my_database');
 {% endhighlight %}
@@ -40,9 +40,9 @@ PouchDB can be used either in Node or in the browser. A bundler such as [Browser
 If you're only using PouchDB in the browser, you can use `pouchdb-browser` for
 faster install times:
 
-{% highlight bash %}npm install --save pouchdb-browser{% endhighlight %}
+{% highlight "bash" %}npm install --save pouchdb-browser{% endhighlight %}
 
-{% highlight javascript %}
+{% highlight "javascript" %}
 const PouchDB = require('pouchdb-browser');
 const db = new PouchDB('my_database');
 {% endhighlight %}
@@ -57,7 +57,7 @@ PouchDB is hosted at these CDNs:
 * [jsdelivr](https://www.jsdelivr.com/#!pouchdb)
 * [unpkg](https://unpkg.com/pouchdb@{{ site.version }}/dist/)
 
-{% highlight bash %}bower install --save pouchdb{% endhighlight %}
+{% highlight "bash" %}bower install --save pouchdb{% endhighlight %}
 
 {% include anchor.html class="h3" title="Past releases" hash="past-releases" %}
 
