@@ -28,6 +28,7 @@ async function buildCSS() {
 
 async function buildEleventy() {
   await exec('npx @11ty/eleventy');
+  await checkForUnprocessedCurlies();
   console.log('=> Rebuilt eleventy');
 
   highlightEs6();
@@ -51,6 +52,26 @@ async function buildEleventy() {
   } else {
     fs.writeFileSync(targetPath, code);
     console.log('Minified javascript.');
+  }
+}
+
+async function checkForUnprocessedCurlies() {
+  // If unprocessed curlies are ever desired, add a way to ignore them.
+  try {
+    const res = await exec(`grep -Ern --include=\\*.html '\\{\\{|\\}\\}' ./_site/`);
+
+    console.log();
+    console.log('!!! UNPROCESSED CURLIES FOUND IN OUTPUT HTML FILE(S):');
+    console.log(res.stdout.trim());
+    console.log('!!! CHECK TEMPLATES ARE BEING FULLY PROCESSED.');
+    console.log();
+
+    if (process.env.BUILD) process.exit(1);
+  } catch (err) {
+    if (err.code === 1) {
+      return; // no problems found
+    }
+    throw err;
   }
 }
 
