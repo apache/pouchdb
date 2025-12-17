@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pouchdb/pouchdb.git"
+    "url": "https://github.com/apache/pouchdb.git"
   },
   "dependencies": {
     "double-ended-queue": "2.1.0-0",
@@ -64,7 +64,6 @@
     "builtin-modules": "3.1.0",
     "chai": "3.5.0",
     "chai-as-promised": "5.3.0",
-    "change-case": "4.0.1",
     "cssmin": "0.4.3",
     "denodeify": "1.2.1",
     "derequire": "2.1.1",

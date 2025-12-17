@@ -1,0 +1,9 @@
+# GitHub repo settings
+#
+# Mandatory ASF alternative to https://github.com/apache/pouchdb/settings.
+#
+# See: https://github.com/apache/infrastructure-asfyaml/blob/main/README.md
+
+github:
+  pull_requests:
+    allow_update_branch: true
