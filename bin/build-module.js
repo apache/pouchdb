@@ -16,7 +16,7 @@ var path = require('path');
 var denodeify = require('denodeify');
 const { mkdir } = require('node:fs/promises');
 var rimraf = denodeify(require('rimraf'));
-var builtInModules = require('builtin-modules');
+var builtInModules = require('./builtin-modules');
 var fs = require('fs');
 var all = Promise.all.bind(Promise);
 
