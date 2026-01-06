@@ -66,7 +66,9 @@ async function checkForUnprocessedCurlies() {
     console.log('!!! CHECK TEMPLATES ARE BEING FULLY PROCESSED.');
     console.log();
 
-    if (process.env.BUILD) process.exit(1);
+    if (process.env.BUILD) {
+      process.exit(1);
+    }
   } catch (err) {
     if (err.code === 1) {
       return; // no problems found
