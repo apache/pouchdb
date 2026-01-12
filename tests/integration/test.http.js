@@ -48,7 +48,7 @@ describe('test.http.js', function () {
         return PouchDB.fetch(url, opts);
       }
     });
-    db.bulkDocs({ docs: docs }, function () {
+    db.bulkDocs({ docs }, function () {
       db.info(function (err, info) {
         var update_seq = info.update_seq;
         db.changes({
@@ -101,6 +101,14 @@ describe('test.http.js', function () {
       });
     }).then(function (res) {
       res.rows.should.have.length(numDocs);
+    });
+  });
+
+  it('communicates over IPv6', function () {
+    const name = dbs.name.replace(/^http:\/\/localhost:/, 'http://[::1]:');
+    const db = new PouchDB(name);
+    return db.info().then((res) => {
+      should.exist(res.db_name);
     });
   });
 
@@ -171,7 +179,7 @@ describe('test.http.js', function () {
   it('5814 Ensure prefix has trailing /', function () {
     var index = testUtils.adapterUrl('http', '').lastIndexOf('/');
     var prefix = testUtils.adapterUrl('http', '').substring(0, index);
-    var db = new PouchDB('test', {prefix: prefix});
+    var db = new PouchDB('test', {prefix});
     return db.info().then(function () {
       return db.destroy();
     });

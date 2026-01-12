@@ -20,7 +20,7 @@ Plugin for CouchDB's authentication system.
 
 Allows decentralized authentication and access control per document, using asymmetric encryption.
 
-#### [PouchDB Collate](https://github.com/pouchdb/pouchdb/tree/master/packages/node_modules/pouchdb-collate)
+#### [PouchDB Collate](https://github.com/apache/pouchdb/tree/master/packages/node_modules/pouchdb-collate)
 
 Collation functions for PouchDB map/reduce. Used by PouchDB map/reduce to maintain consistent [CouchDB collation ordering](https://wiki.apache.org/couchdb/View_collation).
 
@@ -215,7 +215,7 @@ AngularJS binding for PouchDB.
 
 #### [ampersand-collection-pouchdb-mixin](https://github.com/svnlto/ampersand-collection-pouchdb-mixin)
 
-A mixin for extending ampersand-collection with pouchdb persistance.
+A mixin for extending ampersand-collection with pouchdb persistence.
 
 ### Backbone
 

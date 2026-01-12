@@ -3,11 +3,13 @@ description: PouchDB, the JavaScript Database that Syncs!
 url: http://pouchdb.com
 markdown: redcarpet
 baseurl:
-version: 8.0.1
+version: 9.0.0
 paginate: 5
 paginate_path: "blog/page:num"
 github:
-  repository_url: https://github.com/pouchdb/pouchdb
+  repository_url: https://github.com/apache/pouchdb
 collections:
   guides:
     output: true
+exclude:
+  - src

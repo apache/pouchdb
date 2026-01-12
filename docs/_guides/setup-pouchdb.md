@@ -63,7 +63,7 @@ $ npm install pouchdb
 Then in your JavaScript:
 
 ```js
-var PouchDB = require('pouchdb');
+const PouchDB = require('pouchdb');
 ```
 
 {% include anchor.html title="With TypeScript" hash="typescript" %}
@@ -87,7 +87,7 @@ In your `tsconfig.json` activate `allowSyntheticDefaultImports`:
 Then in your TypeScript:
 
 ```typescript
-import * as PouchDB from 'pouchdb';
+import PouchDB from 'pouchdb';
 ```
 
 You can install a plugin (provided there is a [type definition for it in npm](https://www.npmjs.com/search?q=scope:types%20pouchdb)), import it in the same way and then pass the imported name to `PouchDB.plugin()` method just as you would do in JavaScript.

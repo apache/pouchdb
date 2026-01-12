@@ -8,11 +8,11 @@ PouchDB is an **in-browser database** that allows applications to save data loca
 
 PouchDB also runs in **Node.js** and can be used as a direct interface to **CouchDB**-compatible servers. The API works the same in every environment, so you can spend less time worrying about browser differences, and more time writing clean, consistent code.
 
-PouchDB is a free open-source project, written in JavaScript and driven by our [wonderful  community](https://github.com/pouchdb/pouchdb/graphs/contributors). If you want to get involved, then check out the [contributing guide](https://github.com/pouchdb/pouchdb/blob/master/CONTRIBUTING.md).
+PouchDB is a free open-source project, written in JavaScript and driven by our [wonderful  community](https://github.com/apache/pouchdb/graphs/contributors). If you want to get involved, then check out the [contributing guide](https://github.com/apache/pouchdb/blob/master/CONTRIBUTING.md).
 
 {% include anchor.html class="h3" title="Browser Support" hash="browser_support" %}
 
-PouchDB supports all modern browsers, using [IndexedDB][] under the hood and falling back to [WebSQL][] where IndexedDB isn't supported. It is [fully tested](https://travis-ci.org/pouchdb/pouchdb/) and supported in:
+PouchDB supports all modern browsers, using [IndexedDB][] under the hood and falling back to [WebSQL][] where IndexedDB isn't supported. It is [fully tested](https://github.com/apache/pouchdb/actions) and supported in:
 
  * Firefox 29+ (Including Firefox OS and Firefox for Android)
  * Chrome 30+

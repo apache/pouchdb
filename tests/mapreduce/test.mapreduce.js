@@ -13,9 +13,6 @@ viewTypes.forEach(function (viewType) {
 function tests(suiteName, dbName, dbType, viewType) {
 
   describe(suiteName, function () {
-
-    var Promise = testUtils.Promise;
-
     var createView;
     if (dbType === 'http' || viewType === 'persisted') {
       createView = function (db, viewObj) {
@@ -52,11 +49,11 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     beforeEach(function () {
       if (dbType === 'http') {
-        var uri = testUtils.parseUri(dbName);
-        var dbUrl = `${uri.protocol}://${uri.host}:${uri.port}${uri.path}`;
+        const url = new URL(dbName);
+        const dbUrl = `${url.origin}${url.pathname}`;
         return PouchDB.fetch(dbUrl + '?q=1', {
           method: 'PUT',
-          headers: { Authorization: 'Basic ' + testUtils.btoa(uri.userInfo) }
+          headers: { Authorization: 'Basic ' + testUtils.btoa(`${url.username}:${url.password}`) },
         });
       }
     });
@@ -410,7 +407,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         var docs = values.map(function (x, i) {
           return {_id: (i).toString(), foo: x};
         });
-        return db.bulkDocs({docs: docs}).then(function () {
+        return db.bulkDocs({docs}).then(function () {
           return db.query(queryFun, {reduce: false});
         }).then(function (res) {
           res.rows.forEach(function (x, i) {
@@ -460,7 +457,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         { _id: '1' },
         { _id: '2' }
       ]).then(function () {
-        return createView(db, { map: map });
+        return createView(db, { map });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
           var rows = res.rows.map(function (x) {
@@ -1068,9 +1065,33 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
     });
 
-    it("Built in _stats reduce function should throw an error with a promise",
+    it("Built in _stats reduce function can be used with lists of numbers", function () {
+      const db = new PouchDB(dbName);
+      return createView(db, {
+        map: "function(doc){emit(null, doc.val);}",
+        reduce: "_stats"
+      }).then(function (queryFun) {
+        return db.bulkDocs({
+          docs: [
+            { _id: '1', val: [1, 2, 3] },
+            { _id: '2', val: [4, 5, 6] },
+            { _id: '3', val: [7, 8, 9] },
+          ]
+        }).then(function () {
+          return db.query(queryFun, {reduce: true, group_level: 999});
+        }).then(function (res) {
+          return res.rows[0].value;
+        });
+      }).should.become([
+        { sum: 12, count: 3, min: 1, max: 7, sumsqr: 66  },
+        { sum: 15, count: 3, min: 2, max: 8, sumsqr: 93  },
+        { sum: 18, count: 3, min: 3, max: 9, sumsqr: 126 }
+      ]);
+    });
+
+    it("Built in _stats reduce function should throw an error when confronted with strings",
       function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(doc.val, 'lala');}",
         reduce: "_stats"
@@ -1078,8 +1099,44 @@ function tests(suiteName, dbName, dbType, viewType) {
         return db.bulkDocs({
           docs: [
             { val: 'bar' },
-              { val: 'bar' },
+            { val: 'bar' },
             { val: 'baz' }
+          ]
+        }).then(function () {
+          return db.query(queryFun, {reduce: true, group_level: 999});
+        });
+      }).should.be.rejected;
+    });
+
+    it("Built in _stats reduce function should throw an error when confronted with a mix of numbers and arrays",
+      function () {
+      const db = new PouchDB(dbName);
+      return createView(db, {
+        map: "function(doc){emit(null, doc.val);}",
+        reduce: "_stats"
+      }).then(function (queryFun) {
+        return db.bulkDocs({
+          docs: [
+            { _id: '1', val: [1, 2, 3] },
+            { _id: '2', val: 4 }
+          ]
+        }).then(function () {
+          return db.query(queryFun, {reduce: true, group_level: 999});
+        });
+      }).should.be.rejected;
+    });
+
+    it("Built in _stats reduce function should throw an error when confronted with arrays of inconsistent length",
+      function () {
+      const db = new PouchDB(dbName);
+      return createView(db, {
+        map: "function(doc){emit(null, doc.val);}",
+        reduce: "_stats"
+      }).then(function (queryFun) {
+        return db.bulkDocs({
+          docs: [
+            { _id: '1', val: [1, 2, 3] },
+            { _id: '2', val: [1, 2] }
           ]
         }).then(function () {
           return db.query(queryFun, {reduce: true, group_level: 999});
@@ -1936,13 +1993,13 @@ function tests(suiteName, dbName, dbType, viewType) {
           for (var i = 0; i < numAttempts; i++) {
             keys.push('_design/test' + i);
           }
-          return db.allDocs({keys : keys, include_docs : true});
+          return db.allDocs({keys, include_docs : true});
         }).then(function (res) {
           var docs = res.rows.map(function (row) {
             row.doc._deleted = true;
             return row.doc;
           });
-          return db.bulkDocs({docs : docs});
+          return db.bulkDocs({docs});
         }).then(function () {
           return db.viewCleanup();
         }).then(function (res) {
@@ -2017,7 +2074,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           {_id: 'inf', num: Infinity},
           {_id: 'neginf', num: -Infinity}
         ];
-        return db.bulkDocs({docs: docs}).then(function () {
+        return db.bulkDocs({docs}).then(function () {
           return db.query(mapFunction, {key: 0});
         }).then(function (data) {
           data.rows.should.have.length(1);
@@ -2529,7 +2586,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             {foo: [0, false]}
           ]
         }).then(function () {
-          var opts = {keys: keys};
+          var opts = {keys};
           return db.query(mapFunction, opts);
         }).then(function (data) {
           data.rows.should.have.length(3);
@@ -2618,7 +2675,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           {_id : '8'},
           {_id : '9'}
         ];
-        return db.bulkDocs({docs : docs}).then(function (res) {
+        return db.bulkDocs({docs}).then(function (res) {
           docs[3]._deleted = true;
           docs[7]._deleted = true;
           docs[3]._rev = res[3].rev;
@@ -3078,9 +3135,9 @@ function tests(suiteName, dbName, dbType, viewType) {
             doc._rev = res[i].rev;
             docFun(doc);
           }
-          return db.bulkDocs({docs : docs});
+          return db.bulkDocs({docs});
         }
-        return db.bulkDocs({docs : docs}).then(function (res) {
+        return db.bulkDocs({docs}).then(function (res) {
           return update(res, function (doc) { doc.likes = 'pizza'; });
         }).then(function (res) {
           return update(res, function (doc) { doc.knows = 'kung fu'; });
@@ -3136,20 +3193,20 @@ function tests(suiteName, dbName, dbType, viewType) {
             name: 'gen1'
           });
         }
-        return db.bulkDocs({docs: docs}).then(function (infos) {
+        return db.bulkDocs({docs}).then(function (infos) {
           docs.forEach(function (doc) {
             doc._rev = infos.find((info) => info.id === doc._id).rev;
             doc.name = 'gen2';
           });
           docs.reverse();
-          return db.bulkDocs({docs: docs});
+          return db.bulkDocs({docs});
         }).then(function (infos) {
           docs.forEach(function (doc) {
             doc._rev = infos.find((info) => info.id === doc._id).rev;
             doc.name = 'gen-3';
           });
           docs.reverse();
-          return db.bulkDocs({docs: docs});
+          return db.bulkDocs({docs});
         }).then(function (infos) {
           docs.forEach(function (doc) {
             doc._rev = infos.find((info) => info.id === doc._id).rev;
@@ -3165,7 +3222,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         }).then(function (res) {
           var expected = docs.map(function (doc, i) {
             var key = i % 2 === 1 ? 'gen-4-odd' : 'gen-3';
-            return {key: key, id: doc._id, value: null};
+            return {key, id: doc._id, value: null};
           });
           expected.sort(function (a, b) {
             if (a.key !== b.key) {
@@ -3234,21 +3291,21 @@ function tests(suiteName, dbName, dbType, viewType) {
       }).then(function (queryFun) {
         var keys = ['1', '2'];
         var opts = {
-          keys: keys,
+          keys,
           group: false
         };
         return db.query(queryFun, opts).then(function (res) {
           should.not.exist(res);
         }).catch(function (err) {
           err.status.should.be.oneOf([400, 500]);
-          opts = {keys: keys};
+          opts = {keys};
           return db.query(queryFun, opts).then(function (res) {
             should.not.exist(res);
           }).catch(function (err) {
             err.status.should.be.oneOf([400, 500]);
-            opts = {keys: keys, reduce : false};
+            opts = {keys, reduce : false};
             return db.query(queryFun, opts).then(function () {
-              opts = {keys: keys, group: true};
+              opts = {keys, group: true};
               return db.query(queryFun, opts);
             });
           });
@@ -3525,7 +3582,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           });
         }
       }).then(function (mapFun) {
-        return db.bulkDocs({docs : docs}).then(function () {
+        return db.bulkDocs({docs}).then(function () {
           var tasks = keySets.map(function (keys, i) {
             return function () {
               var expectedResponseKeys = [];
@@ -3541,7 +3598,7 @@ function tests(suiteName, dbName, dbType, viewType) {
                   });
                 });
                 expectedResponseKeys.sort();
-                return db.bulkDocs({docs: docs});
+                return db.bulkDocs({docs});
               }).then(function () {
                 return db.query(mapFun);
               }).then(function (res) {
@@ -3590,7 +3647,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           });
         }
       }).then(function (mapFun) {
-        return db.bulkDocs({docs : docs}).then(function () {
+        return db.bulkDocs({docs}).then(function () {
           var tasks = keySets.map(function (keys, i) {
             return function () {
               var expectedResponseKeys = [];
@@ -3608,7 +3665,7 @@ function tests(suiteName, dbName, dbType, viewType) {
                 expectedResponseKeys.sort(function (a, b) {
                   return a - b;
                 });
-                return db.bulkDocs({docs: docs});
+                return db.bulkDocs({docs});
               }).then(function () {
                 return db.query(mapFun);
               }).then(function (res) {
@@ -3637,7 +3694,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       }).then(async function (mapFun) {
         return db.bulkDocs({docs: [{_id : 'bazbazbazb'}]}).then(function () {
           var keys = ['bazbazbazb'];
-          return db.query(mapFun, {keys: keys}).then(function (resp) {
+          return db.query(mapFun, {keys}).then(function (resp) {
             resp.total_rows.should.equal(1);
             resp.rows.should.have.length(1);
             return resp.rows.every(function (row) {
@@ -3759,7 +3816,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       return createView(db, {
         map: "function(doc){emit(doc.name, doc.count);};\n"
       }).then(function (queryFun) {
-        return db.bulkDocs({docs: docs}).then(function (res) {
+        return db.bulkDocs({docs}).then(function (res) {
           for (var i = 0; i < res.length; i++) {
             docs[i]._rev = res[i].rev;
           }
@@ -3771,7 +3828,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           docs.forEach(function (doc) {
             doc.count = 2;
           });
-          return db.bulkDocs({docs: docs});
+          return db.bulkDocs({docs});
         }).then(function () {
           return db.query(queryFun);
         }).then(function (res) {
@@ -3794,7 +3851,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       return createView(db, {
         map: "function(doc){emit(doc.name);};\n"
       }).then(function (queryFun) {
-        return db.bulkDocs({ docs: docs }).then(function () {
+        return db.bulkDocs({ docs }).then(function () {
           return db.query(queryFun, { update_seq: false });
         }).then(function (result) {
           result.rows.should.have.length(4);
@@ -3815,7 +3872,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }
 
-      return db.bulkDocs({ docs: docs }).then(function () {
+      return db.bulkDocs({ docs }).then(function () {
         return createView(db, {
           map: "function(doc){emit(doc.name);};\n"
         });
@@ -3859,7 +3916,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       return createView(db, {
         map: "function(doc){emit(doc.name);};\n"
       }).then(function (queryFun) {
-        return db.bulkDocs({ docs: docs }).then(function () {
+        return db.bulkDocs({ docs }).then(function () {
           return db.query(queryFun);
         }).then(function (result) {
           result.rows.should.have.length(4);
