@@ -12,7 +12,7 @@ function codeWrap(){
       })
       .filter(function(item, index, inputArray){
           // Each code block has multiple versions so let's only grab one.
-          return inputArray.indexOf(item) == index;
+          return inputArray.indexOf(item) === index;
       });
 
   wrap();
@@ -41,7 +41,7 @@ function codeWrap(){
             '<a href="#callback">Callbacks</a>' +
         '</li>' +
       '</ul>' +
-      '<div class="tab-content">{{tapPanes}}</div>';
+      '<div class="tab-content">{{tabPanes}}</div>';
     codeIds
       .forEach(function(id){
         var $code = $("[data-code-id='" + id + "']");
@@ -51,7 +51,7 @@ function codeWrap(){
         }).join('');
 
         var codeHtml = codeTpl
-                          .replace(/{{tapPanes}}/g, paneHtml)
+                          .replace(/{{tabPanes}}/g, paneHtml)
                           .replace(/{{codeId}}/g, id);
         $code
           .first()
@@ -117,7 +117,9 @@ function addCodeCopyButtons() {
 
   function copyCodeFor(codeElement) {
     return () => {
-      navigator.clipboard.writeText(codeElement.textContent);
+      const clone = codeElement.cloneNode(true);
+      clone.querySelectorAll('.btnCopyCode').forEach(btn => btn.remove());
+      navigator.clipboard.writeText(clone.textContent);
 
       const success = addButton('✅', codeElement);
       success.disabled = true;
@@ -135,6 +137,7 @@ function addCodeCopyButtons() {
     btn.style.top   = '11.5px';
     btn.style.right = '15px';
     btn.textContent = txt;
+    btn.classList.add('btnCopyCode');
 
     parent.appendChild(btn);
 

@@ -1838,6 +1838,29 @@ adapters.forEach(function (adapter) {
       }).catch(done);
     });
 
+    it('Changes accepts "_design" as filter property', async function () {
+      const docs = [
+        { _id: '0' },
+        { _id: '1' },
+        {
+          _id: '_design/foo',
+          views: {
+            any: { map: 'function (doc) { emit(doc._id, null) };' }
+          }
+        }
+      ];
+
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs });
+      const changes = await db.changes({ filter: "_design" });
+      assert.lengthOf(changes.results, 1);
+      assert.equal(changes.results[0].id, '_design/foo');
+      assert.isArray(changes.results[0].changes);
+      assert.lengthOf(changes.results[0].changes, 1);
+      assert.isString(changes.results[0].changes[0].rev);
+      assert.isDefined(changes.results[0].seq);
+    });
+
   });
 });
 

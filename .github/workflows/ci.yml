@@ -75,6 +75,14 @@ jobs:
           - TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test
           - TYPE=mapreduce ADAPTERS=http npm test
     runs-on: ubuntu-latest
+    services:
+      couchdb:
+        image: couchdb:${{ matrix.couchdb }}
+        ports:
+          - 5984:5984
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
     env:
       CLIENT: node
       SERVER: couchdb-master
@@ -87,9 +95,6 @@ jobs:
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ matrix.node }}
-      - uses: ./.github/actions/install-couchdb
-        with:
-          couchdb-version: ${{ matrix.couchdb }}
       - uses: ./.github/actions/build-pouchdb
       - id: test
         run: ${{ matrix.cmd }}
@@ -119,6 +124,14 @@ jobs:
           - TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test
           - TYPE=mapreduce ADAPTERS=http npm test
     runs-on: ubuntu-latest
+    services:
+      couchdb:
+        image: couchdb:${{ matrix.couchdb }}
+        ports:
+          - 5984:5984
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
     env:
       USE_MINIFIED: 1
       CLIENT: ${{ matrix.client }}
@@ -132,10 +145,6 @@ jobs:
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: ./.github/actions/install-playwright
-      - uses: ./.github/actions/install-couchdb
-        with:
-          couchdb-version: ${{ matrix.couchdb }}
       - uses: ./.github/actions/build-pouchdb
       - id: test
         run: ${{ matrix.cmd }}
@@ -215,7 +224,6 @@ jobs:
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: ./.github/actions/install-playwright
       - uses: ./.github/actions/build-pouchdb
       - id: test
         run: ${{ matrix.cmd }}
