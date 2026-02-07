@@ -118,7 +118,7 @@ localDB.sync(remoteDB, {
   // yo, something changed!
 }).on('paused', function (info) {
   // replication was paused, usually because of a lost connection
-}).on('active', function (info) {
+}).on('active', function () {
   // replication was resumed
 }).on('error', function (err) {
   // totally unhandled error (shouldn't happen)
