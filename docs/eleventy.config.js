@@ -26,7 +26,12 @@ module.exports = eleventyConfig => {
 
   eleventyConfig.addPairedShortcode('highlight', function(content, lang) {
     loadLanguages([lang]);
-    const html = Prism.highlight(content.trim(), Prism.languages[lang], lang);
+
+    const html = Prism
+        .highlight(content.trim(), Prism.languages[lang], lang)
+        // prevent markdown interpreter from converting multiple
+        // linebreaks in code examples into <p>...</p>
+        .replaceAll(/\n(?=\n)/g, '\n&zwnj;');
 
     return `<figure class="highlight"><pre><code class="language-${lang}">${html}</code></pre></figure>`;
   });
