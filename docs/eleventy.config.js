@@ -35,6 +35,6 @@ module.exports = eleventyConfig => {
     dir: {
       includes: '_includes',
       layouts: '_layouts',
-    }
+    },
   };
 };
