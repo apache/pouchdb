@@ -117,7 +117,9 @@ function addCodeCopyButtons() {
 
   function copyCodeFor(codeElement) {
     return () => {
-      navigator.clipboard.writeText(codeElement.textContent);
+      const clone = codeElement.cloneNode(true);
+      clone.querySelectorAll('.btnCopyCode').forEach(btn => btn.remove());
+      navigator.clipboard.writeText(clone.textContent);
 
       const success = addButton('✅', codeElement);
       success.disabled = true;
@@ -135,6 +137,7 @@ function addCodeCopyButtons() {
     btn.style.top   = '11.5px';
     btn.style.right = '11.5px';
     btn.textContent = txt;
+    btn.classList.add('btnCopyCode');
 
     parent.appendChild(btn);
 
