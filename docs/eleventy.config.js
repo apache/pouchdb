@@ -21,6 +21,10 @@ module.exports = eleventyConfig => {
         .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
   });
 
+  eleventyConfig.addCollection('pages', collectionApi => {
+    return collectionApi.getAll().filter(item => !item.data.tags);
+  });
+
   eleventyConfig.setFrontMatterParsingOptions({
     excerpt: true,
     excerpt_separator: '#',
