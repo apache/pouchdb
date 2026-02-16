@@ -68,8 +68,8 @@ PouchDB also offers separate browser plugins that use backends other than Indexe
 
 **Downloads:**
 
-* [pouchdb.memory.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.js) (Minified: [pouchdb.memory.min.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.min.js))
-* [pouchdb.localstorage.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.js) (Minified: [pouchdb.localstorage.min.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.min.js))
+* [pouchdb.memory.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.js) (Minified: [pouchdb.memory.min.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.min.js))
+* [pouchdb.localstorage.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.js) (Minified: [pouchdb.localstorage.min.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.min.js))
 
 {% include alert/start.html variant="warning"%}
 {% markdown %}
@@ -177,10 +177,10 @@ Currently PouchDB has full support for:
 
 * CouchDB 1.x
 * [Smileupps](https://www.smileupps.com/) (same as 1.x)
-* CouchDB 2.x ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
-* CouchDB 3.x ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
+* CouchDB 2.x ([tested in CI](https://github.com/apache/pouchdb/actions))
+* CouchDB 3.x ([tested in CI](https://github.com/apache/pouchdb/actions))
 * [Cloudant](https://cloudant.com/) (roughly the same as 2.x)
-* [PouchDB Server](https://github.com/pouchdb/pouchdb-server) ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
+* [PouchDB Server](https://github.com/pouchdb/pouchdb-server) ([tested in CI](https://github.com/apache/pouchdb/actions))
 * [PouchDB Server --in-memory mode](https://github.com/pouchdb/pouchdb-server)
 
 [Drupal 8](http://wearepropeople.com/blog/a-content-staging-solution-for-drupal-8-and-more) has also announced support for PouchDB, and there is [rcouch](https://github.com/rcouch/rcouch) as well, but these are both untested by PouchDB.

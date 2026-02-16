@@ -145,7 +145,6 @@ jobs:
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: ./.github/actions/install-playwright
       - uses: ./.github/actions/build-pouchdb
       - id: test
         run: ${{ matrix.cmd }}
@@ -225,7 +224,6 @@ jobs:
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: ./.github/actions/install-playwright
       - uses: ./.github/actions/build-pouchdb
       - id: test
         run: ${{ matrix.cmd }}
