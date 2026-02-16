@@ -145,7 +145,7 @@ function addCodeCopyButtons() {
   }
 
   document
-    .querySelectorAll('pre.language-js')
+    .querySelectorAll('pre[data-copybutton]')
     .forEach(codeElement => {
       codeElement.style.position = 'relative';
 
