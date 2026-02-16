@@ -59,6 +59,8 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('markdown', content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
 
+  const LINEBREAK_PLACEHOLDER = '---linebreak-placeholder---';
+
   eleventyConfig.addPairedShortcode('highlight', function(content, lang) {
     loadLanguages([lang]);
 
@@ -66,9 +68,15 @@ module.exports = eleventyConfig => {
         .highlight(content.trim(), Prism.languages[lang], lang)
         // prevent markdown interpreter from converting multiple
         // linebreaks in code examples into <p>...</p>
-        .replaceAll(/\n(?=\n)/g, '\n&zwnj;');
+        .replaceAll(/\n(?=\n)/g, `\n${LINEBREAK_PLACEHOLDER}`);
 
     return `<figure class="highlight"><pre data-copybutton><code class="language-${lang}">${html}</code></pre></figure>`;
+  });
+
+  eleventyConfig.addTransform('revert-linebreak-markers', function(content) {
+    console.log('revert-linebreak-markers', this.outputPath);
+    if(!this.outputPath?.endsWith('.html')) return content;
+    return content.replaceAll(new RegExp(`^${LINEBREAK_PLACEHOLDER}$`, 'gm'), '');
   });
 
   return {
