@@ -5,7 +5,7 @@ module.exports = {
   baseurl: '',
   version: '9.0.0',
   github: {
-    repository_url: 'https://github.com/pouchdb/pouchdb',
+    repository_url: 'https://github.com/apache/pouchdb',
   },
   time: new Date().toISOString(),
 };
