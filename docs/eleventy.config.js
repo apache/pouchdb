@@ -42,6 +42,12 @@ module.exports = eleventyConfig => {
     excerpt_separator: '#',
   });
 
+  eleventyConfig.addFilter('liquid', function(content) {
+    if(!this.liquid) return content;
+
+    return this.liquid.parseAndRender(content, this.context);
+  });
+
   const md = markdownIt({
     html: true,
   });
