@@ -15,15 +15,13 @@ module.exports = eleventyConfig => {
   // use e.g. /learn.html in preference to /learn/
   eleventyConfig.addGlobalData('permalink', '/{{ page.filePathStem }}.html');
 
-  eleventyConfig.addCollection('posts', collectionApi => {
-    return collectionApi
-        .getFilteredByGlob('./posts/*.md')
-        .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
+  eleventyConfig.addCollection('guides', collectionApi => {
+    return collectionApi.getFilteredByTag('guides').sort((a, b) => a.data.index - b.data.index);
   });
 
   eleventyConfig.addCollection('pages', collectionApi => {
     // zero-indexed, but skip page 1, as it's served at /blog/
-    const pageCount = Math.ceil(collectionApi.getFilteredByGlob('./posts/*.md').length / 5) - 1;
+    const pageCount = Math.ceil(collectionApi.getFilteredByTag('posts').length / 5) - 1;
     const blogPages = Array.from(
       { length:pageCount },
       (_, n) => ({
@@ -35,6 +33,12 @@ module.exports = eleventyConfig => {
       ...collectionApi.getAll().filter(item => !item.data.tags),
       ...blogPages,
     ];
+  });
+
+  eleventyConfig.addCollection('posts', collectionApi => {
+    return collectionApi
+        .getFilteredByTag('posts')
+        .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
   });
 
   eleventyConfig.setFrontMatterParsingOptions({

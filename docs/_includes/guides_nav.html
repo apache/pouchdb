@@ -1,5 +1,4 @@
-{% assign guides = collections.guides | sort: 'index' %}
-{% for guide in guides %}
+{% for guide in collections.guides %}
     {% assign title = guide.data.title %}
     {% if guide.data.nav %}
         {% assign title = guide.data.nav %}
