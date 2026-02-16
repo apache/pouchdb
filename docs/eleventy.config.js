@@ -22,7 +22,19 @@ module.exports = eleventyConfig => {
   });
 
   eleventyConfig.addCollection('pages', collectionApi => {
-    return collectionApi.getAll().filter(item => !item.data.tags);
+    // zero-indexed, but skip page 1, as it's served at /blog/
+    const pageCount = Math.ceil(collectionApi.getFilteredByGlob('./posts/*.md').length / 5) - 1;
+    const blogPages = Array.from(
+      { length:pageCount },
+      (_, n) => ({
+        url: `/blog/page${n+2}/`,
+      }),
+    );
+
+    return [
+      ...collectionApi.getAll().filter(item => !item.data.tags),
+      ...blogPages,
+    ];
   });
 
   eleventyConfig.setFrontMatterParsingOptions({
