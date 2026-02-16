@@ -19,9 +19,9 @@ permalink: /feed.xml
         {% else %}
           <description>{{ post.data.content | xml_escape }}</description>
         {% endif %}
-        <pubDate>{{ post.data.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
-        <link>{{ site.url }}{{ post.data.url }}</link>
-        <guid isPermaLink="true">{{ site.url }}{{ post.data.url }}</guid>
+        <pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
+        <link>{{ site.url }}{{ post.url }}</link>
+        <guid isPermaLink="true">{{ site.url }}{{ post.url }}</guid>
       </item>
     {% endfor %}
   </channel>
