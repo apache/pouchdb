@@ -3,6 +3,7 @@ const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 
 module.exports = eleventyConfig => {
+  eleventyConfig.addPassthroughCopy('asf.md');
   eleventyConfig.addPassthroughCopy('static');
 
   eleventyConfig.setLiquidOptions({
