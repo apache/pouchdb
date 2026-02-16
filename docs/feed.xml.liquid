@@ -14,10 +14,10 @@ permalink: /feed.xml
         {% if post.data.author %}
           <dc:creator>{{ post.data.author | xml_escape }}</dc:creator>
         {% endif %}
-        {% if post.data.excerpt %}
-          <description>{{ post.data.excerpt | xml_escape }}</description>
+        {% if post.page.excerpt %}
+          <description>{{ post.page.excerpt | markdown | xml_escape }}</description>
         {% else %}
-          <description>{{ post.data.content | xml_escape }}</description>
+          <description>{{ post.content | xml_escape }}</description>
         {% endif %}
         <pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
         <link>{{ site.url }}{{ post.url }}</link>
