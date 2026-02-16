@@ -13,6 +13,12 @@ module.exports = eleventyConfig => {
   // use e.g. /learn.html in preference to /learn/
   eleventyConfig.addGlobalData('permalink', '/{{ page.filePathStem }}.html');
 
+  eleventyConfig.addCollection('posts', collectionApi => {
+    return collectionApi
+        .getFilteredByGlob('./posts/*.md')
+        .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
+  });
+
   eleventyConfig.setFrontMatterParsingOptions({
     excerpt: true,
     excerpt_separator: '#',
