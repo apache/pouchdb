@@ -3,6 +3,8 @@ const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 
 module.exports = eleventyConfig => {
+  process.env.TZ = 'UTC';
+
   eleventyConfig.addPassthroughCopy('asf.md');
   eleventyConfig.addPassthroughCopy('static');
 
