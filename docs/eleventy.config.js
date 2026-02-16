@@ -33,7 +33,7 @@ module.exports = eleventyConfig => {
         // linebreaks in code examples into <p>...</p>
         .replaceAll(/\n(?=\n)/g, '\n&zwnj;');
 
-    return `<figure class="highlight"><pre><code class="language-${lang}">${html}</code></pre></figure>`;
+    return `<figure class="highlight"><pre class="language-${lang}"><code>${html}</code></pre></figure>`;
   });
 
   return {
