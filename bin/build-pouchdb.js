@@ -33,41 +33,41 @@ var currentYear = new Date().getFullYear();
 
 var comments = {
   'pouchdb': '// PouchDB ' + version +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
+    '\n// ' +
+    '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
+    '\n// PouchDB may be freely distributed under the Apache license, ' +
+    'version 2.0.' +
+    '\n// For all details and documentation:' +
+    '\n// http://pouchdb.com\n',
 
   'indexeddb': '// PouchDB indexeddb plugin ' + version + '\n',
 
   'memory': '// PouchDB in-memory plugin ' + version +
-  '\n// Based on MemDOWN: https://github.com/rvagg/memdown' +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
+    '\n// Based on MemDOWN: https://github.com/rvagg/memdown' +
+    '\n// ' +
+    '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
+    '\n// PouchDB may be freely distributed under the Apache license, ' +
+    'version 2.0.' +
+    '\n// For all details and documentation:' +
+    '\n// http://pouchdb.com\n',
 
   'localstorage': '// PouchDB localStorage plugin ' + version +
-  '\n// Based on localstorage-down: https://github.com/No9/localstorage-down' +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
+    '\n// Based on localstorage-down: https://github.com/No9/localstorage-down' +
+    '\n// ' +
+    '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
+    '\n// PouchDB may be freely distributed under the Apache license, ' +
+    'version 2.0.' +
+    '\n// For all details and documentation:' +
+    '\n// http://pouchdb.com\n',
 
   'find': '// pouchdb-find plugin ' + version +
-  '\n// Based on Mango: https://github.com/cloudant/mango' +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
+    '\n// Based on Mango: https://github.com/cloudant/mango' +
+    '\n// ' +
+    '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
+    '\n// PouchDB may be freely distributed under the Apache license, ' +
+    'version 2.0.' +
+    '\n// For all details and documentation:' +
+    '\n// http://pouchdb.com\n',
 };
 
 function doRollup(input, browser, formatsToFiles) {
@@ -82,13 +82,14 @@ function doRollup(input, browser, formatsToFiles) {
   }).then(function (bundle) {
     return Promise.all(Object.keys(formatsToFiles).map(function (format) {
       var fileOut = formatsToFiles[format];
-      return bundle.generate({format}).then(function (bundle) {
+      return bundle.generate({ format }).then(function (result) {
+        var code = result.output[0].code;
         if (DEV_MODE) {
           var ms = Math.round(process.hrtime(start)[1] / 1000000);
           console.log('    took ' + ms + ' ms to rollup ' +
-                      path.dirname(input) + '/' + path.basename(input));
+            path.dirname(input) + '/' + path.basename(input));
         }
-        return writeFile(addPath('pouchdb', fileOut), bundle.code);
+        return writeFile(addPath('pouchdb', fileOut), code);
       });
     }));
   });
@@ -151,7 +152,7 @@ var rimrafMkdirp = function (...args) {
     return rimraf(addPath('pouchdb', otherPath));
   })).then(function () {
     return all(args.map(function (otherPath) {
-      return mkdir(addPath('pouchdb', otherPath), { recursive:true });
+      return mkdir(addPath('pouchdb', otherPath), { recursive: true });
     }));
   });
 };
@@ -165,7 +166,7 @@ var doAll = function (...args) {
 };
 
 function doBuildNode() {
-  return mkdir(addPath('pouchdb', 'lib/plugins'), { recursive:true })
+  return mkdir(addPath('pouchdb', 'lib/plugins'), { recursive: true })
     .then(buildForNode);
 }
 
