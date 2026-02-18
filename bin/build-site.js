@@ -29,6 +29,7 @@ async function buildCSS() {
 async function buildEleventy() {
   await exec('npx @11ty/eleventy');
   await checkForUnprocessedCurlies();
+  await checkForMissingCodeLanguage();
   console.log('=> Rebuilt eleventy');
 
   highlightEs6();
@@ -55,14 +56,51 @@ async function buildEleventy() {
   }
 }
 
+async function checkForMissingCodeLanguage() {
+  // If code blocks without syntax highlighting are ever desired, add a way to allow them.
+  // Note that this might be better done by overwriting `md.renderer.rules.code_block`,
+  // but the markdown-it instance in eleventy.config.js doesn't seem to always be used.
+  // See: https://github.com/markdown-it/markdown-it/issues/902
+  try {
+    const res = await exec(`grep -Frn --include=\\*.html '<pre><code>' ./_site/`);
+
+    console.log();
+    console.log(res.stdout.trim());
+    console.log('!!!');
+    console.log('!!! UNLABELLED CODE BLOCKS FOUND IN OUTPUT HTML FILE(S):');
+    console.log('!!!');
+    console.log('!!! CHECK TEMPLATES ARE USING ONE OF:');
+    console.log('!!!');
+    console.log('!!!     ```lang');
+    console.log('!!!     ...');
+    console.log('!!!     ```');
+    console.log('!!!');
+    console.log('!!! OR:');
+    console.log('!!!');
+    console.log('!!!     {% highlight "lang" %}');
+    console.log();
+
+    if (process.env.BUILD) {
+      process.exit(1);
+    }
+  } catch (err) {
+    if (err.code === 1) {
+      return; // no problems found
+    }
+    throw err;
+  }
+}
+
 async function checkForUnprocessedCurlies() {
   // If unprocessed curlies are ever desired, add a way to ignore them.
   try {
     const res = await exec(`grep -Ern --include=\\*.html '\\{\\{|\\}\\}' ./_site/`);
 
     console.log();
-    console.log('!!! UNPROCESSED CURLIES FOUND IN OUTPUT HTML FILE(S):');
     console.log(res.stdout.trim());
+    console.log('!!!');
+    console.log('!!! UNPROCESSED CURLIES FOUND IN OUTPUT HTML FILE(S):');
+    console.log('!!!');
     console.log('!!! CHECK TEMPLATES ARE BEING FULLY PROCESSED.');
     console.log();
 
