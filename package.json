@@ -65,7 +65,6 @@
     "chai-as-promised": "5.3.0",
     "cssmin": "0.4.3",
     "denodeify": "1.2.1",
-    "derequire": "2.1.1",
     "eleventy-plugin-markdown-shortcode": "^1.1.0",
     "eslint": "8.7.0",
     "express": "4.22.0",
