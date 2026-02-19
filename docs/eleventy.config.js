@@ -55,9 +55,8 @@ module.exports = eleventyConfig => {
   });
 
   const renderMarkdown = initMarkdown();
-  // Instead of calling setLibrary('md', md), define wrapper object for render
-  // function to work around corruption of markdown-it parser.  Check parsing of
-  // indented code blocks with/without this { render:... } wrapper to see the issue.
+  // Re-defined markdown-it lib to prevent eleventy messing with internals.
+  // See: https://github.com/11ty/eleventy/issues/2438
   eleventyConfig.setLibrary('md', { render:renderMarkdown });
   eleventyConfig.addFilter('markdown', renderMarkdown);
   eleventyConfig.addPairedShortcode('markdown', renderMarkdown);
