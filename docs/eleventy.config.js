@@ -54,6 +54,10 @@ module.exports = eleventyConfig => {
     return this.liquid.parseAndRender(content, this.context);
   });
 
+  // Ensure consistent code style across:
+  // * markdown indented code blocks
+  // * markdown "fenced" code blocks
+  // * liquid {% highlight ... %} code blocks
   const wrapCode = (code, lang) => {
     let html = code.trim();
 
