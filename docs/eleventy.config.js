@@ -70,7 +70,6 @@ module.exports = eleventyConfig => {
   const md = markdownIt({
     html: true,
   });
-  const builtinFence = md.renderer.rules.fence;
   md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
     const { content, info } = tokens[idx];
     const lang = info ? info.trim().split(/\s/)[0] : '';
