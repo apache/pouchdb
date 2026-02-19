@@ -2,6 +2,8 @@ const markdownIt = require('markdown-it');
 const Prism = require('prismjs');
 const loadLanguages = require('prismjs/components/');
 
+const LINEBREAK_PLACEHOLDER = '---linebreak-placeholder---';
+
 module.exports = eleventyConfig => {
   process.env.TZ = 'UTC';
 
@@ -76,12 +78,17 @@ module.exports = eleventyConfig => {
 
     return wrapCode(content, lang);
   };
+  md.renderer.rules.code_block = (tokens, idx, options, env, slf) => {
+    const { content } = tokens[idx];
+    return wrapCode(content);
+  };
 
-  eleventyConfig.setLibrary('md', md);
+  // Define wrapper object for render function to work around corruption of
+  // markdown-it parser.  Check parsing of indented code blocks with/without
+  // this { render:... } wrapper to see the issue.
+  eleventyConfig.setLibrary('md', { render:raw => md.render(raw) });
   eleventyConfig.addFilter('markdown', content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
-
-  const LINEBREAK_PLACEHOLDER = '---linebreak-placeholder---';
 
   eleventyConfig.addPairedShortcode('highlight', wrapCode);
 
