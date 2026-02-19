@@ -82,7 +82,6 @@
     "ncp": "2.0.0",
     "playwright": "1.49.1",
     "pouchdb-express-router": "0.0.11",
-    "prismjs": "^1.30.0",
     "replace": "1.2.1",
     "rimraf": "2.7.1",
     "rollup": "0.67.4",
