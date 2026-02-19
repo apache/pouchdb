@@ -6,7 +6,6 @@ var path = require('path');
 var denodeify = require('denodeify');
 var browserify = require('browserify');
 var browserifyIncremental = require('browserify-incremental');
-var derequire = require('derequire');
 var fs = require('fs');
 var writeFileAsync = denodeify(fs.writeFile);
 var renameAsync = denodeify(fs.rename);
@@ -60,12 +59,7 @@ function doBrowserify(pkgName, filepath, opts, exclude) {
     browserifyCache[filepath] = bundler;
   }
 
-  return streamToPromise(bundler.bundle()).then(function (code) {
-    if (!DEV_MODE) {
-      code = derequire(code);
-    }
-    return code;
-  });
+  return streamToPromise(bundler.bundle());
 }
 
 exports.addPath = addPath;
