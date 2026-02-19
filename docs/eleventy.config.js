@@ -54,45 +54,13 @@ module.exports = eleventyConfig => {
     return this.liquid.parseAndRender(content, this.context);
   });
 
-  // Ensure consistent code style across:
-  // * markdown indented code blocks
-  // * markdown "fenced" code blocks
-  // * liquid {% highlight ... %} code blocks
-  const wrapCode = (code, lang) => {
-    let html = code.trim();
-
-    if(lang) {
-      loadLanguages([lang]);
-      html = Prism.highlight(html, Prism.languages[lang], lang);
-    }
-
-    // prevent markdown interpreter from converting multiple
-    // linebreaks in code examples into <p>...</p>
-    html = html.replaceAll(/\n(?=\n)/g, `\n${LINEBREAK_PLACEHOLDER}`);
-
-    return `<figure class="highlight"><pre data-copybutton><code class="language-${lang}">${html}</code></pre></figure>`;
-  };
-
-  const md = markdownIt({
-    html: true,
-  });
-  md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
-    const { content, info } = tokens[idx];
-    const lang = info ? info.trim().split(/\s/)[0] : '';
-
-    return wrapCode(content, lang);
-  };
-  md.renderer.rules.code_block = (tokens, idx, options, env, slf) => {
-    const { content } = tokens[idx];
-    return wrapCode(content);
-  };
-
-  // Define wrapper object for render function to work around corruption of
-  // markdown-it parser.  Check parsing of indented code blocks with/without
-  // this { render:... } wrapper to see the issue.
-  eleventyConfig.setLibrary('md', { render:raw => md.render(raw) });
-  eleventyConfig.addFilter('markdown', content => md.render(content));
-  eleventyConfig.addPairedShortcode('markdown', content => md.render(content));
+  const renderMarkdown = initMarkdown();
+  // Instead of calling setLibrary('md', md), define wrapper object for render
+  // function to work around corruption of markdown-it parser.  Check parsing of
+  // indented code blocks with/without this { render:... } wrapper to see the issue.
+  eleventyConfig.setLibrary('md', { render:renderMarkdown });
+  eleventyConfig.addFilter('markdown', renderMarkdown);
+  eleventyConfig.addPairedShortcode('markdown', renderMarkdown);
 
   eleventyConfig.addPairedShortcode('highlight', wrapCode);
 
@@ -109,3 +77,40 @@ module.exports = eleventyConfig => {
     },
   };
 };
+
+// Ensure consistent code style across:
+// * markdown indented code blocks
+// * markdown "fenced" code blocks
+// * liquid {% highlight ... %} code blocks
+function initMarkdown() {
+  const md = markdownIt({
+    html: true,
+  });
+  md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
+    const { content, info } = tokens[idx];
+    const lang = info ? info.trim().split(/\s/)[0] : '';
+
+    return wrapCode(content, lang);
+  };
+  md.renderer.rules.code_block = (tokens, idx, options, env, slf) => {
+    const { content } = tokens[idx];
+    return wrapCode(content);
+  };
+
+  return md.render.bind(md);
+}
+
+function wrapCode(code, lang) {
+  let html = code.trim();
+
+  if(lang) {
+    loadLanguages([lang]);
+    html = Prism.highlight(html, Prism.languages[lang], lang);
+  }
+
+  // prevent markdown interpreter from converting multiple
+  // linebreaks in code examples into <p>...</p>
+  html = html.replaceAll(/\n(?=\n)/g, `\n${LINEBREAK_PLACEHOLDER}`);
+
+  return `<figure class="highlight"><pre data-copybutton><code class="language-${lang}">${html}</code></pre></figure>`;
+}
