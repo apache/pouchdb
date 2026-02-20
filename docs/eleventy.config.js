@@ -85,17 +85,18 @@ function initMarkdown() {
   const md = markdownIt({
     html: true,
   });
+
+  // Indented code blocks seem to introduce parsing differences across
+  // markdownversions, and inconsistencies with whitespace introduced
+  // by liquid templates.  The simplest option is to disable them, and
+  // require code "fences" (```) instead.
+  md.disable('code');
+
   md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
     const { content, info } = tokens[idx];
     const lang = info ? info.trim().split(/\s/)[0] : '';
 
     return wrapCode(content, lang);
-  };
-  md.renderer.rules.code_block = (tokens, idx, options, env, slf) => {
-    const { content } = tokens[idx];
-    const { inputPath } = env.page;
-    console.error('WARN', 'Code block in', inputPath, 'will not have formatting.  Prefer fences.');
-    return wrapCode(content);
   };
 
   return md.render.bind(md);
