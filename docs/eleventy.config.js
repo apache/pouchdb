@@ -14,9 +14,6 @@ module.exports = eleventyConfig => {
     jekyllInclude: true,
     trimTagLeft: true,
     trimTagRight: true,
-    trimOutputLeft: true,
-    trimOutputRight: true,
-    hasDashModifier: true,
   });
 
   // use e.g. /learn.html in preference to /learn/
