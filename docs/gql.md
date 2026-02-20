@@ -38,16 +38,12 @@ Note that only identifiers and string literals are case-sensitive.
 Although only the query is mandatory, the callback is required to access the query result.
 Currently no query options are implemented.
 
-    const pouchdb;
-    PouchDB('idb://test', function(err, db) {
-       pouchdb = db;
-      // Use pouchdb to call further functions
-        db.gql({select: "*", where: "type='Fire' and name is not null"}, function(err, result){
-            if(!err){
-            // Use the results of the query here
-            }
-          }
-    })
+    const db = await PouchDB('test');
+    db.gql({select: "*", where: "type='Fire' and name is not null"}, function(err, result) {
+      if(!err) {
+        // Use the results of the query here
+      }
+    });
 
 ## Select
 
