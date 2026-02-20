@@ -12,8 +12,6 @@ module.exports = eleventyConfig => {
 
   eleventyConfig.setLiquidOptions({
     jekyllInclude: true,
-    trimTagLeft: true,
-    trimTagRight: true,
   });
 
   // use e.g. /learn.html in preference to /learn/
