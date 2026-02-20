@@ -12,6 +12,11 @@ module.exports = eleventyConfig => {
 
   eleventyConfig.setLiquidOptions({
     jekyllInclude: true,
+    trimTagLeft: true,
+    trimTagRight: true,
+    trimOutputLeft: true,
+    trimOutputRight: true,
+    hasDashModifier: true,
   });
 
   // use e.g. /learn.html in preference to /learn/
@@ -93,6 +98,8 @@ function initMarkdown() {
   };
   md.renderer.rules.code_block = (tokens, idx, options, env, slf) => {
     const { content } = tokens[idx];
+    const { inputPath } = env.page;
+    console.error('WARN', 'Code block in', inputPath, 'will not have formatting.  Prefer fences.');
     return wrapCode(content);
   };
 
