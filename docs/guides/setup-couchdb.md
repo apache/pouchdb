@@ -11,7 +11,9 @@ One of the main benefits of learning PouchDB is that it's exactly the same as Co
 
 For instance, in CouchDB you would fetch all documents using:
 
-    /db/_all_docs?include_docs=true
+```
+/db/_all_docs?include_docs=true
+```
 
 In PouchDB this becomes:
 
@@ -84,11 +86,15 @@ If you see a screen like the following, then you are ready to rock and roll with
 
 Enabling CORS is easy. Just install this handy script:
 
-    $ npm install -g add-cors-to-couchdb
+```sh
+$ npm install -g add-cors-to-couchdb
+```
 
 And run it:
 
-    $ add-cors-to-couchdb
+```sh
+$ add-cors-to-couchdb
+```
 
 If you installed PouchDB Server, CORS is enabled by default, and this step is not necessary.
 

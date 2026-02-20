@@ -77,8 +77,10 @@ There is a limit of one database per app in some versions of the Android WebView
 
 If you see this warning:
 
-    (node) warning: possible EventEmitter memory leak detected. 11 listeners added.
-    Use emitter.setMaxListeners() to increase limit.
+```
+(node) warning: possible EventEmitter memory leak detected. 11 listeners added.
+Use emitter.setMaxListeners() to increase limit.
+```
 
 This is because PouchDB uses Node-style [EventEmitters](https://nodejs.org/api/events.html) for its events. An EventEmitter is any object that has an `.on()` or `once()` method, such as `db.changes().on('change', ...`.
 
@@ -134,13 +136,17 @@ In Firefox, PouchDB instead throws a [`No valid adapter found`](#no_valid_adapte
 
 If you ever see:
 
-    Uncaught DataCloneError:
-      Failed to execute 'put' on 'IDBObjectStore':
-      An object could not be cloned.
+```
+Uncaught DataCloneError:
+  Failed to execute 'put' on 'IDBObjectStore':
+  An object could not be cloned.
+```
 
 Or:
 
-    DataCloneError: The object could not be cloned.
+```
+DataCloneError: The object could not be cloned.
+```
 
 Then the problem is that the document you are trying to store is not a pure JSON object. For example, an object with its own class (`new Foo()`) or with special methods like getters and setters cannot be stored in PouchDB/CouchDB.
 

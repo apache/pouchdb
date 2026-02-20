@@ -224,9 +224,11 @@ docs.forEach(function (doc) {
 
 Then Babel.js will fail with a somewhat opaque error:
 
-    Error : /../script.js: Unexpected token (38:23)
-    > 38 |     await db.post(doc);
-         |           ^
+```
+Error : /../script.js: Unexpected token (38:23)
+> 38 |     await db.post(doc);
+     |           ^
+```
 
 This is because you cannot use `await` from within a normal function. You have to use an async function.
 
@@ -245,10 +247,12 @@ console.log('main loop done');
 
 This will compile, but the problem is that this will print out:
 
-    main loop done
-    0
-    1
-    2
+```
+main loop done
+0
+1
+2
+```
 
 What's happening is that the main function is exiting early, because the `await` is actually in the sub-function. Furthermore, this will execute each promise *concurrently*, which is not what we intended.
 
