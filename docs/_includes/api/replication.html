@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Replicate a database" hash="replication" %}
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.replicate(source, target, [options])
 {% endhighlight %}
 
@@ -36,7 +36,7 @@ All options default to `false` unless otherwise specified.
 
 #### Example Usage:
 
-{% highlight js %}
+{% highlight "js" %}
 const rep = PouchDB.replicate('mydb', 'http://localhost:5984/mydb', {
   live: true,
   retry: true
@@ -59,7 +59,7 @@ rep.cancel(); // whenever you want to cancel
 
 There are also shorthands for replication given existing PouchDB objects. These behave the same as `PouchDB.replicate()`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.replicate.to(remoteDB, [options]);
 // or
 db.replicate.from(remoteDB, [options]);
@@ -82,7 +82,7 @@ The `remoteDB` can either be a string or a `PouchDB` object. If you have a fetch
 As with [changes()](#changes), you can also omit `live`, in which case you can use `replicate()` in the callback/promise style and it will be treated as a single-shot operation.
 
 {% include code/start.html id="replication1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.replicate.to(remote, function (err, result) {
   if (err) { return console.log(err); }
   // handle 'completed' result
@@ -91,7 +91,7 @@ db.replicate.to(remote, function (err, result) {
 {% include code/end.html %}
 
 {% include code/start.html id="replication1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.replicate.to(remote);
 } catch (err) {
@@ -101,7 +101,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="replication1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.replicate.to(remote).then(function (result) {
   // handle 'completed' result
 }).catch(function (err) {
@@ -116,7 +116,7 @@ For non-live replications, the returned object is also an event emitter as well 
 
 Example response in the `'change'` listener:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "doc_write_failures": 0,
   "docs_read": 1,
@@ -135,7 +135,7 @@ Example response in the `'change'` listener:
 
 Example response in the `'complete'` listener:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "doc_write_failures": 0,
   "docs_read": 2,
@@ -181,7 +181,7 @@ You should also beware trying to use filtered replication to enforce security, e
 
 In these examples, we'll work with some mammals. Let's imagine our docs are:
 
-{% highlight js %}
+{% highlight "js" %}
 [
   {_id: 'a', name: 'Kangaroo', type: 'marsupial'},
   {_id: 'b', name: 'Koala', type: 'marsupial'},
@@ -197,7 +197,7 @@ Here are 5 examples using the 5 different systems.
 
 Filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 remote.replicate.to(local, {
   filter: function (doc) {
     return doc.type === 'marsupial';
@@ -209,7 +209,7 @@ remote.replicate.to(local, {
 
 Filter documents with `_id`s `['a', 'c']`.
 
-{% highlight js %}
+{% highlight "js" %}
 remote.replicate.to(local, {
   doc_ids: ['a', 'c']
 });
@@ -219,7 +219,7 @@ remote.replicate.to(local, {
 
 First `put()` a design document in the remote database:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/mydesign',
   filters: {
@@ -232,7 +232,7 @@ First `put()` a design document in the remote database:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 remote.replicate.to(local, {
   filter: 'mydesign/myfilter'
 });
@@ -244,7 +244,7 @@ This is the most powerful way to filter, because it allows you to pass in arbitr
 
 First `put()` a design document in the remote database:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/mydesign',
   filters: {
@@ -257,7 +257,7 @@ First `put()` a design document in the remote database:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 remote.replicate.to(local, {
   filter: 'mydesign/myfilter',
   query_params: {type: 'marsupial'}
@@ -272,7 +272,7 @@ Any documents that `emit()` anything will be considered to have passed this filt
 
 First `put()` a design document in the remote database:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   _id: '_design/mydesign',
   views: {
@@ -289,7 +289,7 @@ First `put()` a design document in the remote database:
 
 Then filter by `type === 'marsupial'`:
 
-{% highlight js %}
+{% highlight "js" %}
 remote.replicate.to(local, {
   filter: '_view',
   view: 'mydesign/myview'
@@ -302,7 +302,7 @@ During `retry` replication, you can customize the backoff function that determin
 
 Here's a simple backoff function that starts at 1000 milliseconds and triples it every time a remote request fails:
 
-{% highlight js %}
+{% highlight "js" %}
 
 db.replicate.to(remote, {
   live: true,

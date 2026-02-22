@@ -12,7 +12,7 @@ use to customize the PouchDB build, see [Custom Builds](/custom.html).
 
 Writing a plugin is easy! The API is:
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.plugin({
   methodName: myFunction
 });
@@ -23,7 +23,7 @@ This will add a `db.methodName()` to all databases, which runs `myFunction`.It w
 There is a [PouchDB Plugin Seed project](https://github.com/pouchdb/plugin-seed), which is the fastest way to get started writing, building and testing your very own plugin.
 
 #### Example Usage:
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.plugin({
   sayHello : function () {
     console.log("Hello!");
@@ -38,7 +38,7 @@ you want on it. You can use this to load multiple plugins, add adapters,
 or attach event listeners to the `PouchDB` object.
 
 #### Example Usage:
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.plugin(function (PouchDB) {
   PouchDB.hello = 'world';
 });
@@ -53,7 +53,7 @@ attach it to their PouchDB object.)
 
 You can load plugins into PouchDB when you load it via `require()`.
 
-{% highlight js %}
+{% highlight "js" %}
 const greet = {sayHello: function() { console.log("Hello!"); }};
 
 const PouchDB = require('pouchdb').plugin(greet);
@@ -64,7 +64,7 @@ db.sayHello(); // prints "Hello!"
 
 You can chain plugins, as well:
 
-{% highlight js %}
+{% highlight "js" %}
 const greet = {sayHello: function() { console.log("Hello!"); }};
 const manners = {thank: function(name) { console.log("Thank you, " + name); }};
 
@@ -85,7 +85,7 @@ The best way to intercept all updates to a PouchDB database is to **override the
 
 Because PouchDB guarantees to plugin authors that all data changes ultimately happen via `bulkDocs()`, it is the ideal place for an application or plugin to intercept updates.
 
-{% highlight js %}
+{% highlight "js" %}
 // Keep a reference to the "upstream" function.
 const pouchBulkDocs = PouchDB.prototype.bulkDocs;
 PouchDB.plugin({bulkDocs: validBulkDocs});

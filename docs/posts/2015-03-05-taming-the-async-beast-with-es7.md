@@ -13,7 +13,7 @@ We can't really help it. PouchDB is an abstraction over IndexedDB, WebSQL, Level
 
 When I think of elegant database APIs, however, I'm still struck by the simplicity of LocalStorage:
 
-{% highlight js %}
+{% highlight "js" %}
 if (!localStorage.foo) {
   localStorage.foo = 'bar';
 };
@@ -30,7 +30,7 @@ For PouchDB, we can try to mitigate the complexity of asynchronous APIs with pro
 
 However, promisey code is still hard to read, because promises are basically a bolt-on replacement for language primitives like `try`, `catch`, and `return`:
 
-{% highlight js %}
+{% highlight "js" %}
 var db = new PouchDB('mydb');
 db.post({}).then(function (result) { // post a new doc
   return db.get(result.id);          // fetch the doc
@@ -49,7 +49,7 @@ Until recently, this was the best we could hope for. But all of that changes wit
 
 What if I told you that, with ES7, you could rewrite the above code to look like this:
 
-{% highlight js %}
+{% highlight "js" %}
 let db = new PouchDB('mydb');
 try {
   let result = await db.post({});
@@ -72,7 +72,7 @@ First, let's take a look at how ES7 is accomplishing this amazing feat.
 
 ES7 gives us a new kind of function, the `async function`. Inside of an `async function`, we have a new keyword, `await`, which we use to "wait for" a promise:
 
-{% highlight js %}
+{% highlight "js" %}
 async function myFunction() {
   let result = await somethingThatReturnsAPromise();
   console.log(result); // cool, we have a result
@@ -82,7 +82,7 @@ async function myFunction() {
 
 If the promise resolves, we can immediately interact with it on the next line. And if it rejects, then an error is thrown. So `try`/`catch` actually works again!
 
-{% highlight js %}
+{% highlight "js" %}
 async function myFunction() {
   try {
     await somethingThatReturnsAPromise();
@@ -104,7 +104,7 @@ First, consider a common idiom in PouchDB: we want to `get()` a document by `_id
 
 With promises, you'd have to write something like this:
 
-{% highlight js %}
+{% highlight "js" %}
 db.get('docid').catch(function (err) {
   if (err.name === 'not_found') {
     return {}; // new doc
@@ -117,7 +117,7 @@ db.get('docid').catch(function (err) {
 
 With async functions, this becomes:
 
-{% highlight js %}
+{% highlight "js" %}
 let doc;
 try {
   doc = await db.get('docid');
@@ -143,7 +143,7 @@ Another, more insidious problem is that you have to be careful to wrap your code
 
 My advice is to ensure that your async functions are entirely surrounded by `try`/`catch`es, at least at the top level:
 
-{% highlight js %}
+{% highlight "js" %}
 async function createNewDoc() {
   let response = await db.post({}); // post a new doc
   return await db.get(response.id); // find by id
@@ -165,7 +165,7 @@ Async functions get really impressive when it comes to iteration. For instance, 
 
 Using standard ES6 promises, we'd have to roll our own promise chain:
 
-{% highlight js %}
+{% highlight "js" %}
 var promise = Promise.resolve();
 var docs = [{}, {}, {}];
 
@@ -182,7 +182,7 @@ promise.then(function () {
 
 This works, but it sure is ugly. It's also error-prone, because if you accidentally do:
 
-{% highlight js %}
+{% highlight "js" %}
 docs.forEach(function (doc) {
   promise = promise.then(db.post(doc));
 });
@@ -192,7 +192,7 @@ Then the promises will actually execute *concurrently*, which can lead to unexpe
 
 With ES7, though, we can just use a regular for-loop:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 
 for (let i = 0; i < docs.length; i++) {
@@ -203,7 +203,7 @@ for (let i = 0; i < docs.length; i++) {
 
 This (very concise) code does the same thing as the promise chain! We can make it even shorter by using `for...of`:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 
 for (let doc of docs) {
@@ -213,7 +213,7 @@ for (let doc of docs) {
 
 Note that you cannot use a  `forEach()` loop here. If you were to naïvely write:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 
 // WARNING: this won't work
@@ -224,15 +224,17 @@ docs.forEach(function (doc) {
 
 Then Babel.js will fail with a somewhat opaque error:
 
-    Error : /../script.js: Unexpected token (38:23)
-    > 38 |     await db.post(doc);
-         |           ^
+```
+Error : /../script.js: Unexpected token (38:23)
+> 38 |     await db.post(doc);
+     |           ^
+```
 
 This is because you cannot use `await` from within a normal function. You have to use an async function.
 
 However, if you try to use an async function, then you will get a more subtle bug:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 
 // WARNING: this won't work
@@ -245,10 +247,12 @@ console.log('main loop done');
 
 This will compile, but the problem is that this will print out:
 
-    main loop done
-    0
-    1
-    2
+```
+main loop done
+0
+1
+2
+```
 
 What's happening is that the main function is exiting early, because the `await` is actually in the sub-function. Furthermore, this will execute each promise *concurrently*, which is not what we intended.
 
@@ -260,7 +264,7 @@ If we do want to execute multiple promises concurrently, though, then this is pr
 
 Recall that with ES6 promises, we have `Promise.all()`. Let's use it to return an array of values from an array of promises:
 
-{% highlight js %}
+{% highlight "js" %}
 var docs = [{}, {}, {}];
 
 return Promise.all(docs.map(function (doc) {
@@ -272,7 +276,7 @@ return Promise.all(docs.map(function (doc) {
 
 In ES7, we can do this is a more straightforward way:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 let promises = docs.map((doc) => db.post(doc));
 
@@ -285,7 +289,7 @@ console.log(results);
 
 The most important parts are 1) creating the `promises` array, which starts invoking all the promises immediately, and 2) that we are `await`ing those promises within the main function. If we tried to use `Array.prototype.map`, then it wouldn't work:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 let promises = docs.map((doc) => db.post(doc));
 
@@ -302,7 +306,7 @@ The reason this doesn't work is because we are `await`ing inside of the sub-func
 
 If you don't mind using `Promise.all`, you can also use it to tidy up the code a bit:
 
-{% highlight js %}
+{% highlight "js" %}
 let docs = [{}, {}, {}];
 let promises = docs.map((doc) => db.post(doc));
 

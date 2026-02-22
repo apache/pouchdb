@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Get an attachment" hash="get_attachment" %} 
 
-{% highlight js %}
+{% highlight "js" %}
 db.getAttachment(docId, attachmentId, [options], [callback])
 {% endhighlight %}
 
@@ -15,7 +15,7 @@ Get attachment data.
 Get an attachment with filename `'att.txt'` from document with ID `'doc'`:
 
 {% include code/start.html id="get_att1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getAttachment('doc', 'att.txt', function(err, blobOrBuffer) {
   if (err) { return console.log(err); }
   // handle result
@@ -24,7 +24,7 @@ db.getAttachment('doc', 'att.txt', function(err, blobOrBuffer) {
 {% include code/end.html %}
 
 {% include code/start.html id="get_att1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const blobOrBuffer = await db.getAttachment('doc', 'att.txt');
 } catch (err) {
@@ -34,7 +34,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="get_att1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getAttachment('doc', 'att.txt').then(function (blobOrBuffer) {
   // handle result
 }).catch(function (err) {
@@ -47,7 +47,7 @@ Get an attachment with filename `'att.txt'` from document with ID `'doc'`, at
 the revision `'1-abcd'`:
 
 {% include code/start.html id="get_att2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getAttachment('doc', 'att.txt', {rev: '1-abcd'}, function(err, blobOrBuffer) {
   if (err) { return console.log(err); }
   // handle result
@@ -56,7 +56,7 @@ db.getAttachment('doc', 'att.txt', {rev: '1-abcd'}, function(err, blobOrBuffer) 
 {% include code/end.html %}
 
 {% include code/start.html id="get_att2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const blobOrBuffer = await db.getAttachment('doc', 'att.txt', {rev: '1-abcd'});
 } catch (err) {
@@ -66,7 +66,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="get_att2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.getAttachment('doc', 'att.txt', {rev: '1-abcd'}).then(function (blobOrBuffer) {
   // handle result
 }).catch(function (err) {
@@ -83,7 +83,7 @@ The response will be a `Blob` object in the browser, and a `Buffer` object in No
 
 You can specify `{attachments: true}` to most "read" operations, such as `get()`, `allDocs()`, `changes()`, and `query()`. The attachment data will then be included inlined in the resulting doc(s). However, it will always be supplied as base64. For example:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "_attachments": {
     "att.txt": {
@@ -99,7 +99,7 @@ You can specify `{attachments: true}` to most "read" operations, such as `get()`
 
 For such APIs, when you don't specify `{attachments: true}`, you will instead get metadata about the attachments. For example:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "_attachments": {
     "att.txt": {

@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="View cleanup" hash="view_cleanup" %} 
 
-{% highlight js %}
+{% highlight "js" %}
 db.viewCleanup([callback])
 {% endhighlight %}
 
@@ -13,7 +13,7 @@ See [the CouchDB documentation on view cleanup](http://couchdb.readthedocs.org/e
 #### Example Usage:
 
 {% include code/start.html id="viewcleanup" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.viewCleanup(function (err, result) {
   if (err) { return console.log(err); }
   // handle result
@@ -22,7 +22,7 @@ db.viewCleanup(function (err, result) {
 {% include code/end.html %}
 
 {% include code/start.html id="viewcleanup" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.viewCleanup();
 } catch (err) {
@@ -32,7 +32,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="viewcleanup" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.viewCleanup().then(function (result) {
   // handle result
 }).catch(function (err) {
@@ -42,6 +42,6 @@ db.viewCleanup().then(function (result) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 { "ok" : "true" }
 {% endhighlight %}

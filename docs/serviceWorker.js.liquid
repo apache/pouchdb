@@ -1,4 +1,5 @@
 ---
+permalink: /serviceWorker.js
 ---
 
 // Useful resources:
@@ -13,18 +14,18 @@ var criticalAssets = [
 ];
 
 var pages = [
-  {% for page in site.pages %}
+  {% for page in collections.pages %}
     {% if page.url != '/manifest.appcache' %}
       '{{ page.url | replace:'index.html','' }}',
     {% endif %}
   {% endfor %}
-  {% for page in site.guides %}
+  {% for page in collections.guides %}
     '{{ page.url | replace:'index.html','' }}',
   {% endfor %}
 ];
 
 var blogPosts = [
-  {% for page in site.posts %}
+  {% for page in collections.posts %}
     '{{ page.url | replace:'index.html','' }}',
   {% endfor %}
 ];

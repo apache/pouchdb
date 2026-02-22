@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Document revisions diff" hash="revisions_diff" %} 
 
-{% highlight js %}
+{% highlight "js" %}
 db.revsDiff(diff, [callback])
 {% endhighlight %}
 
@@ -10,7 +10,7 @@ to revisions stored in the database. Primarily used in replication.
 #### Example Usage:
 
 {% include code/start.html id="revsdiff1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.revsDiff({
   myDoc1: [
     "1-b2e54331db828310f3c772d6e042ac9c",
@@ -24,7 +24,7 @@ db.revsDiff({
 {% include code/end.html %}
 
 {% include code/start.html id="revsdiff1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.revsDiff({
     myDoc1: [
@@ -39,7 +39,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="revsdiff1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.revsDiff({
   myDoc1: [
     "1-b2e54331db828310f3c772d6e042ac9c",
@@ -54,7 +54,7 @@ db.revsDiff({
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "myDoc1": {
     "missing": ["2-3a24009a9525bde9e4bfa8a99046b00d"]

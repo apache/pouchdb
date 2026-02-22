@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Create/update a batch of documents" hash="batch_create" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs(docs, [options], [callback])
 {% endhighlight %}
 
@@ -13,7 +13,7 @@ If you omit an `_id` parameter on a given document, the database will create a n
 Put some new docs, providing the `_id`s:
 
 {% include code/start.html id="bulk_docs_1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {title : 'Lisa Says', _id: 'doc1'},
   {title : 'Space Oddity', _id: 'doc2'}
@@ -25,7 +25,7 @@ db.bulkDocs([
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.bulkDocs([
     {title : 'Lisa Says', _id: 'doc1'},
@@ -38,7 +38,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {title : 'Lisa Says', _id: 'doc1'},
   {title : 'Space Oddity', _id: 'doc2'}
@@ -53,7 +53,7 @@ db.bulkDocs([
 Post some new docs and auto-generate the `_id`s:
 
 {% include code/start.html id="bulk_docs_2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {title : 'Lisa Says'},
   {title : 'Space Oddity'}
@@ -65,7 +65,7 @@ db.bulkDocs([
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.bulkDocs([
     {title : 'Lisa Says'},
@@ -78,7 +78,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {title : 'Lisa Says'},
   {title : 'Space Oddity'}
@@ -91,7 +91,7 @@ db.bulkDocs([
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 [
   {
     "ok": true,
@@ -110,7 +110,7 @@ The response contains an array of the familiar `ok`/`rev`/`id`
 from the [put()/post() API](#create_document). If there are any errors, they
 will be provided individually like so:
 
-{% highlight js %}
+{% highlight "js" %}
 [
   { status: 409,
     name: 'conflict',
@@ -131,7 +131,7 @@ atomic unit is the document.
 You can also use `bulkDocs()` to update/delete many documents at once:
 
 {% include code/start.html id="bulk_docs3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {
     title  : 'Lisa Says',
@@ -153,7 +153,7 @@ db.bulkDocs([
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.bulkDocs([
     {
@@ -176,7 +176,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {
     title  : 'Lisa Says',
@@ -201,7 +201,7 @@ db.bulkDocs([
 Or delete them:
 
 {% include code/start.html id="bulk_docs_4" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {
     title    : 'Lisa Says',
@@ -223,7 +223,7 @@ db.bulkDocs([
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_4" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.bulkDocs([
     {
@@ -246,7 +246,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="bulk_docs_4" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.bulkDocs([
   {
     title    : 'Lisa Says',

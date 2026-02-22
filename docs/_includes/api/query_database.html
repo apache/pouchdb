@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Map/reduce queries" hash="query_database" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.query(fun, [options], [callback])
 {% endhighlight %}
 
@@ -62,7 +62,7 @@ For details, see the [CouchDB query options documentation](https://docs.couchdb.
 #### Example Usage:
 
 {% include code/start.html id="query1" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 // create a design doc
 const ddoc = {
   _id: '_design/index',
@@ -96,7 +96,7 @@ db.put(ddoc, function (err) {
 {% include code/end.html %}
 
 {% include code/start.html id="query1" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 // create a design doc
 const ddoc = {
   _id: '_design/index',
@@ -133,7 +133,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query1" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 // create a design doc
 const ddoc = {
   _id: '_design/index',
@@ -169,7 +169,7 @@ db.put(ddoc).catch(function (err) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "offset" : 0,
   "rows": [{
@@ -197,7 +197,7 @@ The result may also have `update_seq` if you set `update_seq` to `true`
 You can also use [complex keys](https://docs.couchdb.org/en/stable/ddocs/views/collation.html#complex-keys) for fancy ordering:
 
 {% include code/start.html id="query2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // sort by last name, first name, and age
   emit([doc.lastName, doc.firstName, doc.age]);
@@ -210,7 +210,7 @@ db.query(map, function (err, response) {
 {% include code/end.html %}
 
 {% include code/start.html id="query2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // sort by last name, first name, and age
   emit([doc.lastName, doc.firstName, doc.age]);
@@ -224,7 +224,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // sort by last name, first name, and age
   emit([doc.lastName, doc.firstName, doc.age]);
@@ -238,7 +238,7 @@ db.query(map).then(function (result) {
 {% include code/end.html %}
 
 #### Example Response:
-{% highlight js %}
+{% highlight "js" %}
 {
   "offset": 0,
   "rows": [{
@@ -271,7 +271,7 @@ db.query(map).then(function (result) {
 PouchDB fully supports [linked documents](https://docs.couchdb.org/en/stable/ddocs/views/joins.html?highlight=linked%20documents#linked-documents). Use them to join two types of documents together, by simply adding an `_id` to the emitted value:
 
 {% include code/start.html id="query3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // join artist data to albums
   if (doc.type === 'album') {
@@ -286,7 +286,7 @@ db.query(map, {include_docs : true}, function (err, response) {
 {% include code/end.html %}
 
 {% include code/start.html id="query3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // join artist data to albums
   if (doc.type === 'album') {
@@ -302,7 +302,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 function map(doc) {
   // join artist data to albums
   if (doc.type === 'album') {
@@ -319,7 +319,7 @@ db.query(map, {include_docs : true}).then(function (result) {
 
 #### Example response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
     "offset": 0,
     "rows": [
@@ -378,7 +378,7 @@ db.query(map, {include_docs : true}).then(function (result) {
 If you pass a function to `db.query` and give it the `emit` function as the second argument, then you can use a closure. (Since PouchDB has to use `eval()` to bind `emit`.)
 
 {% include code/start.html id="query4" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 // BAD! will throw error
 const myId = 'foo';
 db.query(function(doc) {
@@ -403,7 +403,7 @@ db.query(function(doc, emit) {
 {% include code/end.html %}
 
 {% include code/start.html id="query4" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 // BAD! will throw error
 const myId = 'foo';
 try {
@@ -431,7 +431,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query4" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 // BAD! will throw error
 const myId = 'foo';
 db.query(function(doc) {

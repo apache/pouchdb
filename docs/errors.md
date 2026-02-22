@@ -20,14 +20,14 @@ it's because you need to enable [CORS](https://developer.mozilla.org/en-US/docs/
 
 You can enable CORS in CouchDB using `curl` or the Futon web interface, but we've saved you some time by making a Node script called [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb). Just run:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ npm install -g add-cors-to-couchdb
 $ add-cors-to-couchdb
 {% endhighlight %}
 
 Or if your database is not at `127.0.0.1:5984`:
 
-{% highlight bash %}
+{% highlight "bash" %}
 $ add-cors-to-couchdb http://me.example.com \
     -u myusername -p mypassword
 {% endhighlight %}
@@ -77,8 +77,10 @@ There is a limit of one database per app in some versions of the Android WebView
 
 If you see this warning:
 
-    (node) warning: possible EventEmitter memory leak detected. 11 listeners added.
-    Use emitter.setMaxListeners() to increase limit.
+```
+(node) warning: possible EventEmitter memory leak detected. 11 listeners added.
+Use emitter.setMaxListeners() to increase limit.
+```
 
 This is because PouchDB uses Node-style [EventEmitters](https://nodejs.org/api/events.html) for its events. An EventEmitter is any object that has an `.on()` or `once()` method, such as `db.changes().on('change', ...`.
 
@@ -88,7 +90,7 @@ By default, all EventEmitters have 10 listeners, and if you exceed that limit, e
 
 If you're sure it's not a memory leak, though, you can increase the limit by doing:
 
-{% highlight javascript %}
+{% highlight "javascript" %}
 db.setMaxListeners(20);  // or 30 or 40 or however many you need
 {% endhighlight %}
 
@@ -134,13 +136,17 @@ In Firefox, PouchDB instead throws a [`No valid adapter found`](#no_valid_adapte
 
 If you ever see:
 
-    Uncaught DataCloneError:
-      Failed to execute 'put' on 'IDBObjectStore':
-      An object could not be cloned.
+```
+Uncaught DataCloneError:
+  Failed to execute 'put' on 'IDBObjectStore':
+  An object could not be cloned.
+```
 
 Or:
 
-    DataCloneError: The object could not be cloned.
+```
+DataCloneError: The object could not be cloned.
+```
 
 Then the problem is that the document you are trying to store is not a pure JSON object. For example, an object with its own class (`new Foo()`) or with special methods like getters and setters cannot be stored in PouchDB/CouchDB.
 
