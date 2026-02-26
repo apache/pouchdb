@@ -8,14 +8,11 @@ var utils = PouchDB.utils.mapReduceUtils;
 describe('test.mapreduce.js-upsert', function () {
   it('should throw an error if the doc errors', async function () {
     try {
-      await upsert(
-        {
-          get: function () {
-            return Promise.reject(new Error('a fake error!'));
-          },
+      await upsert({
+        get: function () {
+          return Promise.reject(new Error('a fake error!'));
         },
-        'foo',
-      );
+      }, 'foo');
 
       should.fail("Expected promise to be rejected");
     } catch (err) {
@@ -24,37 +21,29 @@ describe('test.mapreduce.js-upsert', function () {
   });
 
   it('should fulfill if the diff returns false', async function () {
-    const res = await upsert(
-      {
-        get: function () {
-          return Promise.resolve({ _rev: 'xyz' });
-        },
+    const res = await upsert({
+      get: function () {
+        return Promise.resolve({ _rev: 'xyz' });
       },
-      'foo',
-      function () {
-        return false;
-      },
-    );
+    }, 'foo', function () {
+      return false;
+    });
 
     res.updated.should.equal(false);
     res.rev.should.equal('xyz');
   });
 
   it('should put if get throws 404', async function () {
-    const res = await upsert(
-      {
-        get: function () {
-          return Promise.reject({ status: 404 });
-        },
-        put: function () {
-          return Promise.resolve({ rev: 'abc' });
-        },
+    const res = await upsert({
+      get: function () {
+        return Promise.reject({ status: 404 });
       },
-      'foo',
-      function () {
-        return { difference: "something" };
+      put: function () {
+        return Promise.resolve({ rev: 'abc' });
       },
-    );
+    }, 'foo', function () {
+      return { difference: "something" };
+    });
 
     res.updated.should.equal(true);
     res.rev.should.equal('abc');
@@ -62,20 +51,16 @@ describe('test.mapreduce.js-upsert', function () {
 
   it('should error if it can\'t put', async function () {
     try {
-      await upsert(
-        {
-          get: function () {
-            return Promise.resolve({ _rev: 'xyz' });
-          },
-          put: function () {
-            return Promise.reject(new Error('falala'));
-          },
+      await upsert({
+        get: function () {
+          return Promise.resolve({ _rev: 'xyz' });
         },
-        'foo',
-        function () {
+        put: function () {
+          return Promise.reject(new Error('falala'));
+        },
+      }, 'foo', function () {
           return { difference: "something" };
-        },
-      );
+      });
 
       should.fail("Expected promise to be rejected");
     } catch (err) {
