@@ -86,7 +86,7 @@ Data is stored locally on device in PouchDB database and can be synced to the cl
 
 ## NPM Browser
 
-[NPM Browser](http://www.npm-browser.com/#/) is a fully offline cache of NPM packages, which runs in your browser, using Angular.js, PouchDB, and the pouchdb-load plugin.
+[NPM Browser](https://github.com/pouchdb/npm-browser) is a fully offline cache of NPM packages, which runs in your browser, using Angular.js, PouchDB, and the pouchdb-load plugin.
 
 ## Pokedex.org
 
