@@ -45,7 +45,6 @@ module.exports = eleventyConfig => {
 
   eleventyConfig.setFrontMatterParsingOptions({
     excerpt: true,
-    excerpt_separator: '#',
   });
 
   eleventyConfig.addFilter('liquid', function(content) {
