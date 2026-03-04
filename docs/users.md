@@ -55,6 +55,8 @@ A list of known products and services that are using PouchDB.
 
 [Hoodie](http://hood.ie/) provides a complete backend solution for your frontend code. It helps you develop your web application fast and easy. Hoodie-based apps are [offline-first](http://offlinefirst.org/) so they are usable anytime. Just plug Hoodie’s API into your frontend code, and your app is ready.
 
+## HospitalRun
+
 {% include svg/hospitalrun-logo.html %}
 
 [HospitalRun](http://hospitalrun.io/) is an open source software product designed specifically for developing world hospitals, making usability the key requirement. Using PouchDB and offline-first design, HospitalRun allows records to be carried to remote clinics, functioning when there is no Internet, and syncing when there is.
@@ -123,6 +125,8 @@ Story-writer is a free Markdown editor, with a [web version](http://markdown.xia
 ## YLD
 
 [YLD](http://www.yld.io) is a Node.js software engineering, consulting and training company. We partner with enterprises to strengthen their software engineering culture and create the agility necessary to compete in today’s market, and are responsible for some of the largest Node.js solutions in production today. PouchDB allows us to create responsive, resilient and sync-enabled web applications.
+
+## FactoryTalk TeamONE
 
 {% include img.html src="TeamONE.png" alt="FactoryTalk TeamONE" %}
 [FactoryTalk® TeamONE™](http://33seconds.io) delivers one new experience and helps industrial teams improve productivity.  Created by [Rockwell Automation](http://www.rockwellautomation.com/). We're using PouchDB for offline access and team synchronization. Looking to use the [Thali project](http://thaliproject.org/) (also a PouchDB client listed here) to enable true peer-to-peer connectivity. Connect with us on twitter ([@ROKTeamONE](https://twitter.com/rokteamone).)
