@@ -92,7 +92,7 @@ Data is stored locally on device in PouchDB database and can be synced to the cl
 
 {% include img.html width=100 src="pokedexorg-logo.png" alt="Pokedex.org logo" %}
 
-[Pokedex.org](https://www.pokedex.org/) [(Github)](https://github.com/nolanlawson/pokedex.org) is a progressive web app, powered by ServiceWorker, PouchDB, virtual-dom, and web workers.
+[Pokedex.org](https://github.com/nolanlawson/pokedex.org) is a progressive web app, powered by ServiceWorker, PouchDB, virtual-dom, and web workers.
 
 ## Quizster
 
