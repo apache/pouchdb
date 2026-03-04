@@ -28,7 +28,7 @@ A list of known products and services that are using PouchDB.
 [Cozy](https://cozy.io/en/) is a personal cloud that you can host, customize, and fully control. It syncs contacts, calendars, and files between your personal devices and server. Under the hood, it leverages CouchDB and PouchDB.
 
 ## Delta
-[Delta](http://delta.octavore.com/) is a command-line utility for text diffs. View split diffs in the browser with syntax highlighting, or in the command-line using the --cli flag.
+[Delta](https://github.com/octavore/delta) is a command-line utility for text diffs. View split diffs in the browser with syntax highlighting, or in the command-line using the --cli flag.
 
 ## DevITJobs
 [DevITJobs](http://devitjobs.com) is a job board for the tech industry with mandatory salary ranges & tech stacks.
