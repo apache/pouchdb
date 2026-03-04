@@ -55,7 +55,7 @@ A list of known products and services that are using PouchDB.
 
 [Hoodie](http://hood.ie/) provides a complete backend solution for your frontend code. It helps you develop your web application fast and easy. Hoodie-based apps are [offline-first](http://offlinefirst.org/) so they are usable anytime. Just plug Hoodie’s API into your frontend code, and your app is ready.
 
-{% include svg/hospitalrun-logo.html %}
+{% include img.html width=150 src="hospitalrun-logo.svg" alt="HospitalRun" href="http://hospitalrun.io/" %}
 
 [HospitalRun](http://hospitalrun.io/) is an open source software product designed specifically for developing world hospitals, making usability the key requirement. Using PouchDB and offline-first design, HospitalRun allows records to be carried to remote clinics, functioning when there is no Internet, and syncing when there is.
 
