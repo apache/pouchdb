@@ -36,11 +36,10 @@
       <strong>Published:</strong> {{ post_date | date_to_long_string }}<br>
       {% if page.url == "/blog/" or page.url contains "/blog/page" or page.url == "/" %}
         {% if post.page.excerpt %}
-          {{ post.page.excerpt | liquid | markdown | strip_html }}
+          {{ post.page.excerpt | liquid | markdown | strip_html | truncatewords: 30, '' }}
         {% else %}
-          {{ post.content | first_paragraph | strip_html }}
-        {% endif %}
-        <a href='{{ site.baseurl }}{{ url }}'>[...]</a>
+          {{ post.content | first_paragraph | strip_html | truncatewords: 30, '' }}
+        {% endif %}<a href='{{ site.baseurl }}{{ url }}'>[...]</a>
       {% endif %}
     </p>
     </div>
