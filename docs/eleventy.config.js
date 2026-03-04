@@ -43,8 +43,11 @@ module.exports = eleventyConfig => {
         .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
   });
 
-  eleventyConfig.setFrontMatterParsingOptions({
-    excerpt: true,
+  eleventyConfig.addFilter('first_paragraph', function(content) {
+    const marker = '</p>';
+    const idx = content.indexOf(marker);
+    if(idx === -1) return content;
+    return content.substring(0, idx + marker.length);
   });
 
   eleventyConfig.addFilter('liquid', function(content) {

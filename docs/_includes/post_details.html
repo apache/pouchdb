@@ -35,7 +35,11 @@
       <strong>By:</strong> {{ post_author }}<br>
       <strong>Published:</strong> {{ post_date | date_to_long_string }}<br>
       {% if page.url == "/blog/" or page.url contains "/blog/page" or page.url == "/" %}
-        {{ post.page.excerpt | liquid | markdown | strip_html | truncatewords: 30, '' }}
+        {% if post.page.excerpt %}
+          {{ post.page.excerpt | liquid | markdown | strip_html }}
+        {% else %}
+          {{ post.content | first_paragraph | strip_html }}
+        {% endif %}
         <a href='{{ site.baseurl }}{{ url }}'>[...]</a>
       {% endif %}
     </p>
