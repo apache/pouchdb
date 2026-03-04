@@ -77,7 +77,7 @@ A list of known products and services that are using PouchDB.
 
 {% include img.html src="medic-mobile.png" alt="Medic Mobile" %}
 
-[Medic Mobile](http://medicmobile.org) is a software toolkit that combines smart messaging, decision support, easy data gathering and management, and health system analytics. Thanks to PouchDB our tools are offline first so workers can file reports wherever they are and sync when back online.
+[Medic Mobile](http://medic.org) is a software toolkit that combines smart messaging, decision support, easy data gathering and management, and health system analytics. Thanks to PouchDB our tools are offline first so workers can file reports wherever they are and sync when back online.
 
 ## MoneyTracker.cc
 
