@@ -31,7 +31,9 @@ The `pouchdb.find.js` file is available in the `pouchdb` package in npm/Bower, o
 
 If you are using Node, Browserify, Webpack, Rollup, etc., then you can install it like so:
 
-    npm install --save pouchdb-find
+```sh
+npm install --save pouchdb-find
+```
 
 Then in code:
 

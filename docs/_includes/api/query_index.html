@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Query index" hash="query_index" %}
 
-{% highlight js %}
+{% highlight "js" %}
 db.find(request [, callback])
 {% endhighlight %}
 
@@ -18,7 +18,7 @@ Query an index and return the list of documents that match the request.
 #### Example Usage:
 
 {% include code/start.html id="query_idx" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: 'Mario'},
   fields: ['_id', 'name'],
@@ -31,7 +31,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {name: 'Mario'},
@@ -45,7 +45,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: 'Mario'},
   fields: ['_id', 'name'],
@@ -60,7 +60,7 @@ db.find({
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "docs": [
     {
@@ -104,7 +104,7 @@ The above is a simple example. For an in-depth tutorial, please refer to
 
 If there's no index that matches your `selector`/`sort`, then this method will issue a warning:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "docs": [ /* ... */ ],
   "warning": "No matching index found, create an index to optimize query time."
@@ -121,7 +121,7 @@ selectors and the Mango query language.
 Use `$eq` for "equals":
 
 {% include code/start.html id="query_idx2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: {$eq: 'Mario'}}
 }, function (err, result) {
@@ -132,7 +132,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {name: {$eq: 'Mario'}}
@@ -144,7 +144,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: {$eq: 'Mario'}}
 }).then(function (result) {
@@ -158,7 +158,7 @@ db.find({
 This is equivalent to:
 
 {% include code/start.html id="query_idx3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: 'Mario'}
 }, function (err, result) {
@@ -169,7 +169,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {name: 'Mario'}
@@ -181,7 +181,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {name: 'Mario'}
 }).then(function (result) {
@@ -196,7 +196,7 @@ You can also do selections on multiple fields. For instance, to
 find all docs where `series` is `'Mario'` and `debut` is greater than `1990`:
 
 {% include code/start.html id="query_idx4" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     series: 'Mario',
@@ -210,7 +210,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx4" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {
@@ -225,7 +225,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx4" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     series: 'Mario',
@@ -242,7 +242,7 @@ db.find({
 This is equivalent to:
 
 {% include code/start.html id="query_idx5" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     $and: [
@@ -258,7 +258,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx5" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {
@@ -275,7 +275,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx5" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     $and: [
@@ -294,7 +294,7 @@ db.find({
 You can also sort the returned documents. For instance, to find all docs sorted by `debut` descending:
 
 {% include code/start.html id="query_idx6" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     debut: {'$gte': null}
@@ -308,7 +308,7 @@ db.find({
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx6" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const result = await db.find({
     selector: {
@@ -323,7 +323,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="query_idx6" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.find({
   selector: {
     debut: {'$gte': null}

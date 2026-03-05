@@ -1,10 +1,4 @@
-{% if include.path %}
-  {% assign pagePath = include.path %}
-{% elsif page.relative_path %}
-  {% assign pagePath = page.relative_path %}
-{% else %}
-  {% assign pagePath = page.path  %}
-{% endif %}
+{% assign pagePath = page.inputPath | replace: "./", "" %}
 <a
   data-toggle="tooltip"
   data-placement="top"

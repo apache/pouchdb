@@ -1,12 +1,12 @@
 {% include anchor.html edit="true" title="Delete a document" hash="delete_document"%}
 
-{% highlight js %}
+{% highlight "js" %}
 db.remove(doc, [options], [callback])
 {% endhighlight %}
 
 Or:
 
-{% highlight js %}
+{% highlight "js" %}
 db.remove(docId, docRev, [options], [callback])
 {% endhighlight %}
 
@@ -18,7 +18,7 @@ See [filtered replication]({{ site.baseurl }}/api.html#filtered-replication) for
 #### Example Usage:
 
 {% include code/start.html id="delete_doc" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc', function(err, doc) {
   if (err) { return console.log(err); }
   db.remove(doc, function(err, response) {
@@ -30,7 +30,7 @@ db.get('mydoc', function(err, doc) {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const doc = await db.get('mydoc');
   const response = await db.remove(doc);
@@ -41,7 +41,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc').then(function(doc) {
   return db.remove(doc);
 }).then(function (result) {
@@ -54,7 +54,7 @@ db.get('mydoc').then(function(doc) {
 
 #### Example Response:
 
-{% highlight js %}
+{% highlight "js" %}
 {
   "ok": true,
   "id": "mydoc",
@@ -65,7 +65,7 @@ db.get('mydoc').then(function(doc) {
 You can also delete a document by just providing an `id` and `rev`:
 
 {% include code/start.html id="delete_doc3" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc', function(err, doc) {
   if (err) { return console.log(err); }
   db.remove(doc._id, doc._rev, function(err, response) {
@@ -77,7 +77,7 @@ db.get('mydoc', function(err, doc) {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc3" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const doc = await db.get('mydoc');
   const response = await db.remove(doc._id, doc._rev);
@@ -88,7 +88,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc3" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc').then(function(doc) {
   return db.remove(doc._id, doc._rev);
 }).then(function (result) {
@@ -102,7 +102,7 @@ db.get('mydoc').then(function(doc) {
 You can also delete a document by using `put()` with `{_deleted: true}`:
 
 {% include code/start.html id="delete_doc2" type="callback" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc', function(err, doc) {
   if (err) { return console.log(err); }
   doc._deleted = true;
@@ -115,7 +115,7 @@ db.get('mydoc', function(err, doc) {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc2" type="async" %}
-{% highlight js %}
+{% highlight "js" %}
 try {
   const doc = await db.get('mydoc');
   doc._deleted = true;
@@ -127,7 +127,7 @@ try {
 {% include code/end.html %}
 
 {% include code/start.html id="delete_doc2" type="promise" %}
-{% highlight js %}
+{% highlight "js" %}
 db.get('mydoc').then(function(doc) {
   doc._deleted = true;
   return db.put(doc);

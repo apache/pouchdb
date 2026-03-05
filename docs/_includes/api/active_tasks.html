@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="List active tasks" hash="active_tasks" %}
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.activeTasks.list()
 {% endhighlight %}
 
@@ -8,13 +8,13 @@ List all active database tasks. There are three types of internal tasks: `databa
 
 #### Example Usage:
 
-{% highlight js %}
+{% highlight "js" %}
 const tasks = PouchDB.activeTasks.list()
 {% endhighlight %}
 
 #### Example Result:
 
-{% highlight js %}
+{% highlight "js" %}
 [{
   "id": "d81fea92-8ce4-42df-bb2b-89a4e67536c3",
   "name": "database_compaction",
@@ -29,7 +29,7 @@ const tasks = PouchDB.activeTasks.list()
 
 You can use [JavaScript Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to monitor calls to the active tasks API. For the `PouchDB.activeTasks.add()` function, which is used internally to announce new tasks to PouchDB, you can monitor calls as follows:
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.activeTasks.add = new Proxy(PouchDB.activeTasks.add, {
   apply: (target, thisArg, argumentsList) => {
     const task = argumentsList[0];

@@ -28,7 +28,7 @@ A list of known products and services that are using PouchDB.
 [Cozy](https://cozy.io/en/) is a personal cloud that you can host, customize, and fully control. It syncs contacts, calendars, and files between your personal devices and server. Under the hood, it leverages CouchDB and PouchDB.
 
 ## Delta
-[Delta](http://delta.octavore.com/) is a command-line utility for text diffs. View split diffs in the browser with syntax highlighting, or in the command-line using the --cli flag.
+[Delta](https://github.com/octavore/delta) is a command-line utility for text diffs. View split diffs in the browser with syntax highlighting, or in the command-line using the --cli flag.
 
 ## DevITJobs
 [DevITJobs](http://devitjobs.com) is a job board for the tech industry with mandatory salary ranges & tech stacks.
@@ -55,6 +55,8 @@ A list of known products and services that are using PouchDB.
 
 [Hoodie](http://hood.ie/) provides a complete backend solution for your frontend code. It helps you develop your web application fast and easy. Hoodie-based apps are [offline-first](http://offlinefirst.org/) so they are usable anytime. Just plug Hoodie’s API into your frontend code, and your app is ready.
 
+## HospitalRun
+
 {% include img.html width=150 src="hospitalrun-logo.svg" alt="HospitalRun" href="http://hospitalrun.io/" %}
 
 [HospitalRun](http://hospitalrun.io/) is an open source software product designed specifically for developing world hospitals, making usability the key requirement. Using PouchDB and offline-first design, HospitalRun allows records to be carried to remote clinics, functioning when there is no Internet, and syncing when there is.
@@ -77,7 +79,7 @@ A list of known products and services that are using PouchDB.
 
 {% include img.html src="medic-mobile.png" alt="Medic Mobile" %}
 
-[Medic Mobile](http://medicmobile.org) is a software toolkit that combines smart messaging, decision support, easy data gathering and management, and health system analytics. Thanks to PouchDB our tools are offline first so workers can file reports wherever they are and sync when back online.
+[Medic Mobile](http://medic.org) is a software toolkit that combines smart messaging, decision support, easy data gathering and management, and health system analytics. Thanks to PouchDB our tools are offline first so workers can file reports wherever they are and sync when back online.
 
 ## MoneyTracker.cc
 
@@ -86,13 +88,13 @@ Data is stored locally on device in PouchDB database and can be synced to the cl
 
 ## NPM Browser
 
-[NPM Browser](http://www.npm-browser.com/#/) is a fully offline cache of NPM packages, which runs in your browser, using Angular.js, PouchDB, and the pouchdb-load plugin.
+[NPM Browser](https://github.com/pouchdb/npm-browser) is a fully offline cache of NPM packages, which runs in your browser, using Angular.js, PouchDB, and the pouchdb-load plugin.
 
 ## Pokedex.org
 
 {% include img.html width=100 src="pokedexorg-logo.png" alt="Pokedex.org logo" %}
 
-[Pokedex.org](https://www.pokedex.org/) [(Github)](https://github.com/nolanlawson/pokedex.org) is a progressive web app, powered by ServiceWorker, PouchDB, virtual-dom, and web workers.
+[Pokedex.org](https://github.com/nolanlawson/pokedex.org) is a progressive web app, powered by ServiceWorker, PouchDB, virtual-dom, and web workers.
 
 ## Quizster
 
@@ -123,6 +125,8 @@ Story-writer is a free Markdown editor, with a [web version](http://markdown.xia
 ## YLD
 
 [YLD](http://www.yld.io) is a Node.js software engineering, consulting and training company. We partner with enterprises to strengthen their software engineering culture and create the agility necessary to compete in today’s market, and are responsible for some of the largest Node.js solutions in production today. PouchDB allows us to create responsive, resilient and sync-enabled web applications.
+
+## FactoryTalk TeamONE
 
 {% include img.html src="TeamONE.png" alt="FactoryTalk TeamONE" %}
 [FactoryTalk® TeamONE™](http://33seconds.io) delivers one new experience and helps industrial teams improve productivity.  Created by [Rockwell Automation](http://www.rockwellautomation.com/). We're using PouchDB for offline access and team synchronization. Looking to use the [Thali project](http://thaliproject.org/) (also a PouchDB client listed here) to enable true peer-to-peer connectivity. Connect with us on twitter ([@ROKTeamONE](https://twitter.com/rokteamone).)

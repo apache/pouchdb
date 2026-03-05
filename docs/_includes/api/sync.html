@@ -1,6 +1,6 @@
 {% include anchor.html edit="true" title="Sync a database" hash="sync" %} 
 
-{% highlight js %}
+{% highlight "js" %}
 const sync = PouchDB.sync(src, target, [options])
 {% endhighlight %}
 
@@ -8,7 +8,7 @@ Sync data from `src` to `target` and `target` to `src`. This is a convenience me
 
 In other words, this code:
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.replicate('mydb', 'http://localhost:5984/mydb');
 PouchDB.replicate('http://localhost:5984/mydb', 'mydb');
 {% endhighlight %}
@@ -16,7 +16,7 @@ PouchDB.replicate('http://localhost:5984/mydb', 'mydb');
 
 is equivalent to this code:
 
-{% highlight js %}
+{% highlight "js" %}
 PouchDB.sync('mydb', 'http://localhost:5984/mydb');
 {% endhighlight %}
 
@@ -28,7 +28,7 @@ PouchDB.sync('mydb', 'http://localhost:5984/mydb');
 Replication options such as `filter` passed to sync directly will be passed to both replications. Please refer to [replicate()](api.html#replication) for documentation on those options.
 
 #### Example Usage:
-{% highlight js %}
+{% highlight "js" %}
 const sync = PouchDB.sync('mydb', 'http://localhost:5984/mydb', {
   live: true,
   retry: true
@@ -51,14 +51,14 @@ sync.cancel(); // whenever you want to cancel
 
 There is also a shorthand for syncing given existing PouchDB objects. This behaves the same as `PouchDB.sync()`:
 
-{% highlight js %}
+{% highlight "js" %}
 db.sync(remoteDB, [options]);
 {% endhighlight %}
 
 It is also possible to combine "one-way" replication and sync for performance reasons. 
 When your PouchDB application starts up it could perform a one-off, one-way replication to completion and then initiate the two-way, continuous retryable sync:
 
-{% highlight js %}
+{% highlight "js" %}
 const url = 'http://localhost:5984/mydb';
 const opts = { live: true, retry: true };
 
@@ -78,7 +78,7 @@ The above technique results in fewer HTTP requests being used and better perform
 
 Change events in `sync` have an extra property `direction` which refers to the direction the change was going. Its value will either be `push` or `pull`.
 
-{% highlight js %}
+{% highlight "js" %}
 { direction: 'push',
   change:
    { ok: true,

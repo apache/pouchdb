@@ -135,7 +135,7 @@ function addCodeCopyButtons() {
     const btn = document.createElement('button');
     btn.style.position = 'absolute';
     btn.style.top   = '11.5px';
-    btn.style.right = '15px';
+    btn.style.right = '11.5px';
     btn.textContent = txt;
     btn.classList.add('btnCopyCode');
 
@@ -145,9 +145,9 @@ function addCodeCopyButtons() {
   }
 
   document
-    .querySelectorAll('code[data-lang]')
+    .querySelectorAll('pre[data-copybutton]')
     .forEach(codeElement => {
-      codeElement.parentElement.style.position = 'relative';
+      codeElement.style.position = 'relative';
 
       const btn = addButton('📎', codeElement);
       btn.onclick = copyCodeFor(codeElement);
