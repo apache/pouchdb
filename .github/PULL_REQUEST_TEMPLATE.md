@@ -20,7 +20,7 @@
 
 ## Overview
 
-<!-- Please give a short brief for the pull request,
+<!-- Please give a summary of the pull request,
      what problem it solves or how it makes things better. -->
 
 ## Testing recommendations
