@@ -57,7 +57,7 @@ A list of known products and services that are using PouchDB.
 
 ## HospitalRun
 
-{% include svg/hospitalrun-logo.html %}
+{% include img.html width=150 src="hospitalrun-logo.svg" alt="HospitalRun" href="http://hospitalrun.io/" %}
 
 [HospitalRun](http://hospitalrun.io/) is an open source software product designed specifically for developing world hospitals, making usability the key requirement. Using PouchDB and offline-first design, HospitalRun allows records to be carried to remote clinics, functioning when there is no Internet, and syncing when there is.
 
