@@ -9,9 +9,21 @@
 name: PouchDB CI
 
 on:
-  push: {}
+  push: 
+    paths-ignore:
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+      - 'package.json'
+      - 'bin/**'
+      - 'docs/**'
   pull_request:
     branches: [master]
+    paths-ignore:
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+      - 'package.json'
+      - 'bin/**'
+      - 'docs/**'
 
 env:
   NODE_VERSION: 22
