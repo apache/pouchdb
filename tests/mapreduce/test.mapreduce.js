@@ -1,11 +1,11 @@
 /* global sum */
 'use strict';
 
-var viewTypes = ['persisted', 'temp'];
+const viewTypes = ['persisted', 'temp'];
 viewTypes.forEach(function (viewType) {
-  var suiteName = 'test.mapreduce.js-' + viewType;
-  var adapter = testUtils.adapterType();
-  var dbName = testUtils.adapterUrl(adapter, 'testdb');
+  const suiteName = 'test.mapreduce.js-' + viewType;
+  const adapter = testUtils.adapterType();
+  const dbName = testUtils.adapterUrl(adapter, 'testdb');
 
   tests(suiteName, dbName, adapter, viewType);
 });
@@ -13,10 +13,10 @@ viewTypes.forEach(function (viewType) {
 function tests(suiteName, dbName, dbType, viewType) {
 
   describe(suiteName, function () {
-    var createView;
+    let createView;
     if (dbType === 'http' || viewType === 'persisted') {
       createView = function (db, viewObj) {
-        var storableViewObj = {
+        const storableViewObj = {
           map: viewObj.map.toString()
         };
         if (viewObj.reduce) {
@@ -63,7 +63,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test basic view", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo, doc);
@@ -94,7 +94,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test basic view, no emitted value", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -126,12 +126,12 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     if (dbType === 'local' && viewType === 'temp') {
       it("with a closure", function () {
-        var db = new PouchDB(dbName);
+        const db = new PouchDB(dbName);
         return db.bulkDocs({docs: [
           {foo: 'bar'},
           { _id: 'volatile', foo: 'baz' }
         ]}).then(function () {
-          var queryFun = (function (test) {
+          const queryFun = (function (test) {
             return function (doc, emit) {
               if (doc._id === test) {
                 emit(doc.foo);
@@ -155,10 +155,10 @@ function tests(suiteName, dbName, dbType, viewType) {
     if (viewType === 'temp' && dbType !== 'http') {
 
       it('Test simultaneous temp views', function () {
-        var db = new PouchDB(dbName);
+        const db = new PouchDB(dbName);
         return db.put({_id: '0', foo: 1, bar: 2, baz: 3}).then(function () {
           return Promise.all(['foo', 'bar', 'baz'].map(function (key, i) {
-            var fun = 'function(doc){emit(doc.' + key + ');}';
+            const fun = 'function(doc){emit(doc.' + key + ');}';
             return db.query({map: fun}).then(function (res) {
               res.rows.should.deep.equal([{
                 id: '0',
@@ -171,7 +171,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
 
       it("Test passing just a function", function () {
-        var db = new PouchDB(dbName);
+        const db = new PouchDB(dbName);
         return db.bulkDocs({docs: [
           {foo: 'bar'},
           { _id: 'volatile', foo: 'baz' }
@@ -198,7 +198,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     }
 
     it("Test opts.startkey/opts.endkey", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.key, doc);
@@ -236,7 +236,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("#4154 opts.start_key/opts.end_key are synonyms", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.key, doc);
@@ -275,7 +275,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     //TODO: split this to their own tests within a describe block
     it("Test opts.inclusive_end = false", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.key, doc);
@@ -329,7 +329,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test opts.key", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.key, doc);
@@ -353,7 +353,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it("Test basic view collation", function () {
 
-      var values = [];
+      const values = [];
 
       // special values sort before all other types
       values.push(null);
@@ -397,14 +397,14 @@ function tests(suiteName, dbName, dbType, viewType) {
       // (this test might fail if used with a js engine
       // that doesn't preserve order)
       values.push({b: 2, c: 2});
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
         }
       }).then(function (queryFun) {
 
-        var docs = values.map(function (x, i) {
+        const docs = values.map(function (x, i) {
           return {_id: (i).toString(), foo: x};
         });
         return db.bulkDocs({docs}).then(function () {
@@ -426,7 +426,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test complex key collation', function () {
-      var map = function () {
+      const map = function () {
         emit(null);
         emit(false);
         emit(true);
@@ -452,7 +452,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         emit({"b":2,"a":1});
         emit({"b":2,"c":2});
       };
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -460,7 +460,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         return createView(db, { map });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -522,7 +522,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test duplicate collation of objects', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -535,7 +535,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -553,7 +553,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of undefined/null', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -566,7 +566,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -584,7 +584,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of null/undefined', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -597,7 +597,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -615,7 +615,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test duplicate collation of nulls', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -628,7 +628,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -646,7 +646,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test duplicate collation of booleans', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -659,7 +659,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -677,7 +677,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -690,7 +690,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -708,7 +708,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects 2', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -721,7 +721,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -739,7 +739,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects 3', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -752,7 +752,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -770,7 +770,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects 4', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -783,7 +783,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -801,7 +801,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects 5', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -814,7 +814,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -832,7 +832,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different objects 6', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -845,7 +845,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -863,7 +863,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different booleans', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -876,7 +876,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -894,7 +894,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test collation of different booleans 2', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
@@ -907,7 +907,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       }).then(function (queryFun) {
         return db.query(queryFun).then(function (res) {
-          var rows = res.rows.map(function (x) {
+          const rows = res.rows.map(function (x) {
             return {
               id: x.id,
               key: x.key,
@@ -925,7 +925,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test joins", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           if (doc.doc_id) {
@@ -946,7 +946,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("No reduce function", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function () {
           emit('key', 'val');
@@ -959,7 +959,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Query after db.close", function () {
-      var db = new PouchDB(dbName);
+      let db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo, 'val');
@@ -992,7 +992,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Built in _sum reduce function", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.val, 1);
@@ -1016,7 +1016,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Built in _count reduce function", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.val, doc.val);
@@ -1040,7 +1040,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Built in _stats reduce function", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(doc.val, 1);}",
         reduce: "_stats"
@@ -1146,7 +1146,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it("Built in _sum reduce function should throw an error with a promise",
       function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(null, doc.val);}",
         reduce: "_sum"
@@ -1165,7 +1165,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it("Built in _sum reduce function with num arrays should throw an error",
       function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(null, doc.val);}",
         reduce: "_sum"
@@ -1183,7 +1183,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Built in _sum can be used with lists of numbers", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(null, doc.val);}",
         reduce: "_sum"
@@ -1207,7 +1207,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("#6364 Recognize built in reduce functions with trailing garbage", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.val, 1);
@@ -1232,7 +1232,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it("Starts with _ but not a built in reduce function should throw",
       function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){emit(null, doc.val);}",
         reduce: "_product"
@@ -1251,9 +1251,9 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     if (viewType === 'temp' && dbType !== 'http') {
       it("No reduce function, passing just a function", function () {
-        var db = new PouchDB(dbName);
+        const db = new PouchDB(dbName);
         return db.post({foo: 'bar'}).then(function () {
-          var queryFun = function () {
+          const queryFun = function () {
             emit('key', 'val');
           };
           return db.query(queryFun);
@@ -1262,13 +1262,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     }
 
     it('Query result should include _conflicts', function () {
-      var db2name = testUtils.adapterUrl(dbType, 'test2b');
-      var cleanup = function () {
+      const db2name = testUtils.adapterUrl(dbType, 'test2b');
+      const cleanup = function () {
         return new PouchDB(db2name).destroy();
       };
-      var doc1 = {_id: '1', foo: 'bar'};
-      var doc2 = {_id: '1', foo: 'baz'};
-      var db = new PouchDB(dbName);
+      const doc1 = {_id: '1', foo: 'bar'};
+      const doc2 = {_id: '1', foo: 'baz'};
+      const db = new PouchDB(dbName);
       return testUtils.fin(db.info().then(function () {
         return db.put({
           _id: '_design/test',
@@ -1283,9 +1283,9 @@ function tests(suiteName, dbName, dbType, viewType) {
           }
         });
       }).then(function () {
-        var remote = new PouchDB(db2name);
+        const remote = new PouchDB(db2name);
         return remote.info().then(function () {
-          var replicate = testUtils.promisify(db.replicate.from, db.replicate);
+          const replicate = testUtils.promisify(db.replicate.from, db.replicate);
           return db.post(doc1).then(function () {
             return remote.post(doc2);
           }).then(function () {
@@ -1302,7 +1302,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       }), cleanup);
     });
 
-    var icons = [
+    const icons = [
       "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",
@@ -1310,7 +1310,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAEG0lEQVQ4EQEQBO/7AQAAAAAAAAAAAAAAAAAAAACmm0ohDxD8bwT//ksOBPAhAAAAAPL8EN8IDQLB5eQEhVpltt8AAAAAAAAAAAAAAAABAAAAAAAAAACHf0UGKSgBgygY7m/w4O8F5t71ABMaCQAPEAQAAAAAAPwEBgAMFAn74/ISnunoA3RcZ7f2AAAAAAEAAAAAh39FBjo4AZYTAOtf1sLmAvb1+gAAAAAALzsVACEn+wAAAAAA/f4G/+LcAgH9AQIA+hAZpuDfBmhaZrb1AwAAAABtaCSGHAjraf///wD47/kB9vX7AAAAAAAYHgsAERT+AAAAAAACAf0BERT/AAQHB/746/IuBRIMFfL3G8ECpppKHigY7m/68vcCHRv0AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//0ADgvzAgP//gAWBe1hUEgMOgIKDfxr9Oz3BRsiAf8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHCP///zu8gMjIftYAgkD/1ID//4ABwb6Af//AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFBPwBAAAAAAP0710CDgTvIQD//QAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//QD8BAYADQv//gQAAAAAAAAAAAAAAgABAf4AAAAAAAAAAAAAAAAAAAAAAAABAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//gAAAAAABPL7D+D57Owh0MQAAAAAAAD08/sAAAAAAAAAAADj2fQA8ewGAAAAAAAAAAAAAAAAAAAAAAAAAAAA+/r1AAwECwIEAggDugsNBGcAAAAAAwMBAO7o+AAAAAAAAAAAAAgKBAAOEAUAAAAAAAAAAAAAAAAAAAAAAAAAAADz8vwA/QwRowTr6gSLHSQQYvfr9QUhJ/sA6OEEAPPy+QAAAAAAFR0IACEn+wAAAAAAAAAAAAAAAAAAAAAA4+YP/g0OAgDT3wWoAlpltt/d7BKYBAwH/uTmDf4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPL1Df798fUC+AgSqMfL9sICAAAAAOblAHXzBRSo////APTz+wD//wAAAAAAAAAAAAAAAAAAAAEBAP3+Bv/j5g/+7uL3AukDH97g3wZomJzA9wMAAAAAs7jd/kE8J7n9BwoSJSgGMQYD/wL++/8ABAUCAPb1BQDw7AIA8e8DAQAFBf/0DBqj6OgGTlpmtvUAAAAAAQAAAAAAAAAAAAAAAFFRPg1SSAwbGxv8cQn67mMHBf7/AwL/APb5AwH/DRCn294GpMLH9sKdoMD3AAAAAAAAAABEawlCEphz4AAAAABJRU5ErkJggg=="
     ];
 
-    var iconDigests = [
+    const iconDigests = [
       "md5-Mf8m9ehZnCXC717bPkqkCA==",
       "md5-fdEZBYtnvr+nozYVDzzxpA==",
       "md5-ImDARszfC+GA3Cv9TVW4HA==",
@@ -1318,13 +1318,13 @@ function tests(suiteName, dbName, dbType, viewType) {
       "md5-jDUyV6ySnTVANn2qq3332g=="
     ];
 
-    var iconLengths = [1047, 789, 967, 527, 1108];
+    const iconLengths = [1047, 789, 967, 527, 1108];
 
     it('#190 Query works with attachments=true', function () {
 
-      var db = new PouchDB(dbName);
-      var docs = [];
-      for (var i = 0; i < 5; i++) {
+      const db = new PouchDB(dbName);
+      const docs = [];
+      for (let i = 0; i < 5; i++) {
         docs.push({
           _id: i.toString(),
           _attachments: {
@@ -1346,8 +1346,8 @@ function tests(suiteName, dbName, dbType, viewType) {
           include_docs: true,
           attachments: true
         }).then(function (res) {
-          var attachments = res.rows.map(function (row) {
-            var doc = row.doc;
+          const attachments = res.rows.map(function (row) {
+            const doc = row.doc;
             delete doc._attachments['foo.png'].revpos;
             return doc._attachments;
           });
@@ -1362,8 +1362,8 @@ function tests(suiteName, dbName, dbType, viewType) {
           }), 'works with attachments=true');
           return db.query(queryFun, {include_docs: true});
         }).then(function (res) {
-          var attachments = res.rows.map(function (row) {
-            var doc = row.doc;
+          const attachments = res.rows.map(function (row) {
+            const doc = row.doc;
             delete doc._attachments['foo.png'].revpos;
             return doc._attachments['foo.png'];
           });
@@ -1390,14 +1390,14 @@ function tests(suiteName, dbName, dbType, viewType) {
 
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
-      var db = new PouchDB(dbName, {
+      const db = new PouchDB(dbName, {
         fetch: function (url, opts) {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
       });
-      var docs = [];
-      for (var i = 0; i < 5; i++) {
+      const docs = [];
+      for (let i = 0; i < 5; i++) {
         docs.push({
           _id: i.toString(),
           _attachments: {
@@ -1421,9 +1421,9 @@ function tests(suiteName, dbName, dbType, viewType) {
           binary: true
         }).then(function (res) {
           res.rows.forEach(function (row) {
-            var doc = row.doc;
+            const doc = row.doc;
             Object.keys(doc._attachments).forEach(function (attName) {
-              var att = doc._attachments[attName];
+              const att = doc._attachments[attName];
               should.not.exist(att.stub);
               att.data.should.not.be.a('string');
             });
@@ -1436,14 +1436,14 @@ function tests(suiteName, dbName, dbType, viewType) {
 
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
-      var db = new PouchDB(dbName, {
+      const db = new PouchDB(dbName, {
         fetch: function (url, opts) {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
       });
-      var docs = [];
-      for (var i = 0; i < 5; i++) {
+      const docs = [];
+      for (let i = 0; i < 5; i++) {
         docs.push({
           _id: i.toString()
         });
@@ -1461,7 +1461,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           binary: true
         }).then(function (res) {
           res.rows.forEach(function (row) {
-            var doc = row.doc;
+            const doc = row.doc;
             should.not.exist(doc._attachments);
           });
         });
@@ -1469,7 +1469,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#242 conflicts at the root level', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
 
       return db.bulkDocs([
         {
@@ -1517,7 +1517,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#242 conflicts at the root+1 level', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
 
       return db.bulkDocs([
         {
@@ -1572,22 +1572,22 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Views should include _conflicts', function () {
-      var db2name = testUtils.adapterUrl(dbType, 'test2');
-      var cleanup = function () {
+      const db2name = testUtils.adapterUrl(dbType, 'test2');
+      const cleanup = function () {
         return new PouchDB(db2name).destroy();
       };
-      var doc1 = {_id: '1', foo: 'bar'};
-      var doc2 = {_id: '1', foo: 'baz'};
-      var db = new PouchDB(dbName);
+      const doc1 = {_id: '1', foo: 'bar'};
+      const doc2 = {_id: '1', foo: 'baz'};
+      const db = new PouchDB(dbName);
       return testUtils.fin(db.info().then(function () {
-        var remote = new PouchDB(db2name);
+        const remote = new PouchDB(db2name);
         return remote.info().then(function () {
           return createView(db, {
             map : function (doc) {
               emit(doc._id, !!doc._conflicts);
             }
           }).then(function (queryFun) {
-            var replicate = testUtils.promisify(db.replicate.from, db.replicate);
+            const replicate = testUtils.promisify(db.replicate.from, db.replicate);
             return db.post(doc1).then(function () {
               return remote.post(doc2);
             }).then(function () {
@@ -1606,7 +1606,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with limit option", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           if (doc.foo === 'bar') {
@@ -1630,7 +1630,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with custom reduce function", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1638,12 +1638,12 @@ function tests(suiteName, dbName, dbType, viewType) {
         reduce: function (keys, values) {
           if (keys) {
             return keys.map(function (keyId) {
-              var key = keyId[0];
-              // var id = keyId[1];
+              const key = keyId[0];
+              // const id = keyId[1];
               return key.join('');
             });
           } else {
-            var result = [];
+            const result = [];
             values.map(function (value) {
               value.map(function (v) {
                 result.push(v);
@@ -1695,7 +1695,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with group_level option and reduce", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1737,7 +1737,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with invalid group_level options", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1760,7 +1760,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with limit option and reduce", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1790,7 +1790,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with invalid limit option and reduce", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1821,11 +1821,11 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test unsafe object usage (#244)', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.bulkDocs([
         {_id: 'constructor'}
       ]).then(function (res) {
-        var rev = res[0].rev;
+        let rev = res[0].rev;
         return createView(db, {
           map: function (doc) {
             emit(doc._id);
@@ -1875,8 +1875,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with a skip option and reduce", function () {
-      var qf;
-      var db = new PouchDB(dbName);
+      let qf;
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1907,7 +1907,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("Test view querying with invalid skip option and reduce", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -1939,7 +1939,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it("Special document member _doc_id_rev should never leak outside",
       function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           if (doc.foo === 'bar') {
@@ -1960,10 +1960,10 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('multiple view creations and cleanups', function () {
-      var db = new PouchDB(dbName);
-      var map = function (doc) { emit(doc.num); };
+      const db = new PouchDB(dbName);
+      const map = function (doc) { emit(doc.num); };
       function createView(name) {
-        var storableViewObj = { map: map.toString() };
+        const storableViewObj = { map: map.toString() };
         return  db.put({
           _id: '_design/' + name,
           views: {
@@ -1983,19 +1983,19 @@ function tests(suiteName, dbName, dbType, viewType) {
             });
           });
         }
-        var attempts = [];
-        var numAttempts = 10;
-        for (var i = 0; i < numAttempts; i++) {
+        const attempts = [];
+        const numAttempts = 10;
+        for (let i = 0; i < numAttempts; i++) {
           attempts.push(sequence('test' + i));
         }
         return Promise.all(attempts).then(function () {
-          var keys = [];
-          for (var i = 0; i < numAttempts; i++) {
+          const keys = [];
+          for (let i = 0; i < numAttempts; i++) {
             keys.push('_design/test' + i);
           }
           return db.allDocs({keys, include_docs : true});
         }).then(function (res) {
-          var docs = res.rows.map(function (row) {
+          const docs = res.rows.map(function (row) {
             row.doc._deleted = true;
             return row.doc;
           });
@@ -2013,7 +2013,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('If reduce function returns 0, resulting value should not be null', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo);
@@ -2035,7 +2035,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing skip with a view', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.foo);
@@ -2058,13 +2058,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Map documents on 0/null/undefined/empty string', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.num);
         }
       }).then(function (mapFunction) {
-        var docs = [
+        const docs = [
           {_id: '0', num: 0},
           {_id: '1', num: 1},
           {_id: 'undef' /* num is undefined */},
@@ -2090,7 +2090,7 @@ function tests(suiteName, dbName, dbType, viewType) {
           data.rows.should.have.length(8); // everything
 
           // keys that should all resolve to null
-          var emptyKeys = [null, NaN, Infinity, -Infinity];
+          const emptyKeys = [null, NaN, Infinity, -Infinity];
           return Promise.all(emptyKeys.map(function (emptyKey) {
             return db.query(mapFunction, {key: emptyKey}).then(function (data) {
               data.rows.map(function (row) {
@@ -2103,13 +2103,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing query with keys', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.field);
         }
       }).then(function (queryFun) {
-        var opts = {include_docs: true};
+        const opts = {include_docs: true};
         return db.bulkDocs({
           docs: [
             {_id: 'doc_0', field: 0},
@@ -2204,9 +2204,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       function ids(row) {
         return row.id;
       }
-      var opts = {keys: [0, 1, 2]};
-      var spec;
-      var db = new PouchDB(dbName);
+      const opts = {keys: [0, 1, 2]};
+      let spec;
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.field1);
@@ -2240,7 +2240,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing multiple emissions (issue #14)', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.foo);
@@ -2256,7 +2256,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             {_id: 'doc2', foo : 'foo', bar : 'bar'}
           ]
         }).then(function () {
-          var opts = {keys: ['foo', 'bar']};
+          const opts = {keys: ['foo', 'bar']};
 
           return db.query(mapFunction, opts);
         });
@@ -2296,7 +2296,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing multiple emissions (complex keys)', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function () {
           emit(['a'], 1);
@@ -2323,12 +2323,12 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing empty startkeys and endkeys', function () {
-      var opts = {startkey: null, endkey: ''};
+      let opts = {startkey: null, endkey: ''};
       function ids(row) {
         return row.id;
       }
-      var spec;
-      var db = new PouchDB(dbName);
+      let spec;
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.field);
@@ -2369,7 +2369,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#238 later non-winning revisions', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
 
       return createView(db, {
         map: function (doc) {
@@ -2410,7 +2410,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#238 later non-winning deleted revisions', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
 
       return createView(db, {
         map: function (doc) {
@@ -2452,7 +2452,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#238 query with conflicts', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
 
       return createView(db, {
         map: function (doc) {
@@ -2514,12 +2514,12 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Testing ordering with startkey/endkey/key', function () {
-      var opts = {startkey: '1', endkey: '4'};
+      let opts = {startkey: '1', endkey: '4'};
       function ids(row) {
         return row.id;
       }
-      var spec;
-      var db = new PouchDB(dbName);
+      let spec;
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.field, null);
@@ -2564,13 +2564,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('opts.keys should work with complex keys', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo, doc.foo);
         }
       }).then(function (mapFunction) {
-        var keys = [
+        const keys = [
           {key: 'missing'},
           ['test', 1],
           {key1: 'value1'},
@@ -2586,7 +2586,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             {foo: [0, false]}
           ]
         }).then(function () {
-          var opts = {keys};
+          const opts = {keys};
           return db.query(mapFunction, opts);
         }).then(function (data) {
           data.rows.should.have.length(3);
@@ -2601,7 +2601,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       function ids(row) {
         return row.id;
       }
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.date, null);
@@ -2627,7 +2627,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       function change(row) {
         return [row.key, row.doc._id, row.doc.val];
       }
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           if (doc.join) {
@@ -2649,9 +2649,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
     });
 
-    it('should query correctly with a variety of criteria', function () {
-      var db = new PouchDB(dbName);
-      var ddoc = {
+    it('should query correctly with a constiety of criteria', function () {
+      const db = new PouchDB(dbName);
+      const ddoc = {
         _id: '_design/test',
         views: {
           test: {
@@ -2661,9 +2661,9 @@ function tests(suiteName, dbName, dbType, viewType) {
           }
         }
       };
-      var mapFun = 'test';
+      const mapFun = 'test';
       return db.put(ddoc).then(function () {
-        var docs = [
+        const docs = [
           {_id : '0'},
           {_id : '1'},
           {_id : '2'},
@@ -2766,17 +2766,17 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly with skip/limit and multiple keys/values', function () {
-      var db = new PouchDB(dbName);
-      var docs = {
+      const db = new PouchDB(dbName);
+      const docs = {
         docs: [
           {_id: 'doc1', foo : 'foo', bar : 'bar'},
           {_id: 'doc2', foo : 'foo', bar : 'bar'}
         ]
       };
-      var getValues = function (res) {
+      const getValues = function (res) {
         return res.value;
       };
-      var getIds = function (res) {
+      const getIds = function (res) {
         return res.id;
       };
 
@@ -2861,8 +2861,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly with undefined key/values', function () {
-      var db = new PouchDB(dbName);
-      var docs = {
+      const db = new PouchDB(dbName);
+      const docs = {
         docs: [
           {_id: 'doc1'},
           {_id: 'doc2'}
@@ -2894,7 +2894,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly with no docs', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function () {
           emit();
@@ -2909,7 +2909,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly with no emits', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function () {
         }
@@ -2941,7 +2941,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       function docIds(row) {
         return row.doc._id;
       }
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.name);
@@ -3038,8 +3038,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly after replicating and other ddoc', function () {
-      var db = new PouchDB(dbName);
-      var db2 = new PouchDB(testUtils.adapterUrl(dbType, 'local-other'));
+      const db = new PouchDB(dbName);
+      const db2 = new PouchDB(testUtils.adapterUrl(dbType, 'local-other'));
       return createView(db, {
         map: function (doc) {
           emit(doc.name);
@@ -3090,13 +3090,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly after many edits', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.name, doc.likes);
         }
       }).then(function (queryFun) {
-        var docs = [
+        const docs = [
           { _id: '1', name: 'leonardo' },
           { _id: '2', name: 'michelangelo' },
           { _id: '3', name: 'donatello' },
@@ -3120,18 +3120,18 @@ function tests(suiteName, dbName, dbType, viewType) {
           { _id: 'l', name: 'ace duck' }
         ];
 
-        for (var i = 0; i < 100; i++) {
+        for (let i = 0; i < 100; i++) {
           docs.push({
             _id: 'z-' + (i + 1000), // for correct string ordering
             name: 'random foot soldier #' + i
           });
         }
 
-        var byId = Object.fromEntries(docs.map((doc) => [doc._id, doc]));
+        const byId = Object.fromEntries(docs.map((doc) => [doc._id, doc]));
 
         function update(res, docFun) {
-          for (var i  = 0; i < res.length; i++) {
-            var doc = byId[res[i].id];
+          for (let i  = 0; i < res.length; i++) {
+            const doc = byId[res[i].id];
             doc._rev = res[i].rev;
             docFun(doc);
           }
@@ -3179,15 +3179,15 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should query correctly with staggered seqs', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.name);
         }
       }).then(function (queryFun) {
-        var docs = [];
+        const docs = [];
 
-        for (var i = 0; i < 200; i++) {
+        for (let i = 0; i < 200; i++) {
           docs.push({
             _id: 'doc-' + (i + 1000), // for correct string ordering
             name: 'gen1'
@@ -3212,7 +3212,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             doc._rev = infos.find((info) => info.id === doc._id).rev;
             doc.name = 'gen-4-odd';
           });
-          var docsToUpdate = docs.filter(function (doc, i) {
+          const docsToUpdate = docs.filter(function (doc, i) {
             return i % 2 === 1;
           });
           docsToUpdate.reverse();
@@ -3220,8 +3220,8 @@ function tests(suiteName, dbName, dbType, viewType) {
         }).then(function () {
           return db.query(queryFun);
         }).then(function (res) {
-          var expected = docs.map(function (doc, i) {
-            var key = i % 2 === 1 ? 'gen-4-odd' : 'gen-3';
+          const expected = docs.map(function (doc, i) {
+            const key = i % 2 === 1 ? 'gen-4-odd' : 'gen-3';
             return {key, id: doc._id, value: null};
           });
           expected.sort(function (a, b) {
@@ -3236,9 +3236,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should handle removes/undeletes/updates', function () {
-      var theDoc = {name : 'bar', _id : '1'};
+      const theDoc = {name : 'bar', _id : '1'};
 
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.name);
@@ -3284,13 +3284,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should return error when multi-key fetch & group=false', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) { emit(doc._id); },
         reduce: '_sum'
       }).then(function (queryFun) {
-        var keys = ['1', '2'];
-        var opts = {
+        const keys = ['1', '2'];
+        let opts = {
           keys,
           group: false
         };
@@ -3314,8 +3314,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should handle user errors in map functions', function () {
-      var db = new PouchDB(dbName);
-      var err;
+      const db = new PouchDB(dbName);
+      let err;
       db.on('error', function (e) { err = e; });
       return createView(db, {
         map : function (doc) {
@@ -3334,8 +3334,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should handle user errors in reduce functions', function () {
-      var db = new PouchDB(dbName);
-      var err;
+      const db = new PouchDB(dbName);
+      let err;
       db.on('error', function (e) { err = e; });
       return createView(db, {
         map : function (doc) {
@@ -3360,8 +3360,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should handle reduce returning undefined', function () {
-      var db = new PouchDB(dbName);
-      var err;
+      const db = new PouchDB(dbName);
+      let err;
       db.on('error', function (e) { err = e; });
       return createView(db, {
         map : function (doc) {
@@ -3383,7 +3383,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should properly query custom reduce functions', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           emit(doc.name, doc.count);
@@ -3391,15 +3391,15 @@ function tests(suiteName, dbName, dbType, viewType) {
         reduce : function (keys, values, rereduce) {
           // calculate the average count per name
           if (!rereduce) {
-            var result = {
+            const result = {
               sum : sum(values),
               count : values.length
             };
             result.average = result.sum / result.count;
             return result;
           } else {
-            var thisSum = sum(values.map(function (value) {return value.sum; }));
-            var thisCount = sum(values.map(function (value) {return value.count; }));
+            const thisSum = sum(values.map(function (value) {return value.sum; }));
+            const thisCount = sum(values.map(function (value) {return value.count; }));
             return {
               sum : thisSum,
               count : thisCount,
@@ -3558,9 +3558,9 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it('should handle many doc changes', function () {
 
-      var docs = [{_id: '0'}, {_id : '1'}, {_id: '2'}];
+      let docs = [{_id: '0'}, {_id : '1'}, {_id: '2'}];
 
-      var keySets = [
+      const keySets = [
         [1],
         [2, 3],
         [4],
@@ -3574,7 +3574,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         [9, 3, 2, 1]
       ];
 
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           doc.keys.forEach(function (key) {
@@ -3583,9 +3583,9 @@ function tests(suiteName, dbName, dbType, viewType) {
         }
       }).then(function (mapFun) {
         return db.bulkDocs({docs}).then(function () {
-          var tasks = keySets.map(function (keys, i) {
+          const tasks = keySets.map(function (keys, i) {
             return function () {
-              var expectedResponseKeys = [];
+              const expectedResponseKeys = [];
               return db.allDocs({
                 keys : ['0', '1', '2'],
                 include_docs: true
@@ -3602,16 +3602,16 @@ function tests(suiteName, dbName, dbType, viewType) {
               }).then(function () {
                 return db.query(mapFun);
               }).then(function (res) {
-                var actualKeys = res.rows.map(function (x) {
+                const actualKeys = res.rows.map(function (x) {
                   return x.key;
                 });
                 actualKeys.should.deep.equal(expectedResponseKeys);
               });
             };
           });
-          var chain = tasks.shift()();
+          const chain = tasks.shift()();
           function getNext() {
-            var task = tasks.shift();
+            const task = tasks.shift();
             return task && function () {
               return task().then(getNext());
             };
@@ -3623,9 +3623,9 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it('should handle many doc changes', function () {
 
-      var docs = [{_id: '0'}, {_id : '1'}, {_id: '2'}];
+      let docs = [{_id: '0'}, {_id : '1'}, {_id: '2'}];
 
-      var keySets = [
+      const keySets = [
         [1],
         [2, 3],
         [4],
@@ -3639,7 +3639,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         [9, 3, 2, 1]
       ];
 
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map : function (doc) {
           doc.keys.forEach(function (key) {
@@ -3648,9 +3648,9 @@ function tests(suiteName, dbName, dbType, viewType) {
         }
       }).then(function (mapFun) {
         return db.bulkDocs({docs}).then(function () {
-          var tasks = keySets.map(function (keys, i) {
+          const tasks = keySets.map(function (keys, i) {
             return function () {
-              var expectedResponseKeys = [];
+              const expectedResponseKeys = [];
               return db.allDocs({
                 keys : ['0', '1', '2'],
                 include_docs: true
@@ -3669,7 +3669,7 @@ function tests(suiteName, dbName, dbType, viewType) {
               }).then(function () {
                 return db.query(mapFun);
               }).then(function (res) {
-                var actualKeys = res.rows.map(function (x) {
+                const actualKeys = res.rows.map(function (x) {
                   return x.key;
                 });
                 actualKeys.should.deep.equal(expectedResponseKeys);
@@ -3677,7 +3677,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             };
           });
           function getNext() {
-            var task = tasks.shift();
+            const task = tasks.shift();
             if (task) {
               return task().then(getNext);
             }
@@ -3688,12 +3688,12 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should work with post', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) { emit(doc._id); }
       }).then(async function (mapFun) {
         return db.bulkDocs({docs: [{_id : 'bazbazbazb'}]}).then(function () {
-          var keys = ['bazbazbazb'];
+          const keys = ['bazbazbazb'];
           return db.query(mapFun, {keys}).then(function (resp) {
             resp.total_rows.should.equal(1);
             resp.rows.should.have.length(1);
@@ -3706,7 +3706,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("should accept trailing ';' in a map definition (#178)", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: "function(doc){};\n"
       }).then(function (queryFun) {
@@ -3719,7 +3719,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should throw a 404 when no funcs found in ddoc (#181)', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return db.put({
         _id: '_design/test'
       }).then(function () {
@@ -3733,8 +3733,8 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should continue indexing when map eval fails (#214)', function () {
-      var db = new PouchDB(dbName);
-      var err;
+      const db = new PouchDB(dbName);
+      let err;
       db.on('error', function (e) {
         err = e;
       });
@@ -3772,7 +3772,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it('should continue indexing when map eval fails, ' +
         'even without a listener (#214)', function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.foo.bar, doc);
@@ -3803,9 +3803,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('should update the emitted value', function () {
-      var db = new PouchDB(dbName);
-      var docs = [];
-      for (var i = 0; i < 300; i++) {
+      const db = new PouchDB(dbName);
+      const docs = [];
+      for (let i = 0; i < 300; i++) {
         docs.push({
           _id: i.toString(),
           name: 'foo',
@@ -3817,12 +3817,12 @@ function tests(suiteName, dbName, dbType, viewType) {
         map: "function(doc){emit(doc.name, doc.count);};\n"
       }).then(function (queryFun) {
         return db.bulkDocs({docs}).then(function (res) {
-          for (var i = 0; i < res.length; i++) {
+          for (let i = 0; i < res.length; i++) {
             docs[i]._rev = res[i].rev;
           }
           return db.query(queryFun);
         }).then(function (res) {
-          var values = res.rows.map(function (x) { return x.value; });
+          const values = res.rows.map(function (x) { return x.value; });
           values.should.have.length(docs.length);
           values[0].should.equal(1);
           docs.forEach(function (doc) {
@@ -3832,7 +3832,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         }).then(function () {
           return db.query(queryFun);
         }).then(function (res) {
-          var values = res.rows.map(function (x) { return x.value; });
+          const values = res.rows.map(function (x) { return x.value; });
           values.should.have.length(docs.length);
           values[0].should.equal(2);
         });
@@ -3840,9 +3840,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#6230 Test db.query() opts update_seq: false', function () {
-      var db = new PouchDB(dbName);
-      var docs = [];
-      for (var i = 0; i < 4; i++) {
+      const db = new PouchDB(dbName);
+      const docs = [];
+      for (let i = 0; i < 4; i++) {
         docs.push({
           _id: i.toString(),
           name: 'foo',
@@ -3863,9 +3863,9 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     it('#6230 Test db.query() opts update_seq: true', function () {
 
-      var db = new PouchDB(dbName);
-      var docs = [];
-      for (var i = 0; i < 4; i++) {
+      const db = new PouchDB(dbName);
+      const docs = [];
+      for (let i = 0; i < 4; i++) {
         docs.push({
           _id: i.toString(),
           name: 'foo',
@@ -3888,7 +3888,7 @@ function tests(suiteName, dbName, dbType, viewType) {
             return false;
           }
         });
-        var normSeq = normalizeSeq(result.update_seq);
+        const normSeq = normalizeSeq(result.update_seq);
         normSeq.should.be.a('number');
       });
 
@@ -3905,9 +3905,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('#6230 Test db.query() opts with update_seq missing', function () {
-      var db = new PouchDB(dbName);
-      var docs = [];
-      for (var i = 0; i < 4; i++) {
+      const db = new PouchDB(dbName);
+      const docs = [];
+      for (let i = 0; i < 4; i++) {
         docs.push({
           _id: i.toString(),
           name: 'foo',
@@ -3926,13 +3926,13 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it("#8370 keys queries should support skip and limit", function () {
-      var db = new PouchDB(dbName);
+      const db = new PouchDB(dbName);
       return createView(db, {
         map: function (doc) {
           emit(doc.field);
         }
       }).then(function (queryFun) {
-        var opts = {include_docs: true};
+        const opts = {include_docs: true};
         return db.bulkDocs({
           docs: [
             { _id: "doc_0", field: 0 },
