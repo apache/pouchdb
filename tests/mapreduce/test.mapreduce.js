@@ -62,65 +62,60 @@ function tests(suiteName, dbName, dbType, viewType) {
       return new PouchDB(dbName).destroy();
     });
 
-    it("Test basic view", function () {
+    it("Test basic view", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
+      const view = await createView(db, {
+        map: (doc) => {
           emit(doc.foo, doc);
         }
-      }).then(function (view) {
-        return db.bulkDocs({docs: [
-          {foo: 'bar'},
-          { _id: 'volatile', foo: 'baz' }
-        ]}).then(function () {
-          return db.get('volatile');
-        }).then(function (doc) {
-          return db.remove(doc);
-        }).then(function () {
-          return db.query(view, {include_docs: true, reduce: false});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Dont include deleted documents');
-          res.total_rows.should.equal(1, 'Include total_rows property.');
-          res.rows.forEach(function (x) {
-            should.exist(x.id);
-            should.exist(x.key);
-            should.exist(x.value);
-            should.exist(x.value._rev);
-            should.exist(x.doc);
-            should.exist(x.doc._rev);
-          });
-        });
+      });
+
+      await db.bulkDocs({docs: [
+        {foo: 'bar'},
+        { _id: 'volatile', foo: 'baz' }
+      ]});
+
+      const doc = await db.get('volatile');
+      await db.remove(doc);
+      const res = await db.query(view, {include_docs: true, reduce: false});
+
+      res.rows.should.have.length(1, 'Dont include deleted documents');
+      res.total_rows.should.equal(1, 'Include total_rows property.');
+      res.rows.forEach((x) => {
+        should.exist(x.id);
+        should.exist(x.key);
+        should.exist(x.value);
+        should.exist(x.value._rev);
+        should.exist(x.doc);
+        should.exist(x.doc._rev);
       });
     });
 
-    it("Test basic view, no emitted value", function () {
+    it("Test basic view, no emitted value", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        }
-      }).then(function (view) {
-        return db.bulkDocs({docs: [
-          {foo: 'bar'},
-          { _id: 'volatile', foo: 'baz' }
-        ]}).then(function () {
-          return db.get('volatile');
-        }).then(function (doc) {
-          return db.remove(doc);
-        }).then(function () {
-          return db.query(view, {include_docs: true, reduce: false});
-        }).then(function (res) {
-          res.rows.should.have.length(1,
-                                      'Dont include deleted documents');
-          res.total_rows.should.equal(1, 'Include total_rows property.');
-          res.rows.forEach(function (x) {
-            should.exist(x.id);
-            should.exist(x.key);
-            should.equal(x.value, null);
-            should.exist(x.doc);
-            should.exist(x.doc._rev);
-          });
-        });
+      const view = await createView(db, {
+        map: (doc) => {
+            emit(doc.foo);
+          }
+      });
+
+      await db.bulkDocs({docs: [
+        {foo: 'bar'},
+        { _id: 'volatile', foo: 'baz' }
+      ]});
+
+      const doc = await db.get('volatile');
+      await db.remove(doc);
+      const res = await db.query(view, {include_docs: true, reduce: false});
+
+      res.rows.should.have.length(1, 'Dont include deleted documents');
+      res.total_rows.should.equal(1, 'Include total_rows property.');
+      res.rows.forEach((x) => {
+        should.exist(x.id);
+        should.exist(x.key);
+        should.equal(x.value, null);
+        should.exist(x.doc);
+        should.exist(x.doc._rev);
       });
     });
 
