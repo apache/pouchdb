@@ -192,158 +192,147 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
     }
 
-    it("Test opts.startkey/opts.endkey", function () {
+    it("Test opts.startkey/opts.endkey", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
+      const queryFun = await createView(db, {
+        map: (doc) => {
           emit(doc.key, doc);
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({docs: [
-          {key: 'key1'},
-          {key: 'key2'},
-          {key: 'key3'},
-          {key: 'key4'},
-          {key: 'key5'}
-        ]}).then(function () {
-          return db.query(queryFun, {reduce: false, startkey: 'key2'});
-        }).then(function (res) {
-          res.rows.should.have.length(4, 'Startkey is inclusive');
-          return db.query(queryFun, {reduce: false, endkey: 'key3'});
-        }).then(function (res) {
-          res.rows.should.have.length(3, 'Endkey is inclusive');
-          return db.query(queryFun, {
+      });
+
+      await db.bulkDocs({docs: [
+        {key: 'key1'},
+        {key: 'key2'},
+        {key: 'key3'},
+        {key: 'key4'},
+        {key: 'key5'}]});
+
+      let res = await db.query(queryFun, {reduce: false, startkey: 'key2'});
+      res.rows.should.have.length(4, 'Startkey is inclusive');
+
+      res = await db.query(queryFun, {reduce: false, endkey: 'key3'});
+      res.rows.should.have.length(3, 'Endkey is inclusive');
+
+      res = await db.query(queryFun, {
             reduce: false,
             startkey: 'key2',
             endkey: 'key3'
-          });
-        }).then(function (res) {
-          res.rows.should.have.length(2, 'Startkey and endkey together');
-          return db.query(queryFun, {
+      });
+      res.rows.should.have.length(2, 'Startkey and endkey together');
+
+      res = await db.query(queryFun, {
             reduce: false,
             startkey: 'key4',
             endkey: 'key4'
-          });
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Startkey=endkey');
-        });
       });
+      res.rows.should.have.length(1, 'Startkey=endkey');
     });
 
-    it("#4154 opts.start_key/opts.end_key are synonyms", function () {
+    it("#4154 opts.start_key/opts.end_key are synonyms", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
+      const queryFun = await createView(db, {
+        map: (doc) => {
           emit(doc.key, doc);
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({docs: [
-          {key: 'key1'},
-          {key: 'key2'},
-          {key: 'key3'},
-          {key: 'key4'},
-          {key: 'key5'}
-        ]}).then(function () {
-          return db.query(queryFun, {reduce: false, start_key: 'key2'});
-        }).then(function (res) {
-          res.rows.should.have.length(4, 'Startkey is inclusive');
-          return db.query(queryFun, {reduce: false, end_key: 'key3'});
-        }).then(function (res) {
-          res.rows.should.have.length(3, 'Endkey is inclusive');
-          return db.query(queryFun, {
-            reduce: false,
-            start_key: 'key2',
-            end_key: 'key3'
-          });
-        }).then(function (res) {
-          res.rows.should.have.length(2, 'Startkey and endkey together');
-          return db.query(queryFun, {
-            reduce: false,
-            start_key: 'key4',
-            end_key: 'key4'
-          });
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Startkey=endkey');
-        });
       });
+
+      await db.bulkDocs({docs: [
+        {key: 'key1'},
+        {key: 'key2'},
+        {key: 'key3'},
+        {key: 'key4'},
+        {key: 'key5'}
+      ]});
+
+      let res = await db.query(queryFun, {reduce: false, start_key: 'key2'});
+      res.rows.should.have.length(4, 'Startkey is inclusive');
+
+      res = await db.query(queryFun, {reduce: false, end_key: 'key3'});
+      res.rows.should.have.length(3, 'Endkey is inclusive');
+
+      res = await db.query(queryFun, {
+          reduce: false,
+          start_key: 'key2',
+          end_key: 'key3'
+      });
+      res.rows.should.have.length(2, 'Startkey and endkey together');
+
+      res = await db.query(queryFun, {
+          reduce: false,
+          start_key: 'key4',
+          end_key: 'key4'
+      });
+      res.rows.should.have.length(1, 'Startkey=endkey');
     });
 
     //TODO: split this to their own tests within a describe block
-    it("Test opts.inclusive_end = false", function () {
+    it("Test opts.inclusive_end = false", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
+      const queryFun = await createView(db, {
+        map: (doc) => {
           emit(doc.key, doc);
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({docs: [
-          {key: 'key1'},
-          {key: 'key2'},
-          {key: 'key3'},
-          {key: 'key4'},
-          {key: 'key4'},
-          {key: 'key5'}
-        ]}).then(function () {
-          return db.query(queryFun, {
+      });
+
+      await db.bulkDocs({docs: [
+        {key: 'key1'},
+        {key: 'key2'},
+        {key: 'key3'},
+        {key: 'key4'},
+        {key: 'key4'},
+        {key: 'key5'}
+      ]});
+
+      let res = await db.query(queryFun, {
+          reduce: false,
+          endkey: 'key4',
+          inclusive_end: false
+      });
+      res.rows.should.have.length(3, 'endkey=key4 without ' + 'inclusive end');
+      res.rows[0].key.should.equal('key1');
+      res.rows[2].key.should.equal('key3');
+
+      res = await db.query(queryFun, {
             reduce: false,
+            startkey: 'key3',
             endkey: 'key4',
             inclusive_end: false
-          });
-        }).then(function (resp) {
-          resp.rows.should.have.length(3, 'endkey=key4 without ' +
-                                       'inclusive end');
-          resp.rows[0].key.should.equal('key1');
-          resp.rows[2].key.should.equal('key3');
-        })
-          .then(function () {
-            return db.query(queryFun, {
-              reduce: false,
-              startkey: 'key3',
-              endkey: 'key4',
-              inclusive_end: false
-            });
-          }).then(function (resp) {
-            resp.rows.should.have.length(1, 'startkey=key3, endkey=key4 ' +
-                                         'without inclusive end');
-            resp.rows[0].key.should.equal('key3');
-          }).then(function () {
-            return db.query(queryFun, {
-              reduce: false,
-              startkey: 'key4',
-              endkey: 'key1',
-              descending: true,
-              inclusive_end: false
-            });
-          }).then(function (resp) {
-            resp.rows.should
-              .have.length(4, 'startkey=key4, endkey=key1 descending without ' +
-                           'inclusive end');
-            resp.rows[0].key.should.equal('key4');
-          });
       });
+      res.rows.should.have.length(1, 'startkey=key3, endkey=key4 ' + 'without inclusive end');
+      res.rows[0].key.should.equal('key3');
+
+      res = await db.query(queryFun, {
+            reduce: false,
+            startkey: 'key4',
+            endkey: 'key1',
+            descending: true,
+            inclusive_end: false
+      });
+      res.rows.should.have.length(4, 'startkey=key4, endkey=key1 descending without ' +
+                          'inclusive end');
+      res.rows[0].key.should.equal('key4');
     });
 
-    it("Test opts.key", function () {
+    it("Test opts.key", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
+      const queryFun = await createView(db, {
+        map: (doc) => {
           emit(doc.key, doc);
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({docs: [
+      });
+
+      await db.bulkDocs({docs: [
           {key: 'key1'},
           {key: 'key2'},
           {key: 'key3'},
           {key: 'key3'}
-        ]}).then(function () {
-          return db.query(queryFun, {reduce: false, key: 'key2'});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Doc with key');
-          return db.query(queryFun, {reduce: false, key: 'key3'});
-        }).then(function (res) {
-          res.rows.should.have.length(2, 'Multiple docs with key');
-        });
-      });
+      ]});
+
+      let res = await db.query(queryFun, {reduce: false, key: 'key2'});
+      res.rows.should.have.length(1, 'Doc with key');
+
+      res = await db.query(queryFun, {reduce: false, key: 'key3'});
+      res.rows.should.have.length(2, 'Multiple docs with key');
     });
 
     it("Test basic view collation", async function () {
