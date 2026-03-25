@@ -351,7 +351,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
     });
 
-    it("Test basic view collation", function () {
+    it("Test basic view collation", async function () {
 
       const values = [];
 
@@ -398,35 +398,33 @@ function tests(suiteName, dbName, dbType, viewType) {
       // that doesn't preserve order)
       values.push({b: 2, c: 2});
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        }
-      }).then(function (queryFun) {
 
-        const docs = values.map(function (x, i) {
-          return {_id: (i).toString(), foo: x};
-        });
-        return db.bulkDocs({docs}).then(function () {
-          return db.query(queryFun, {reduce: false});
-        }).then(function (res) {
-          res.rows.forEach(function (x, i) {
-            JSON.stringify(x.key).should.equal(JSON.stringify(values[i]),
-                                               'keys collate');
-          });
-          return db.query(queryFun, {descending: true, reduce: false});
-        }).then(function (res) {
-          res.rows.forEach(function (x, i) {
-            JSON.stringify(x.key).should.equal(JSON.stringify(
-              values[values.length - 1 - i]),
-                                               'keys collate descending');
-          });
-        });
+      const queryFun = await createView(db, {
+        map: (doc) => {
+        emit(doc.foo);
+        }
+      });
+
+      const docs = values.map((x, i) => ({_id: (i).toString(), foo: x}));
+
+      await db.bulkDocs({docs});
+
+      let res = await db.query(queryFun, {reduce: false});
+
+      res.rows.forEach((x, i) => {
+        JSON.stringify(x.key).should.equal(JSON.stringify(values[i]), 'keys collate');
+      });
+
+      res = await db.query(queryFun, {descending: true, reduce: false});
+
+      res.rows.forEach((x, i) => {
+        JSON.stringify(x.key).should.equal(JSON.stringify(
+          values[values.length - 1 - i]), 'keys collate descending');
       });
     });
 
-    it('Test complex key collation', function () {
-      const map = function () {
+    it('Test complex key collation', async function () {
+      const map = () => {
         emit(null);
         emit(false);
         emit(true);
@@ -452,476 +450,390 @@ function tests(suiteName, dbName, dbType, viewType) {
         emit({"b":2,"a":1});
         emit({"b":2,"c":2});
       };
+
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, { map });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { id: '1', key: null, value: null },
-            { id: '2', key: null, value: null },
-            { id: '1', key: false, value: null },
-            { id: '2', key: false, value: null },
-            { id: '1', key: true, value: null },
-            { id: '2', key: true, value: null },
-            { id: '1', key: 1, value: null },
-            { id: '2', key: 1, value: null },
-            { id: '1', key: 2, value: null },
-            { id: '2', key: 2, value: null },
-            { id: '1', key: 3, value: null },
-            { id: '2', key: 3, value: null },
-            { id: '1', key: 4, value: null },
-            { id: '2', key: 4, value: null },
-            { id: '1', key: 'a', value: null },
-            { id: '2', key: 'a', value: null },
-            { id: '1', key: 'aa', value: null },
-            { id: '2', key: 'aa', value: null },
-            { id: '1', key: 'b', value: null },
-            { id: '2', key: 'b', value: null },
-            { id: '1', key: 'ba', value: null },
-            { id: '2', key: 'ba', value: null },
-            { id: '1', key: 'bb', value: null },
-            { id: '2', key: 'bb', value: null },
-            { id: '1', key: [ 'a' ], value: null },
-            { id: '2', key: [ 'a' ], value: null },
-            { id: '1', key: [ 'b' ], value: null },
-            { id: '2', key: [ 'b' ], value: null },
-            { id: '1', key: [ 'b', 'c' ], value: null },
-            { id: '2', key: [ 'b', 'c' ], value: null },
-            { id: '1', key: [ 'b', 'c', 'a' ], value: null },
-            { id: '2', key: [ 'b', 'c', 'a' ], value: null },
-            { id: '1', key: [ 'b', 'd' ], value: null },
-            { id: '2', key: [ 'b', 'd' ], value: null },
-            { id: '1', key: [ 'b', 'd', 'e' ], value: null },
-            { id: '2', key: [ 'b', 'd', 'e' ], value: null },
-            { id: '1', key: { a: 1 }, value: null },
-            { id: '2', key: { a: 1 }, value: null },
-            { id: '1', key: { a: 2 }, value: null },
-            { id: '2', key: { a: 2 }, value: null },
-            { id: '1', key: { b: 1 }, value: null },
-            { id: '2', key: { b: 1 }, value: null },
-            { id: '1', key: { b: 2 }, value: null },
-            { id: '2', key: { b: 2 }, value: null },
-            { id: '1', key: { b: 2, a: 1 }, value: null },
-            { id: '2', key: { b: 2, a: 1 }, value: null },
-            { id: '1', key: { b: 2, c: 2 }, value: null },
-            { id: '2', key: { b: 2, c: 2 }, value: null }
-          ]);
-        });
-      });
+      ]);
+
+      const queryFun = await createView(db, { map });
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { id: '1', key: null, value: null },
+        { id: '2', key: null, value: null },
+        { id: '1', key: false, value: null },
+        { id: '2', key: false, value: null },
+        { id: '1', key: true, value: null },
+        { id: '2', key: true, value: null },
+        { id: '1', key: 1, value: null },
+        { id: '2', key: 1, value: null },
+        { id: '1', key: 2, value: null },
+        { id: '2', key: 2, value: null },
+        { id: '1', key: 3, value: null },
+        { id: '2', key: 3, value: null },
+        { id: '1', key: 4, value: null },
+        { id: '2', key: 4, value: null },
+        { id: '1', key: 'a', value: null },
+        { id: '2', key: 'a', value: null },
+        { id: '1', key: 'aa', value: null },
+        { id: '2', key: 'aa', value: null },
+        { id: '1', key: 'b', value: null },
+        { id: '2', key: 'b', value: null },
+        { id: '1', key: 'ba', value: null },
+        { id: '2', key: 'ba', value: null },
+        { id: '1', key: 'bb', value: null },
+        { id: '2', key: 'bb', value: null },
+        { id: '1', key: [ 'a' ], value: null },
+        { id: '2', key: [ 'a' ], value: null },
+        { id: '1', key: [ 'b' ], value: null },
+        { id: '2', key: [ 'b' ], value: null },
+        { id: '1', key: [ 'b', 'c' ], value: null },
+        { id: '2', key: [ 'b', 'c' ], value: null },
+        { id: '1', key: [ 'b', 'c', 'a' ], value: null },
+        { id: '2', key: [ 'b', 'c', 'a' ], value: null },
+        { id: '1', key: [ 'b', 'd' ], value: null },
+        { id: '2', key: [ 'b', 'd' ], value: null },
+        { id: '1', key: [ 'b', 'd', 'e' ], value: null },
+        { id: '2', key: [ 'b', 'd', 'e' ], value: null },
+        { id: '1', key: { a: 1 }, value: null },
+        { id: '2', key: { a: 1 }, value: null },
+        { id: '1', key: { a: 2 }, value: null },
+        { id: '2', key: { a: 2 }, value: null },
+        { id: '1', key: { b: 1 }, value: null },
+        { id: '2', key: { b: 1 }, value: null },
+        { id: '1', key: { b: 2 }, value: null },
+        { id: '2', key: { b: 2 }, value: null },
+        { id: '1', key: { b: 2, a: 1 }, value: null },
+        { id: '2', key: { b: 2, a: 1 }, value: null },
+        { id: '1', key: { b: 2, c: 2 }, value: null },
+        { id: '2', key: { b: 2, c: 2 }, value: null }
+      ]);
     });
 
-    it('Test duplicate collation of objects', function () {
+    it('Test duplicate collation of objects', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'a' }, { b: 'b' });
-            emit({ a: 'a' }, { b: 'b' });
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": { b: 'b' }},
-            { "id": "1", "key": { "a": "a" }, "value": { b: 'b' }},
-            { "id": "2", "key": { "a": "a" }, "value": { b: 'b' }},
-            { "id": "2", "key": { "a": "a" }, "value": { b: 'b' }}
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'a' }, { b: 'b' });
+          emit({ a: 'a' }, { b: 'b' });
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": { b: 'b' }},
+        { "id": "1", "key": { "a": "a" }, "value": { b: 'b' }},
+        { "id": "2", "key": { "a": "a" }, "value": { b: 'b' }},
+        { "id": "2", "key": { "a": "a" }, "value": { b: 'b' }}
+      ]);
     });
 
-    it('Test collation of undefined/null', function () {
+    it('Test collation of undefined/null', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit();
-            emit(null);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": null, "value": null},
-            { "id": "1", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null}
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit();
+          emit(null);
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": null, "value": null},
+        { "id": "1", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null}
+      ]);
     });
 
-    it('Test collation of null/undefined', function () {
+    it('Test collation of null/undefined', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
+      ]);
+      const queryFun = await createView(db, {
+          map: () => {
             emit(null);
             emit();
           }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": null, "value": null},
-            { "id": "1", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null}
-          ]);
-        });
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": null, "value": null},
+        { "id": "1", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null}
+      ]);
     });
 
-    it('Test duplicate collation of nulls', function () {
+    it('Test duplicate collation of nulls', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
+      ]);
+      const queryFun = await createView(db, {
+          map: () => {
             emit(null);
             emit(null);
           }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": null, "value": null},
-            { "id": "1", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null},
-            { "id": "2", "key": null, "value": null}
-          ]);
-        });
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": null, "value": null},
+        { "id": "1", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null},
+        { "id": "2", "key": null, "value": null}
+      ]);
     });
 
-    it('Test duplicate collation of booleans', function () {
+    it('Test duplicate collation of booleans', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit(true);
-            emit(true);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": true, "value": null},
-            { "id": "1", "key": true, "value": null},
-            { "id": "2", "key": true, "value": null},
-            { "id": "2", "key": true, "value": null}
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit(true);
+          emit(true);
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": true, "value": null},
+        { "id": "1", "key": true, "value": null},
+        { "id": "2", "key": true, "value": null},
+        { "id": "2", "key": true, "value": null}
+      ]);
     });
 
-    it('Test collation of different objects', function () {
+    it('Test collation of different objects', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'b' }, { a: 'a' });
-            emit({ a: 'a' }, { b: 'b' });
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "1", "key": { "a": "b" }, "value": { "a": "a" } },
-            { "id": "2", "key": { "a": "b" }, "value": { "a": "a" } }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'b' }, { a: 'a' });
+          emit({ a: 'a' }, { b: 'b' });
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "1", "key": { "a": "b" }, "value": { "a": "a" } },
+        { "id": "2", "key": { "a": "b" }, "value": { "a": "a" } }
+      ]);
     });
 
-    it('Test collation of different objects 2', function () {
+    it('Test collation of different objects 2', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'b', b: 'c' }, { a: 'a' });
-            emit({ a: 'a' }, { b: 'b' });
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "1", "key": { "a": "b", "b": "c" }, "value": { "a": "a" } },
-            { "id": "2", "key": { "a": "b", "b": "c" }, "value": { "a": "a" } }
-          ]);
-        });
+      ]);
+
+      const queryFun =  await createView(db, {
+        map: () => {
+          emit({ a: 'b', b: 'c' }, { a: 'a' });
+          emit({ a: 'a' }, { b: 'b' });
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "1", "key": { "a": "b", "b": "c" }, "value": { "a": "a" } },
+        { "id": "2", "key": { "a": "b", "b": "c" }, "value": { "a": "a" } }
+      ]);
     });
 
-    it('Test collation of different objects 3', function () {
+    it('Test collation of different objects 3', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'a' }, { b: 'b' });
-            emit({ a: 'b'}, { a: 'a' });
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
-            { "id": "1", "key": { "a": "b" }, "value": { "a": "a" } },
-            { "id": "2", "key": { "a": "b" }, "value": { "a": "a" } }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'a' }, { b: 'b' });
+          emit({ a: 'b'}, { a: 'a' });
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "2", "key": { "a": "a" }, "value": { "b": "b" } },
+        { "id": "1", "key": { "a": "b" }, "value": { "a": "a" } },
+        { "id": "2", "key": { "a": "b" }, "value": { "a": "a" } }
+      ]);
     });
 
-    it('Test collation of different objects 4', function () {
+    it('Test collation of different objects 4', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'a'});
-            emit({ b: 'b'});
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": null },
-            { "id": "2", "key": { "a": "a" }, "value": null },
-            { "id": "1", "key": { "b": "b" }, "value": null },
-            { "id": "2", "key": { "b": "b" }, "value": null }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'a'});
+          emit({ b: 'b'});
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": null },
+        { "id": "2", "key": { "a": "a" }, "value": null },
+        { "id": "1", "key": { "b": "b" }, "value": null },
+        { "id": "2", "key": { "b": "b" }, "value": null }
+      ]);
     });
 
-    it('Test collation of different objects 5', function () {
+    it('Test collation of different objects 5', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'a'});
-            emit({ a: 'a', b: 'b'});
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": null },
-            { "id": "2", "key": { "a": "a" }, "value": null },
-            { "id": "1", "key": { "a": "a", "b": "b" }, "value": null },
-            { "id": "2", "key": { "a": "a", "b": "b" }, "value": null }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'a'});
+          emit({ a: 'a', b: 'b'});
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": null },
+        { "id": "2", "key": { "a": "a" }, "value": null },
+        { "id": "1", "key": { "a": "a", "b": "b" }, "value": null },
+        { "id": "2", "key": { "a": "a", "b": "b" }, "value": null }
+      ]);
     });
 
-    it('Test collation of different objects 6', function () {
+    it('Test collation of different objects 6', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit({ a: 'a'});
-            emit({ a: 'a', b: 'b'});
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": { "a": "a" }, "value": null },
-            { "id": "2", "key": { "a": "a" }, "value": null },
-            { "id": "1", "key": { "a": "a", "b": "b" }, "value": null },
-            { "id": "2", "key": { "a": "a", "b": "b" }, "value": null }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit({ a: 'a'});
+          emit({ a: 'a', b: 'b'});
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": { "a": "a" }, "value": null },
+        { "id": "2", "key": { "a": "a" }, "value": null },
+        { "id": "1", "key": { "a": "a", "b": "b" }, "value": null },
+        { "id": "2", "key": { "a": "a", "b": "b" }, "value": null }
+      ]);
     });
 
-    it('Test collation of different booleans', function () {
+    it('Test collation of different booleans', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
+      ]);
+
+      const queryFun = await createView(db, {
+          map: () => {
             emit(true);
             emit(false);
           }
         });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": false, "value": null },
-            { "id": "2", "key": false, "value": null },
-            { "id": "1", "key": true, "value": null },
-            { "id": "2", "key": true, "value": null }
-          ]);
-        });
-      });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": false, "value": null },
+        { "id": "2", "key": false, "value": null },
+        { "id": "1", "key": true, "value": null },
+        { "id": "2", "key": true, "value": null }
+      ]);
     });
 
-    it('Test collation of different booleans 2', function () {
+    it('Test collation of different booleans 2', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      await db.bulkDocs([
         { _id: '1' },
         { _id: '2' }
-      ]).then(function () {
-        return createView(db, {
-          map: function () {
-            emit(false);
-            emit(true);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun).then(function (res) {
-          const rows = res.rows.map(function (x) {
-            return {
-              id: x.id,
-              key: x.key,
-              value: x.value
-            };
-          });
-          assert.deepEqual(rows, [
-            { "id": "1", "key": false, "value": null },
-            { "id": "2", "key": false, "value": null },
-            { "id": "1", "key": true, "value": null },
-            { "id": "2", "key": true, "value": null }
-          ]);
-        });
+      ]);
+
+      const queryFun = await createView(db, {
+        map: () => {
+          emit(false);
+          emit(true);
+        }
       });
+
+      const res = await db.query(queryFun);
+      const rows = mapToRows(res);
+
+      assert.deepEqual(rows, [
+        { "id": "1", "key": false, "value": null },
+        { "id": "2", "key": false, "value": null },
+        { "id": "1", "key": true, "value": null },
+        { "id": "2", "key": true, "value": null }
+      ]);
     });
 
     it("Test joins", function () {
@@ -3966,3 +3878,11 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
   });
 }
+
+const mapToRows = (res) => {
+  return res.rows.map((x) => ({
+    id: x.id,
+    key: x.key,
+    value: x.value
+  }));
+};
