@@ -174,13 +174,28 @@ jobs:
           - TYPE=find PLUGINS=pouchdb-find npm test
           - TYPE=mapreduce npm test
     runs-on: ubuntu-latest
+    services:
+      couchdb:
+        image: couchdb:3.1
+        ports:
+          - 5984:5984
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
     env:
       CLIENT: node
+      SERVER: couchdb-master
+      COUCH_HOST: http://admin:password@127.0.0.1:5984
+      SKIP_MIGRATION: 1
       ADAPTERS: ${{ matrix.adapter }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Wait for CouchDB
+        run: ./bin/wait-for-couch.sh 20
+      - name: Setup CouchDB CORS
+        run: curl 'http://admin:password@127.0.0.1:5984/_node/_local/_config/cors/origins' -X PUT -d '"http://127.0.0.1:8000"'
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ matrix.node }}
@@ -213,7 +228,18 @@ jobs:
           - TYPE=find PLUGINS=pouchdb-find npm test
           - TYPE=mapreduce npm test
     runs-on: ubuntu-latest
+    services:
+      couchdb:
+        image: couchdb:3.1
+        ports:
+          - 5984:5984
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
     env:
+      SERVER: couchdb-master
+      COUCH_HOST: http://admin:password@127.0.0.1:5984
+      SKIP_MIGRATION: 1
       USE_MINIFIED: 1
       CLIENT: ${{ matrix.client }}
       ADAPTERS: ${{ matrix.adapter }}
@@ -221,6 +247,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Wait for CouchDB
+        run: ./bin/wait-for-couch.sh 20
+      - name: Setup CouchDB CORS
+        run: curl 'http://admin:password@127.0.0.1:5984/_node/_local/_config/cors/origins' -X PUT -d '"http://127.0.0.1:8000"'
       - uses: ./.github/actions/install-node-package
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -247,13 +277,56 @@ jobs:
       matrix:
         node: [20, 22]
         cmd:
-          - CLIENT=firefox npm run test-webpack
+          - COUCH_HOST=http://admin:password@127.0.0.1:5984 CLIENT=firefox npm run test-webpack
           - AUTO_COMPACTION=true npm test
-          - TYPE=performance npm test
           - npm run test-unit
           - npm run test-component
           - npm run test-fuzzy
           - npm run verify-build
+    runs-on: ubuntu-latest
+    env:
+      SERVER: couchdb-master
+      COUCH_HOST: http://admin:password@127.0.0.1:5984
+    services:
+      couchdb:
+        image: couchdb:3.1
+        ports:
+          - 5984:5984
+        env:
+          COUCHDB_USER: admin
+          COUCHDB_PASSWORD: password
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for CouchDB
+        run: ./bin/wait-for-couch.sh 20
+      - name: Setup CouchDB CORS
+        run: curl 'http://admin:password@127.0.0.1:5984/_node/_local/_config/cors/origins' -X PUT -d '"http://127.0.0.1:8000"'
+      - uses: ./.github/actions/install-node-package
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: ./.github/actions/build-pouchdb
+      - id: test
+        run: ${{ matrix.cmd }}
+        continue-on-error: true
+      - name: First retry
+        id: retry
+        if: steps.test.outcome == 'failure'
+        run: git reset --hard && ${{ matrix.cmd }}
+        continue-on-error: true
+      - name: Second retry
+        if: steps.retry.outcome == 'failure'
+        run: git reset --hard && ${{ matrix.cmd }}
+
+  nodejs-perf:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+        cmd:
+          - TYPE=performance npm test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
