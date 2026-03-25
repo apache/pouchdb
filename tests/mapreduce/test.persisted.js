@@ -12,10 +12,10 @@ describe('test.persisted.js', function () {
 
   function createView(db, viewObj) {
     const storableViewObj = {
-      map : viewObj.map.toString()
+      map : `${viewObj.map}`
     };
     if (viewObj.reduce) {
-      storableViewObj.reduce = viewObj.reduce.toString();
+      storableViewObj.reduce = `${viewObj.reduce}`;
     }
     return new Promise(function (resolve, reject) {
       db.put({

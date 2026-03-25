@@ -230,7 +230,7 @@ describe('test.views.js', function () {
     const db = new PouchDB(dbs.name);
     const docs = values.map(function (x, i) {
       return {
-        _id: i.toString(),
+        _id: `${i}`,
         foo: x
       };
     });
