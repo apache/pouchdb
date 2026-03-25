@@ -22,11 +22,11 @@ describe('pouchdb-find: test.kitchen-sink.js', function () {
 
   const context = {};
 
-  before(function () {
+  before(async function () {
     this.timeout(60000);
     context.db = new PouchDB(dbName);
 
-    return context.db.bulkDocs([
+    await context.db.bulkDocs([
       { name: 'mario', _id: 'mario', rank: 5, series: 'mario', debut: 1981 },
       { name: 'jigglypuff', _id: 'puff', rank: 8, series: 'pokemon', debut: 1996 },
       { name: 'link', rank: 10, _id: 'link', series: 'zelda', debut: 1986 },
@@ -39,28 +39,28 @@ describe('pouchdb-find: test.kitchen-sink.js', function () {
       { name: 'samus', rank: 12, _id: 'samus', series: 'metroid', debut: 1986 },
       { name: 'yoshi', _id: 'yoshi', rank: 6, series: 'mario', debut: 1990 },
       { name: 'kirby', _id: 'kirby', series: 'kirby', rank: 2, debut: 1992 }
-    ]).then(() => {
-      // This could be done by Promise.all, but for now that breaks IDBNext.
-      // Promise.all index creation is tested explicitly in test.ddoc.js
-      const indexes = [
-        {index: {fields: ['rank']}},
-        {index: {fields: ['series']}},
-        {index: {fields: ['debut']}},
-        {index: {fields: ['name']}},
-        {index: {fields: ['name', 'rank']}},
-        {index: {fields: ['name', 'series']}},
-        {index: {fields: ['series', 'debut', 'rank']}},
-        {index: {fields: ['rank', 'debut']}},
-      ];
+    ]);
 
-      return indexes.reduce((p, index) => {
-        return p.then(() => context.db.createIndex(index));
-      }, Promise.resolve());
-    });
+    // This could be done by Promise.all, but for now that breaks IDBNext.
+    // Promise.all index creation is tested explicitly in test.ddoc.js
+    const indexes = [
+      {index: {fields: ['rank']}},
+      {index: {fields: ['series']}},
+      {index: {fields: ['debut']}},
+      {index: {fields: ['name']}},
+      {index: {fields: ['name', 'rank']}},
+      {index: {fields: ['name', 'series']}},
+      {index: {fields: ['series', 'debut', 'rank']}},
+      {index: {fields: ['rank', 'debut']}},
+    ];
+
+    for (const index of indexes) {
+      await context.db.createIndex(index);
+    }
   });
-  after(function () {
+  after(async function () {
     this.timeout(60000);
-    return context.db.destroy();
+    await context.db.destroy();
   });
 
   // to actually generate the list:
@@ -109,12 +109,11 @@ describe('pouchdb-find: test.kitchen-sink.js', function () {
 
   });
 
-  it.skip('special kitchen sink test #s001', () => {
-    return context.db.find({
+  it.skip('special kitchen sink test #s001', async () => {
+    const res = await context.db.find({
       selector: {name: {"$gte":"Captain Falco","$lte":"captain falcon"}},
       fields: ['_id']
-    }).then((res) => {
-      res.should.deep.equal({docs: [{_id: 'falcon'}]});
     });
+    res.should.deep.equal({docs: [{_id: 'falcon'}]});
   });
 });
