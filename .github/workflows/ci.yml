@@ -277,7 +277,7 @@ jobs:
       matrix:
         node: [20, 22]
         cmd:
-          - COUCH_HOST=http://admin:password@127.0.0.1:5984 CLIENT=firefox npm run test-webpack
+          - CLIENT=firefox npm run test-webpack
           - AUTO_COMPACTION=true npm test
           - npm run test-unit
           - npm run test-component
