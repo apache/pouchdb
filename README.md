@@ -20,7 +20,7 @@ The PouchDB community is active [in `#pouchdb` on the CouchDB Slack](https://joi
 If you think you've found a bug in PouchDB, please write a reproducible test case and file [a Github issue](https://github.com/pouchdb/pouchdb/issues).
 
 Prerelease builds
-----
+-----------------
 
 If you like to live on the bleeding edge, you can build PouchDB from source using these steps:
 
