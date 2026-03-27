@@ -11,26 +11,18 @@ name: PouchDB CI
 on:
   push: 
     paths-ignore:
-      - '.github/ISSUE_TEMPLATE/'
-      - '.github/PULL_REQUEST_TEMPLATE.md'
-      - 'CONTRIBUTING.md'
-      - 'DISCLAIMER'
-      - 'LICENSE'
-      - 'NOTICE'
-      - 'README.md'
-      - 'TESTING.md'
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+      - 'package.json'
+      - 'bin/**'
       - 'docs/**'
   pull_request:
     branches: [master]
     paths-ignore:
-      - '.github/ISSUE_TEMPLATE/'
-      - '.github/PULL_REQUEST_TEMPLATE.md'
-      - 'CONTRIBUTING.md'
-      - 'DISCLAIMER'
-      - 'LICENSE'      
-      - 'NOTICE'
-      - 'README.md'
-      - 'TESTING.md'
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+      - 'package.json'
+      - 'bin/**'
       - 'docs/**'
 
 env:
