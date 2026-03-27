@@ -30,3 +30,36 @@ jobs:
         with:
           node-version: 24
       - run: BUILD=1 npm run build-site
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+      - name: Checkout pouchdb-www repo
+        uses: actions/checkout@v4
+        with:
+          repository: neighbourhoodie/pouchdb-www
+          ref: asf-site
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          path: checked-out-pouchdb-www
+          fetch-depth: 0
+      - name: Commit and push if changed
+        run: |
+          cd checked-out-pouchdb-www
+          git config user.name "CI"
+          git config user.email "ci@users.noreply.github.com"
+
+          # Juuust in case
+          git checkout asf-site
+
+          git rm -rf . || true
+
+          cp -R ../docs/_site/. .
+
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Committing changes…"
+            git add -A
+            git commit -m "Deploy site from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+            git push git@github.com:neighbourhoodie/pouchdb-www.git asf-site --force
+          else
+            echo "No changes to commit"
+          fi
