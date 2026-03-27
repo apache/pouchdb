@@ -13,6 +13,7 @@
     "test-component": "mocha --exit tests/component # --exit for #8839",
     "test-fuzzy": "TYPE=fuzzy npm run test",
     "test-browser": "node ./bin/test-browser.js",
+    "test-multitab": "node ./bin/test-multitab.js",
     "test-memleak": "mocha -gc tests/memleak",
     "eslint": "eslint --cache bin/ packages/node_modules/**/src tests/",
     "dev": "./bin/run-dev.sh",

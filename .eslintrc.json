@@ -21,7 +21,8 @@
     "ArrayBuffer": "readonly",
     "FileReaderSync": "readonly",
     "emit": "readonly",
-    "PouchDB": "readonly"
+    "PouchDB": "readonly",
+    "__pouch__": "readonly"
   },
 
   "rules": {

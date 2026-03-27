@@ -5,14 +5,16 @@ run them. PouchDB has been primarily developed on Linux and macOS, if you are
 using Windows then these instructions will have problems, we would love your
 help fixing them though.
 
-> [!WARNING] VERY IMPORTANT
-> **Always set the `COUCH_HOST` env var to a proper CouchDB for the integration tests!**
+> [!WARNING]
+> VERY IMPORTANT **Always set the `COUCH_HOST` env var to a proper CouchDB for
+> the integration tests!**
 > 
-> If you don’t, the integration tests currently fall back to `pouchdb-server`, which is 
-> no longer reliable and causes random test failures. (20000ms timeouts).
+> If you don’t, the integration tests currently fall back to `pouchdb-server`,
+> which is no longer reliable and causes random test failures. (20000ms
+> timeouts).
 >
-> Until this is resolved, please set the `COUCH_HOST` env var:
-> `$ CLIENT=firefox COUCH_HOST=http://admin:admin@127.0.0.1:5984 npm test`
+> Until this is resolved, please set the `COUCH_HOST` env var: `$ CLIENT=firefox
+> COUCH_HOST=http://admin:admin@127.0.0.1:5984 npm test`
 >
 > This is necessary for both `npm test` and `npm run dev`.
 
@@ -22,6 +24,7 @@ help fixing them though.
   - [Test options](#test-options)
 - [Other sets of tests](#other-sets-of-tests)
   - [`find` and `mapreduce`](#find-and-mapreduce)
+  - [multi-tab tests](#multi-tab-tests)
   - ["Fuzzy" tests](#fuzzy-tests)
   - [Performance tests](#performance-tests)
   - [Running tests in the browser](#running-tests-in-the-browser)
@@ -35,8 +38,8 @@ The PouchDB test suite expects an instance of CouchDB (version 1.6.1 and above)
 running in [Admin Party](http://guide.couchdb.org/draft/security.html#party) on
 `http://127.0.0.1:5984` with [CORS
 enabled](https://github.com/pouchdb/add-cors-to-couchdb). See the [official
-CouchDB documentation](https://docs.couchdb.org/en/stable/install/index.html) for
-a guide on how to install CouchDB.
+CouchDB documentation](https://docs.couchdb.org/en/stable/install/index.html)
+for a guide on how to install CouchDB.
 
 If you have CouchDB available at a different URL, you can assign this URL to the
 `COUCH_HOST` environment variable to make the PouchDB tests use it.
@@ -62,7 +65,8 @@ The main test suite can be run using the following command:
     $ npm test
 
 > [!NOTE]
-> If the tests don‘t pass on `main`, try building once before running the tests: `$npm run build`.
+> If the tests don‘t pass on `main`, try building once before running the tests:
+> `$npm run build`.
 
 PouchDB runs in the browser and on Node.js, and has multiple different storage
 backends known as _adapters_. In the browser these are `idb`, `indexeddb` and
@@ -87,10 +91,11 @@ variables.
 
 #### `ADAPTERS` (default: depends on `CLIENT`) <!-- omit from toc -->
 
-Comma-separated list of preferred adapter backends that PouchDB will use for local
-databases. These are selected automatically based on the execution environment,
-but this variable overrides the default choice and causes additional adapters to
-be loaded if they're not part of the default distribution.
+Comma-separated list of preferred adapter backends that PouchDB will use for
+local databases. These are selected automatically based on the execution
+environment, but this variable overrides the default choice and causes
+additional adapters to be loaded if they're not part of the default
+distribution.
 
 On Node.js the available local adapters are `leveldb` and `memory`. In the
 browser they're `idb`, `indexeddb` and `memory`.
@@ -111,8 +116,8 @@ this to `0` to prevent this behaviour.
 
 #### `CLIENT` (default: `node`) <!-- omit from toc -->
 
-Sets the target platform the tests will execute on. Set this to
-`firefox`, `chromium` or `webkit` to execute the tests in the browser.
+Sets the target platform the tests will execute on. Set this to `firefox`,
+`chromium` or `webkit` to execute the tests in the browser.
 
 #### `COUCH_HOST` <!-- omit from toc -->
 
@@ -183,12 +188,12 @@ Set this to `1` to skip the migration tests.
 
 #### `VIEW_ADAPTERS` (default: `memory`) <!-- omit from toc -->
 
-Comma-separated list of preferred view adapter backends that PouchDB will use. 
-This variable overrides the default choice and causes additional adapters to
-be loaded if they're not part of the default distribution.
+Comma-separated list of preferred view adapter backends that PouchDB will use.
+This variable overrides the default choice and causes additional adapters to be
+loaded if they're not part of the default distribution.
 
-On Node.js the available adapters are `leveldb` and `memory`. In the
-browser they're `idb`, `indexeddb` and `memory`.
+On Node.js the available adapters are `leveldb` and `memory`. In the browser
+they're `idb`, `indexeddb` and `memory`.
 
 
 ## Other sets of tests
@@ -235,6 +240,24 @@ like so:
 Note that the default choice for the `SERVER` value (`pouchdb-express-router`)
 does not support `find` or `mapreduce` and does not need to pass these tests.
 
+### Multi-tab tests
+
+We have a few tests to check that interactions with backing stores like
+IndexedDB are synchronized across tabs where multiple PouchDB instances are
+connected to the same database. These have to be scripted via Playwright rather
+than being run inside the normal unit test suite. To run them:
+
+    $ npm run test-multitab
+
+Two environment variables can be used to control how these are run:
+
+- `CLIENT`: may be `firefox`, `chromium` or `webkit` to select the browser where
+  the tests will be run.
+- `ADAPTERS`: may be `idb` or `indexeddb` to set which backend adapter PouchDB
+  will use.
+
+All combinations of these should be tested on CI.
+
 ### "Fuzzy" tests
 
 This test suite checks some more unusual replication scenarios, it can be run
@@ -264,12 +287,12 @@ To run tests in the browser, you first have to install playwright:
 npx playwright install
 ```
 
-This will download the `firefox`, `chromium` and `webkit` `CLIENT`s onto
-your system.
+This will download the `firefox`, `chromium` and `webkit` `CLIENT`s onto your
+system.
 
 PouchDB is tested with `CLIENT=firefox`, `CLIENT=chromium` and `CLIENT=webkit`
-to run a set of tests in the browser automatically. This runs these browsers
-in a “headless” mode and prints the test results back into the terminal.
+to run a set of tests in the browser automatically. This runs these browsers in
+a “headless” mode and prints the test results back into the terminal.
 
     $ CLIENT=firefox npm test
 
@@ -278,7 +301,8 @@ server and opening a browser window yourself. To run the server:
 
     $ npm run dev
 
-You will almost always want to include the `find` plugin though, without it, all the `find` tests will fail:
+You will almost always want to include the `find` plugin though, without it, all
+the `find` tests will fail:
 
     $ PLUGINS=pouchdb-find npm run dev
 
@@ -289,9 +313,12 @@ Then you can open the page for any of the test suites via the following URLs:
 - `http://127.0.0.1:8000/tests/mapreduce/`
 - `http://127.0.0.1:8000/tests/performance/`
 
-You can re-run tests by reloading, and only run specific suites by clicking on the suite names, this sets the `grep` query string mentioned below. This works well in conjunction with setting `.only` on individual tests in that suite.
+You can re-run tests by reloading, and only run specific suites by clicking on
+the suite names, this sets the `grep` query string mentioned below. This works
+well in conjunction with setting `.only` on individual tests in that suite.
 
-The test options are controlled by editing the query string; some of the common command-line options and their query string equivalents are:
+The test options are controlled by editing the query string; some of the common
+command-line options and their query string equivalents are:
 
 | Environment variable | Query-string param |
 | -------------------- | ------------------ |
@@ -343,20 +370,30 @@ Checks that the build is correct.
 
 ### Where do I get a CouchDB from?
 
-See the [official CouchDB documentation](https://docs.couchdb.org/en/stable/install/index.html) for a guide on how to install CouchDB.
+See the [official CouchDB
+documentation](https://docs.couchdb.org/en/stable/install/index.html) for a
+guide on how to install CouchDB.
 
-Your CouchDB will most likely then run at `http://127.0.0.1:5984`. All you need to do now is  enable CORS so CouchDB will accept requests from PouchDB in the tests. Add `http://127.0.0.1:8000`, the test server’s domain. There are several ways to do this, easiest first:
+Your CouchDB will most likely then run at `http://127.0.0.1:5984`. All you need
+to do now is  enable CORS so CouchDB will accept requests from PouchDB in the
+tests. Add `http://127.0.0.1:8000`, the test server’s domain. There are several
+ways to do this, easiest first:
 
-1. In the [CouchDB admin UI](http://127.0.0.1:5984/_utils), click on `Configuration` -> `CORS`. 
-2. Via cURL (`_local` is the node name in single-node databases, which your local dev CouchDB probably is):
-   ```sh
-   curl 'http://admin:password@127.0.0.1:5984/_node/_local/_config/cors/origins' -X PUT -d '"http://127.0.0.1:8000"'
-   ```
-3. There’s also an older [npm package](https://github.com/pouchdb/add-cors-to-couchdb) to help you do this porgrammatically.
+1. In the [CouchDB admin UI](http://127.0.0.1:5984/_utils), click on
+   `Configuration` -> `CORS`. 
+2. Via cURL (`_local` is the node name in single-node databases, which your
+   local dev CouchDB probably is): ```sh curl
+   'http://admin:password@127.0.0.1:5984/_node/_local/_config/cors/origins' -X
+   PUT -d '"http://127.0.0.1:8000"' ```
+3. There’s also an older [npm
+   package](https://github.com/pouchdb/add-cors-to-couchdb) to help you do this
+   porgrammatically.
 
 ### Utils won’t update
 
-If you’re modifying the test utils (`/tests/integration/utils.js` etc.) or adding logs to them, you need to rebuild these before running your tests again, eg.:
+If you’re modifying the test utils (`/tests/integration/utils.js` etc.) or
+adding logs to them, you need to rebuild these before running your tests again,
+eg.:
 
 ```sh
 $ npm run build && CLIENT=firefox npm test
@@ -364,7 +401,8 @@ $ npm run build && CLIENT=firefox npm test
 
 ### Flaky tests and random timeouts
 
-If you regularly run into random timeouts, please re-read the top of this file and set the `COUCH_HOST` env var when running tests or the dev server, eg.:
+If you regularly run into random timeouts, please re-read the top of this file
+and set the `COUCH_HOST` env var when running tests or the dev server, eg.:
 
 ```sh
 $ CLIENT=firefox COUCH_HOST=http://admin:admin@127.0.0.1:5984 npm test
