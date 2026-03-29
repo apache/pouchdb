@@ -71,11 +71,12 @@ describe('pouchdb-find: test.kitchen-sink.js', function () {
 
   testConfigs.forEach((testConfig, i) => {
 
-    const kitchenSinkTest = () => {
+    const kitchenSinkTest = async () => {
       const db = context.db;
       const query = testConfig.input;
       query.fields = ['_id'];
-      return db.find(query).then((res) => {
+      try {
+        const res = await db.find(query);
         if (testConfig.output.res) {
           const ids = res.docs.map((x) => x._id);
           if (!testConfig.input.sort) {
@@ -90,13 +91,13 @@ describe('pouchdb-find: test.kitchen-sink.js', function () {
             'No matching index found, create an index to optimize query time.',
             'no matching index found, create an index to optimize query time']);
         }
-      }, (err) => {
+      } catch (err) {
         if (testConfig.output.res) {
           should.not.exist(err, 'should not have thrown an error');
         } else {
           should.exist(err);
         }
-      });
+      }
     };
 
     const testName = `kitchen sink test #${humanizeNum(i)}`;
