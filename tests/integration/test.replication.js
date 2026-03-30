@@ -1269,7 +1269,7 @@ adapters.forEach(function (adapters) {
       });
     });
 
-    // CouchDB will not generate a conflict here, it uses a deteministic
+    // CouchDB will not generate a conflict here, it uses a deterministic
     // method to generate the revision number, however we cannot copy its
     // method as it depends on erlangs internal data representation
     it('Test basic conflict', function (done) {
@@ -1734,7 +1734,7 @@ adapters.forEach(function (adapters) {
       });
     });
 
-    it('Does not update checkpoint unncessarily (#5379)', function () {
+    it('Does not update checkpoint unnecessarily (#5379)', function () {
       var db = new PouchDB(dbs.name);
       var remote = new PouchDB(dbs.remote);
       var bulkDocs = remote.bulkDocs;
@@ -3996,7 +3996,7 @@ adapters.forEach(function (adapters) {
         // We are testing a negative, that there are no extra events
         // triggered from our replication, cancelling the replication will
         // cancel the event anyway so we wait a short period and give it time
-        // to fire (since there is nothing to wait deteministically for)
+        // to fire (since there is nothing to wait deterministically for)
         // Without the setTimeout this will pass, just less likely to catch
         // the failing case
         setTimeout(function () {

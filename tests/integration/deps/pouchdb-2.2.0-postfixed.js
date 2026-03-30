@@ -913,7 +913,7 @@ function HttpPouch(opts, callback) {
             callback(null, api);
           }
         });
-        // If there were no errros or if the only error is "Precondition Failed"
+        // If there were no errors or if the only error is "Precondition Failed"
         // (note: "Precondition Failed" occurs when we try to create a database
         // that already exists)
       } else if (!err || err.status === 412) {
@@ -1365,7 +1365,7 @@ function HttpPouch(opts, callback) {
     }
 
     // If opts.endkey exists, add the endkey value to the list of parameters.
-    // If endkey is given then the returned list of docuemnts will
+    // If endkey is given then the returned list of documents will
     // end with the document whose id is endkey.
     if (opts.endkey) {
       params.push('endkey=' + encodeURIComponent(JSON.stringify(opts.endkey)));
@@ -1490,7 +1490,7 @@ function HttpPouch(opts, callback) {
     var xhr;
     var lastFetchedSeq;
 
-    // Get all the changes starting wtih the one immediately after the
+    // Get all the changes starting with the one immediately after the
     // sequence number given by since.
     var fetch = function (since, callback) {
       if (opts.aborted) {
@@ -2189,7 +2189,7 @@ function IdbPouch(opts, callback) {
     function insertDoc(docInfo) {
       var winningRev = merge.winningRev(docInfo.metadata);
       var deleted = utils.isDeleted(docInfo.metadata, winningRev);
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       if ('was_delete' in opts && deleted) {
         results.push(errors.MISSING_DOC);
         return processDocs();
@@ -3275,7 +3275,7 @@ function WebSqlPouch(opts, callback) {
     }
 
     function insertDoc(docInfo) {
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       var deleted = utils.isDeleted(docInfo.metadata);
       if ('was_delete' in opts && deleted) {
         results.push(errors.MISSING_DOC);
@@ -3890,7 +3890,7 @@ Changes.prototype.doChanges = function (opts) {
     }, function (err) {
       if (err.id === 'idbNull') {
         //db closed before this returned
-        //thats ok
+        //that's ok
         return;
       }
       throw err;
@@ -4871,7 +4871,7 @@ function doMerge(tree, path, dontExpand) {
     }
   });
 
-  // We didnt find
+  // We didn't find
   if (!merged) {
     restree.push(path);
   }
@@ -5142,7 +5142,7 @@ Checkpointer.prototype.getCheckpoint = function () {
     return 0;
   });
 };
-function replicate(repId, src, target, opts, returnValue) {
+function replicate(rapid, src, target, opts, returnValue) {
   var batches = [];               // list of batches to be processed
   var currentBatch;               // the batch currently being processed
   var pendingBatch = {
@@ -5160,7 +5160,7 @@ function replicate(repId, src, target, opts, returnValue) {
   var changesPending = false;     // true while src.changes is running
   var changesCount = 0; // number of changes received since calling src.changes
   var doc_ids = opts.doc_ids;
-  var checkpointer = new Checkpointer(src, target, repId);
+  var checkpointer = new Checkpointer(src, target, rapid);
   var result = {
     ok: true,
     start_time: new Date(),
@@ -5574,8 +5574,8 @@ function replicateWrapper(src, target, opts, callback) {
         }
         src.replicateOnServer(target, opts, replicateRet);
       } else {
-        return genReplicationId(src, target, opts).then(function (repId) {
-          replicate(repId, src, target, opts, replicateRet);
+        return genReplicationId(src, target, opts).then(function (rapid) {
+          replicate(rapid, src, target, opts, replicateRet);
         });
       }
     });

@@ -937,7 +937,7 @@ function HttpPouch(opts, callback) {
   // Generate the database URL based on the host
   var db_url = genDBUrl(host, '');
 
-  // The functions that will be publically available for HttpPouch
+  // The functions that will be publicly available for HttpPouch
   var api = this;
   var ajaxOpts = opts.ajax || {};
   opts = utils.extend(true, {}, opts);
@@ -984,7 +984,7 @@ function HttpPouch(opts, callback) {
             callback(null, api);
           }
         });
-        // If there were no errros or if the only error is "Precondition Failed"
+        // If there were no errors or if the only error is "Precondition Failed"
         // (note: "Precondition Failed" occurs when we try to create a database
         // that already exists)
       } else if (!err || err.status === 412) {
@@ -1487,7 +1487,7 @@ function HttpPouch(opts, callback) {
     }
 
     // If opts.endkey exists, add the endkey value to the list of parameters.
-    // If endkey is given then the returned list of docuemnts will
+    // If endkey is given then the returned list of documents will
     // end with the document whose id is endkey.
     if (opts.endkey) {
       params.push('endkey=' + encodeURIComponent(JSON.stringify(opts.endkey)));
@@ -1641,7 +1641,7 @@ function HttpPouch(opts, callback) {
     var xhr;
     var lastFetchedSeq;
 
-    // Get all the changes starting wtih the one immediately after the
+    // Get all the changes starting with the one immediately after the
     // sequence number given by since.
     var fetch = function (since, callback) {
       params.since = since;
@@ -2314,7 +2314,7 @@ function IdbPouch(opts, callback) {
     }
 
     function insertDoc(docInfo) {
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       if ('was_delete' in opts && utils.isDeleted(docInfo.metadata)) {
         results.push(errors.MISSING_DOC);
         return processDocs();
@@ -2731,7 +2731,7 @@ function IdbPouch(opts, callback) {
 
     function onsuccess(event) {
       if (!event.target.result) {
-        // Filter out null results casued by deduping
+        // Filter out null results caused by deduping
         for (var i = 0, l = results.length; i < l; i++) {
           var result = results[i];
           if (result) {
@@ -2743,7 +2743,7 @@ function IdbPouch(opts, callback) {
 
       var cursor = event.target.result;
 
-      // Try to pre-emptively dedup to save us a bunch of idb calls
+      // Try to preemptively dedup to save us a bunch of idb calls
       var changeId = cursor.value._id;
       var changeIdIndex = resultIndices[changeId];
       if (changeIdIndex !== undefined) {
@@ -3396,7 +3396,7 @@ function WebSqlPouch(opts, callback) {
     }
 
     function insertDoc(docInfo) {
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       if ('was_delete' in opts && utils.isDeleted(docInfo.metadata)) {
         results.push(errors.MISSING_DOC);
         return processDocs();
@@ -4708,7 +4708,7 @@ exports.MD5 = function (string) {
     return   wordToHexValue;
   }
 
-  //**	function Utf8Encode(string) removed. Aready defined in pidcrypt_utils.js
+  //**	function Utf8Encode(string) removed. Already defined in pidcrypt_utils.js
 
   var x = [];
   var k, AA, BB, CC, DD, a, b, c, d;
@@ -5055,7 +5055,7 @@ function doMerge(tree, path, dontExpand) {
     }
   });
 
-  // We didnt find
+  // We didn't find
   if (!merged) {
     restree.push(path);
   }
@@ -5278,7 +5278,7 @@ function writeCheckpoint(src, target, id, checkpoint, callback) {
 }
 
 
-function replicate(repId, src, target, opts, promise) {
+function replicate(rapid, src, target, opts, promise) {
   var batches = [];     // queue of batches of changes to be processed
   var pendingBatch = new Batch();
   var changesCompleted = false;
@@ -5380,7 +5380,7 @@ function replicate(repId, src, target, opts, promise) {
 
 
   function finishBatch() {
-    writeCheckpoint(src, target, repId, batches[0].seq, function (err, res) {
+    writeCheckpoint(src, target, rapid, batches[0].seq, function (err, res) {
       if (err) {
         return abortReplication('writeCheckpoint completed with error', err);
       }
@@ -5507,7 +5507,7 @@ function replicate(repId, src, target, opts, promise) {
 
 
   function getChanges() {
-    fetchCheckpoint(src, target, repId, function (err, checkpoint) {
+    fetchCheckpoint(src, target, rapid, function (err, checkpoint) {
       if (err) {
         return abortReplication('fetchCheckpoint completed with error', err);
       }
@@ -5515,7 +5515,7 @@ function replicate(repId, src, target, opts, promise) {
       last_seq = checkpoint;
 
       // Was the replication cancelled by the caller before it had a chance
-      // to start. Shouldnt we be calling complete?
+      // to start. Shouldn't we be calling complete?
       if (promise.cancelled) {
         return replicationCancelled();
       }
@@ -5555,7 +5555,7 @@ function replicate(repId, src, target, opts, promise) {
   if (typeof opts.since === 'undefined') {
     getChanges();
   } else {
-    writeCheckpoint(src, target, repId, opts.since, function (err, res) {
+    writeCheckpoint(src, target, rapid, opts.since, function (err, res) {
       if (err) {
         return abortReplication('writeCheckpoint completed with error', err);
       }
@@ -5607,8 +5607,8 @@ function replicateWrapper(src, target, opts, callback) {
         }
         src.replicateOnServer(target, opts, replicateRet);
       } else {
-        genReplicationId(src, target, opts, function (repId) {
-          replicate(repId, src, target, opts, replicateRet);
+        genReplicationId(src, target, opts, function (rapid) {
+          replicate(rapid, src, target, opts, replicateRet);
         });
       }
     });

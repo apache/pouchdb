@@ -903,7 +903,7 @@ adapters.forEach(function (adapter) {
       var docPosted = false;
 
       // We want to wait for a period of time after the final
-      // document was posted to ensure we didnt see another
+      // document was posted to ensure we didn't see another
       // change
       function waitForDocPosted() {
         if (!docPosted) {
@@ -920,7 +920,7 @@ adapters.forEach(function (adapter) {
         live: true
       }).on('complete', function (result) {
         result.status.should.equal('cancelled');
-        // This setTimeout ensures that once we cancel a change we dont recieve
+        // This setTimeout ensures that once we cancel a change we dont receive
         // subsequent callbacks, so it is needed
         interval = setInterval(waitForDocPosted, 100);
       }).on('change', function () {

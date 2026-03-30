@@ -619,7 +619,7 @@ describe('test.array.js', function () {
       });
     });
 
-    //CouchDB is returing a different result
+    //CouchDB is returning a different result
     it.skip("returns false if field isn't in doc", function () {
       var docs = [
             {

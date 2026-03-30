@@ -17,7 +17,7 @@ adapterPairs.forEach(function (adapters) {
       dbs.name = testUtils.adapterUrl(adapters[0], 'testdb');
       dbs.secondDB = testUtils.adapterUrl(adapters[0], 'test_repl_remote');
       //
-      // "test_slash_ids" is just a convenient name, b/c we re-use db
+      // "test_slash_ids" is just a convenient name, b/c we reuse db
       // names to avoid the Safari popup bug in long-running tests.
       //
       // Also for this test, it's only important that the fourth DB be
@@ -158,7 +158,7 @@ adapterPairs.forEach(function (adapters) {
         // syncs up the delete
         // go to browser b
         .then(syncWithRemote.bind(this, dbB)) // sync with remote CouchDB,
-        // syncs up the conflictin non-att-change
+        // syncs up the conflicting non-att-change
         // go to browser C
         .then(syncWithRemote.bind(this, dbC)) // sync from remote CouchDB
         // see replication error

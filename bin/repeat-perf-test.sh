@@ -61,7 +61,7 @@ for treeish_adapter in "$@"; do
   log "  $((i=i+1)). $adapter: $description ($treeish)"
 done
 log
-log "!!! This may cause strange issues if you have uncomitted changes. !!!"
+log "!!! This may cause strange issues if you have uncommitted changes. !!!"
 log
 log "Press <enter> to continue."
 echo
@@ -110,7 +110,7 @@ iterate_tests() {
   done
 }
 
-log "Installing playwright brower..."
+log "Installing playwright browser..."
 npx playwright install "${CLIENT:-firefox}"
 
 log "Starting dev server..."

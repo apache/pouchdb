@@ -184,7 +184,7 @@ describe("test.checkpointer.js", () => {
     result.should.equal(4);
   });
 
-  it("get: return lowest_seq if only written to source but no doc extists", async () => {
+  it("get: return lowest_seq if only written to source but no doc exists", async () => {
     const checkpointer = await createCheckpointer({
       writeSourceCheckpoint: true,
       writeTargetCheckpoint: false,

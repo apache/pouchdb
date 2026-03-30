@@ -81,7 +81,7 @@ adapters.forEach(function (adapter) {
       });
     });
 
-    it('Simple compation test', function (done) {
+    it('Simple compaction test', function (done) {
       var db = new PouchDB(dbs.name);
       var doc = {
         _id: 'foo',
