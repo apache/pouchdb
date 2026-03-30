@@ -346,7 +346,7 @@ describe('test.persisted.js', function () {
       }).then(function (res) {
         res.rows.length.should.equal(1);
         ['baz', 'bar'].indexOf(res.rows[0].key).should.be
-          .above(-1, 'key might be stale, thats ok');
+          .above(-1, 'key might be stale, that's ok');
         return setTimeoutPromise(1000);
       }).then(function () {
         return db.query(queryFun, {stale : 'ok'});

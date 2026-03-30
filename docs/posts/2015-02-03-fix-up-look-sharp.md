@@ -29,7 +29,7 @@ The excellent team at [CozyCloud](https://www.cozycloud.cc/) have been working o
 
 ### Sync Events - [#3155](https://github.com/pouchdb/pouchdb/issues/3155)
 
-We have introduced [new events](/api.html#replication) to give you more information what is happening during syncing. There are now `active` and `paused` events triggered during replication and the `uptodate` event is now deprecated.
+We have introduced [new events](/api.html#replication) to give you more information what is happening during syncing. There are now `active` and `paused` events triggered during replication and the `up-to-date` event is now deprecated.
 
 ### Retry Replication - [#966](https://github.com/pouchdb/pouchdb/issues/966)
 

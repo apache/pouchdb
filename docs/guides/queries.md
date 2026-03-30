@@ -5,7 +5,7 @@ title: Map/reduce queries
 sidebar: guides_nav.html
 ---
 
-Map/reduce queries, also known as the `query()` API, are one of the most powerful features in PouchDB. However, they can be quite tricky to use, and so this guide is designed to dispell some of the mysteries around them.
+Map/reduce queries, also known as the `query()` API, are one of the most powerful features in PouchDB. However, they can be quite tricky to use, and so this guide is designed to dispel some of the mysteries around them.
 
 The first thing to understand is that you don't need map/reduce queries if you merely want to look up documents by `_id` or sort them by `_id`. The `allDocs()` API already does this, using an efficient built-in index (see ["bulk operations"](bulk-operations.html) for details).
 

@@ -70,7 +70,7 @@ PouchDB Hoodie-like API for data persistence & offline sync.
 
 #### [PouchDB List](http://python-pouchdb.marten-de-vries.nl/plugins.html)
 
-Allows you to re-use your CouchDB list functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-rewrite-plug-in))
+Allows you to reuse your CouchDB list functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-rewrite-plug-in))
 
 #### [Pouch Mirror](https://github.com/colinskow/pouch-mirror)
 
@@ -106,11 +106,11 @@ Replicate between CouchDB/PouchDB using streams.
 
 #### [PouchDB Rewrite](http://python-pouchdb.marten-de-vries.nl/plugins.html)
 
-A PouchDB plugin that allows you to re-use your CouchDB rewrites on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-list-plug-in))
+A PouchDB plugin that allows you to reuse your CouchDB rewrites on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-list-plug-in))
 
 #### [PouchDB Show](http://python-pouchdb.marten-de-vries.nl/plugins.html)
 
-A PouchDB plugin that allows you to re-use your CouchDB show functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-show-plug-in))
+A PouchDB plugin that allows you to reuse your CouchDB show functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-show-plug-in))
 
 #### [SocketPouch](https://github.com/nolanlawson/socket-pouch)
 
@@ -143,7 +143,7 @@ Transforms documents before and after storage, e.g. for encryption, compression,
 
 #### [PouchDB Update](http://python-pouchdb.marten-de-vries.nl/plugins.html)
 
-A PouchDB plugin that allows you to re-use your CouchDB update functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-update-plug-in))
+A PouchDB plugin that allows you to reuse your CouchDB update functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-update-plug-in))
 
 #### [PouchDB Upsert](https://github.com/nolanlawson/pouchdb-upsert)
 
@@ -151,7 +151,7 @@ Convenience functions for working with documents: `upsert()` and `putIfNotExists
 
 #### [PouchDB Validation](http://python-pouchdb.marten-de-vries.nl/plugins.html)
 
-A PouchDB plugin that allows you to re-use your CouchDB `validate_doc_update` functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-validation-plug-in))
+A PouchDB plugin that allows you to reuse your CouchDB `validate_doc_update` functions on the client side. ([Documentation](http://pythonhosted.org/Python-PouchDB/js-plugins.html#pouchdb-validation-plug-in))
 
 #### [WorkerPouch](http://github.com/nolanlawson/worker-pouch)
 
