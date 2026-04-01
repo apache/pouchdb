@@ -1,64 +1,70 @@
 'use strict';
 
-function onError(err) {
-  setTimeout(function () {
+const onError = (err) => {
+  setTimeout(() => {
     throw err; // can catch this in the worker's 'error' listener
   }, 0);
-}
+};
 
-function bigTest(name) {
-  var db = new PouchDB(name);
-  db.post({
-    _id: 'blablah',
-    key: 'lala'
-  }).then(function () {
-    return db.get('blablah');
-  }).then(function (doc) {
-    return db.destroy().then(function () {
-      self.postMessage(doc.key);
+const bigTest = async (name) => {
+  const db = new PouchDB(name);
+  try {
+    await db.post({
+      _id: 'blablah',
+      key: 'lala'
     });
-  }).catch(onError);
-}
+    const doc = await db.get('blablah');
+    await db.destroy();
+    self.postMessage(doc.key);
+  } catch (err) {
+    onError(err);
+  }
+};
 
-function postAttachmentThenAllDocs(name) {
-  var db = new PouchDB(name);
-  db.post({
-    _id: 'blah',
-    title: 'lalaa',
-    _attachments: {
-      'test': {
-        data: new Blob(),
-        content_type: ''
+const postAttachmentThenAllDocs = async (name) => {
+  const db = new PouchDB(name);
+  try {
+    await db.post({
+      _id: 'blah',
+      title: 'lalaa',
+      _attachments: {
+        'test': {
+          data: new Blob(),
+          content_type: ''
+        }
       }
-    }
-  }).then(function () {
-    return db.get('blah');
-  }).then(function (doc) {
-    return db.destroy().then(function () {
-      self.postMessage(doc);
     });
-  }).catch(onError);
-}
+    const doc = await db.get('blah');
+    await db.destroy();
+    self.postMessage(doc);
+  } catch (err) {
+    onError(err);
+  }
+};
 
-function putAttachment(name, docId, attId, att, type) {
-  var db = new PouchDB(name);
-  db.putAttachment(docId, attId, att, type).then(function () {
-    return db.getAttachment(docId, attId);
-  }).then(function (fetchedAtt) {
-    return db.destroy().then(function () {
-      self.postMessage(fetchedAtt);
-    });
-  }).catch(onError);
-}
+const putAttachment = async (name, docId, attId, att, type) => {
+  const db = new PouchDB(name);
+  try {
+    await db.putAttachment(docId, attId, att, type);
+    const fetchedAtt = await db.getAttachment(docId, attId);
+    await db.destroy();
+    self.postMessage(fetchedAtt);
+  } catch (err) {
+    onError(err);
+  }
+};
 
-function allDocs(name) {
-  var db = new PouchDB(name);
-  db.allDocs().then(function (res) {
+const allDocs = async (name) => {
+  const db = new PouchDB(name);
+  try {
+    const res = await db.allDocs();
     self.postMessage(res);
-  }).catch(onError);
-}
+  } catch (err) {
+    onError(err);
+  }
+};
 
-self.addEventListener('message', function (e) {
+self.addEventListener('message', (e) => {
   if (Array.isArray(e.data) && e.data[0] === 'source') {
     importScripts(e.data[1]);
   } else if (e.data === 'ping') {
@@ -74,7 +80,7 @@ self.addEventListener('message', function (e) {
   } else if (Array.isArray(e.data) && e.data[0] === 'allDocs') {
     allDocs(e.data[1]);
   } else {
-    onError(new Error('unknown message: ' + JSON.stringify(e.data)));
+    onError(new Error(`unknown message: ${JSON.stringify(e.data)}`));
   }
 
 });
