@@ -120,21 +120,23 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     if (dbType === 'local' && viewType === 'temp') {
-      it("with a closure", function () {
+      it("with a closure",  async function () {
         const db = new PouchDB(dbName);
-        return db.bulkDocs({docs: [
+        await db.bulkDocs({docs: [
           {foo: 'bar'},
           { _id: 'volatile', foo: 'baz' }
-        ]}).then(function () {
-          const queryFun = (function (test) {
-            return function (doc, emit) {
-              if (doc._id === test) {
-                emit(doc.foo);
-              }
-            };
-          }('volatile'));
-          return db.query(queryFun, {reduce: false});
-        }).should.become({
+        ]});
+
+        const queryFun = (function (test) {
+          return function (doc, emit) {
+            if (doc._id === test) {
+              emit(doc.foo);
+            }
+          };
+        }('volatile'));
+
+        const res =  await db.query(queryFun, {reduce: false});
+        res.should.deep.equal({
           total_rows: 1,
           offset: 0,
           rows: [
@@ -147,47 +149,45 @@ function tests(suiteName, dbName, dbType, viewType) {
         });
       });
     }
-    if (viewType === 'temp' && dbType !== 'http') {
 
-      it('Test simultaneous temp views', function () {
+    if (viewType === 'temp' && dbType !== 'http') {
+      it('Test simultaneous temp views', async function () {
         const db = new PouchDB(dbName);
-        return db.put({_id: '0', foo: 1, bar: 2, baz: 3}).then(function () {
-          return Promise.all(['foo', 'bar', 'baz'].map(function (key, i) {
-            const fun = 'function(doc){emit(doc.' + key + ');}';
-            return db.query({map: fun}).then(function (res) {
-              res.rows.should.deep.equal([{
-                id: '0',
-                key: i + 1,
-                value: null
-              }]);
-            });
-          }));
-        });
+        await db.put({_id: '0', foo: 1, bar: 2, baz: 3});
+
+        await Promise.all(['foo', 'bar', 'baz'].map(async (key, i) => {
+          const fun = 'function(doc){emit(doc.' + key + ');}';
+          const res = await db.query({map: fun});
+
+          res.rows.should.deep.equal([{
+            id: '0',
+            key: i + 1,
+            value: null
+          }]);
+        }));
       });
 
-      it("Test passing just a function", function () {
+      it("Test passing just a function", async function () {
         const db = new PouchDB(dbName);
-        return db.bulkDocs({docs: [
+        await db.bulkDocs({docs: [
           {foo: 'bar'},
           { _id: 'volatile', foo: 'baz' }
-        ]}).then(function () {
-          return db.get('volatile');
-        }).then(function (doc) {
-          return db.remove(doc);
-        }).then(function () {
-          return db.query(function (doc) {
-            emit(doc.foo, doc);
-          }, {include_docs: true, reduce: false});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Dont include deleted documents');
-          res.rows.forEach(function (x) {
-            should.exist(x.id);
-            should.exist(x.key);
-            should.exist(x.value);
-            should.exist(x.value._rev);
-            should.exist(x.doc);
-            should.exist(x.doc._rev);
-          });
+        ]});
+        const doc = await db.get('volatile');
+        await db.remove(doc);
+
+        const res = await db.query({map:(doc) =>
+          emit(doc.foo, doc)},
+          {include_docs: true, reduce: false});
+
+        res.rows.should.have.length(1, 'Dont include deleted documents');
+        res.rows.forEach((x) => {
+          should.exist(x.id);
+          should.exist(x.key);
+          should.exist(x.value);
+          should.exist(x.value._rev);
+          should.exist(x.doc);
+          should.exist(x.doc._rev);
         });
       });
     }
