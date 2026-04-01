@@ -1,17 +1,17 @@
-(function () {
+(async () => {
   'use strict';
 
-  var params = testUtils.params();
-  var remote = params.remote === '1';
+  const params = testUtils.params();
+  const remote = params.remote === '1';
 
-  function startTests() {
+  const startTests = () => {
     window.removeEventListener("load", startTests);
 
     if (remote) {
-      mocha.reporter(function (runner) {
-        var eventNames = ['start', 'end', 'suite', 'suite end', 'pass', 'pending', 'fail'];
-        eventNames.forEach(function (name) {
-          runner.on(name, function (obj, err) {
+      mocha.reporter((runner) => {
+        const eventNames = ['start', 'end', 'suite', 'suite end', 'pass', 'pending', 'fail'];
+        eventNames.forEach((name) => {
+          runner.on(name, (obj, err) => {
             window.postMessage({
               type: 'mocha',
               details: {
@@ -40,15 +40,14 @@
     }
 
     mocha.run();
-  }
+  };
 
-  testUtils.loadPouchDB().then(function (PouchDB) {
-    window.PouchDB = PouchDB;
-    if (document.readyState === 'complete') {
-      startTests();
-    } else {
-      window.addEventListener("load", startTests);
-    }
-  });
+  const PouchDB = await testUtils.loadPouchDB();
+  window.PouchDB = PouchDB;
+  if (document.readyState === 'complete') {
+    startTests();
+  } else {
+    window.addEventListener("load", startTests);
+  }
 
 })();
