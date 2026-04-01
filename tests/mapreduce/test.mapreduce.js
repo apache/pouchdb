@@ -1151,16 +1151,17 @@ function tests(suiteName, dbName, dbType, viewType) {
       });
     }
 
-    it('Query result should include _conflicts', function () {
+    it('Query result should include _conflicts', async function () {
       const db2name = testUtils.adapterUrl(dbType, 'test2b');
-      const cleanup = function () {
-        return new PouchDB(db2name).destroy();
-      };
+      const cleanup = () => new PouchDB(db2name).destroy();
+
       const doc1 = {_id: '1', foo: 'bar'};
       const doc2 = {_id: '1', foo: 'baz'};
       const db = new PouchDB(dbName);
-      return testUtils.fin(db.info().then(function () {
-        return db.put({
+
+      try {
+        await db.info();
+        await db.put({
           _id: '_design/test',
           views: {
             test: {
@@ -1172,24 +1173,24 @@ function tests(suiteName, dbName, dbType, viewType) {
             }
           }
         });
-      }).then(function () {
+
         const remote = new PouchDB(db2name);
-        return remote.info().then(function () {
-          const replicate = testUtils.promisify(db.replicate.from, db.replicate);
-          return db.post(doc1).then(function () {
-            return remote.post(doc2);
-          }).then(function () {
-            return replicate(remote);
-          }).then(function () {
-            return db.query('test', {include_docs : true, conflicts: true});
-          }).then(function (res) {
-            should.exist(res.rows[0].doc._conflicts);
-            return db.get(res.rows[0].doc._id, {conflicts: true});
-          }).then(function (res) {
-            should.exist(res._conflicts);
-          });
-        });
-      }), cleanup);
+        await remote.info();
+
+        await db.post(doc1);
+        await remote.post(doc2);
+        await db.replicate.from(remote);
+
+        let res =  await db.query('test', {include_docs : true, conflicts: true});
+
+        res.rows[0].doc._conflicts.should.exist;
+
+        res = await db.get(res.rows[0].doc._id, {conflicts: true});
+
+        res._conflicts.should.exist;
+      } finally {
+        await cleanup();
+      }
     });
 
     const icons = [
