@@ -17,10 +17,10 @@ function tests(suiteName, dbName, dbType, viewType) {
     if (dbType === 'http' || viewType === 'persisted') {
       createView = function (db, viewObj) {
         const storableViewObj = {
-          map: viewObj.map.toString()
+          map: `${viewObj.map}`
         };
         if (viewObj.reduce) {
-          storableViewObj.reduce = viewObj.reduce.toString();
+          storableViewObj.reduce = `${viewObj.reduce}`;
         }
         return new Promise(function (resolve, reject) {
           db.put({
@@ -389,7 +389,7 @@ function tests(suiteName, dbName, dbType, viewType) {
         }
       });
 
-      const docs = values.map((x, i) => ({_id: (i).toString(), foo: x}));
+      const docs = values.map((x, i) => ({_id: `${i}`, foo: x}));
 
       await db.bulkDocs({docs});
 
@@ -1217,7 +1217,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 5; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           _attachments: {
             'foo.png': {
               data: icons[i],
@@ -1290,7 +1290,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 5; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           _attachments: {
             'foo.png': {
               data: icons[i],
@@ -1336,7 +1336,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 5; i++) {
         docs.push({
-          _id: i.toString()
+          _id: `${i}`
         });
       }
       return db.bulkDocs(docs).then(function () {
@@ -1854,7 +1854,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const db = new PouchDB(dbName);
       const map = function (doc) { emit(doc.num); };
       function createView(name) {
-        const storableViewObj = { map: map.toString() };
+        const storableViewObj = { map: `${map}` };
         return  db.put({
           _id: '_design/' + name,
           views: {
@@ -3698,7 +3698,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 300; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           name: 'foo',
           count: 1
         });
@@ -3735,7 +3735,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 4; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           name: 'foo',
         });
       }
@@ -3758,7 +3758,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 4; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           name: 'foo',
         });
       }
@@ -3800,7 +3800,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       const docs = [];
       for (let i = 0; i < 4; i++) {
         docs.push({
-          _id: i.toString(),
+          _id: `${i}`,
           name: 'foo',
         });
       }
