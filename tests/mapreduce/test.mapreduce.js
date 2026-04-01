@@ -1211,8 +1211,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
     const iconLengths = [1047, 789, 967, 527, 1108];
 
-    it('#190 Query works with attachments=true', function () {
-
+    it('#190 Query works with attachments=true', async function () {
       const db = new PouchDB(dbName);
       const docs = [];
       for (let i = 0; i < 5; i++) {
@@ -1226,63 +1225,61 @@ function tests(suiteName, dbName, dbType, viewType) {
           }
         });
       }
-      return db.bulkDocs(docs).then(function () {
-        return createView(db, {
-          map: function (doc) {
-            emit(doc._id);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun, {
-          include_docs: true,
-          attachments: true
-        }).then(function (res) {
-          const attachments = res.rows.map(function (row) {
-            const doc = row.doc;
-            delete doc._attachments['foo.png'].revpos;
-            return doc._attachments;
-          });
-          attachments.should.deep.equal(icons.map(function (icon, i) {
-            return {
-              "foo.png": {
-                "content_type": "image/png",
-                "data": icon,
-                "digest": iconDigests[i]
-              }
-            };
-          }), 'works with attachments=true');
-          return db.query(queryFun, {include_docs: true});
-        }).then(function (res) {
-          const attachments = res.rows.map(function (row) {
-            const doc = row.doc;
-            delete doc._attachments['foo.png'].revpos;
-            return doc._attachments['foo.png'];
-          });
-          attachments.should.deep.equal(icons.map(function (icon, i) {
-            return {
-              "content_type": "image/png",
-              stub: true,
-              "digest": iconDigests[i],
-              length: iconLengths[i]
-            };
-          }), 'works with attachments=false');
+      await db.bulkDocs(docs);
 
-          return db.query(queryFun, {attachments: true});
-        }).then(function (res) {
-          res.rows.should.have.length(5);
-          res.rows.forEach(function (row) {
-            should.not.exist(row.doc, 'ignored if include_docs=false');
-          });
-        });
+      const queryFun = await createView(db, {
+        map: doc => emit(doc._id)
       });
+
+      let res = await db.query(queryFun, {
+        include_docs: true,
+        attachments: true
+      });
+
+      let attachments = res.rows.map((row) => {
+        const doc = row.doc;
+        delete doc._attachments['foo.png'].revpos;
+        return doc._attachments;
+      });
+
+      attachments.should.deep.equal(icons.map((icon, i) => {
+        return {
+          "foo.png": {
+            "content_type": "image/png",
+            "data": icon,
+            "digest": iconDigests[i]
+          }
+        };
+      }), 'works with attachments=true');
+
+      res = await db.query(queryFun, {include_docs: true});
+
+      attachments = res.rows.map((row) => {
+        const doc = row.doc;
+        delete doc._attachments['foo.png'].revpos;
+        return doc._attachments['foo.png'];
+      });
+
+      attachments.should.deep.equal(icons.map((icon, i) => {
+        return {
+          "content_type": "image/png",
+          stub: true,
+          "digest": iconDigests[i],
+          length: iconLengths[i]
+        };
+      }), 'works with attachments=false');
+
+      res = await db.query(queryFun, {attachments: true});
+
+      res.rows.should.have.length(5);
+      res.rows.forEach(row => should.not.exist(row.doc, 'ignored if include_docs=false'));
     });
 
-    it('#2858 Query works with attachments=true, binary=true 1', function () {
-
+    it('#2858 Query works with attachments=true, binary=true 1', async function () {
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
       const db = new PouchDB(dbName, {
-        fetch: function (url, opts) {
+        fetch: (url, opts) => {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
@@ -1299,36 +1296,35 @@ function tests(suiteName, dbName, dbType, viewType) {
           }
         });
       }
-      return db.bulkDocs(docs).then(function () {
-        return createView(db, {
-          map: function (doc) {
-            emit(doc._id);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun, {
-          include_docs: true,
-          attachments: true,
-          binary: true
-        }).then(function (res) {
-          res.rows.forEach(function (row) {
-            const doc = row.doc;
-            Object.keys(doc._attachments).forEach(function (attName) {
-              const att = doc._attachments[attName];
-              should.not.exist(att.stub);
-              att.data.should.not.be.a('string');
-            });
-          });
+
+      await db.bulkDocs(docs);
+
+      const queryFun = await createView(db, {
+        map: doc => emit(doc._id)
+      });
+
+      const res = await db.query(queryFun, {
+        include_docs: true,
+        attachments: true,
+        binary: true
+      });
+
+      res.rows.forEach((row) => {
+        const doc = row.doc;
+        Object.keys(doc._attachments).forEach((attName) => {
+          const att = doc._attachments[attName];
+
+          should.not.exist(att.stub);
+          att.data.should.not.be.a('string');
         });
       });
     });
 
-    it('#2858 Query works with attachments=true, binary=true 2', function () {
-
+    it('#2858 Query works with attachments=true, binary=true 2', async function () {
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
       const db = new PouchDB(dbName, {
-        fetch: function (url, opts) {
+        fetch: (url, opts) => {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
@@ -1339,78 +1335,76 @@ function tests(suiteName, dbName, dbType, viewType) {
           _id: `${i}`
         });
       }
-      return db.bulkDocs(docs).then(function () {
-        return createView(db, {
-          map: function (doc) {
-            emit(doc._id);
-          }
-        });
-      }).then(function (queryFun) {
-        return db.query(queryFun, {
-          include_docs: true,
-          attachments: true,
-          binary: true
-        }).then(function (res) {
-          res.rows.forEach(function (row) {
-            const doc = row.doc;
-            should.not.exist(doc._attachments);
-          });
-        });
+
+      await db.bulkDocs(docs);
+
+      const queryFun = await createView(db, {
+        map: doc => emit(doc._id)
+      });
+
+      const res =  await db.query(queryFun, {
+        include_docs: true,
+        attachments: true,
+        binary: true
+      });
+
+      res.rows.forEach((row) => {
+        const doc = row.doc;
+
+        should.not.exist(doc._attachments);
       });
     });
 
-    it('#242 conflicts at the root level', function () {
+    it('#242 conflicts at the root level', async function () {
       const db = new PouchDB(dbName);
-
-      return db.bulkDocs([
+      await db.bulkDocs([
         {
           foo: '1',
           _id: 'foo',
           _rev: '1-w',
           _revisions: {start: 1, ids: ['w']}
         }
-      ], {new_edits: false}).then(function () {
-        return createView(db, {
-          map: function (doc) {
-            emit(doc.foo);
-          }
-        }).then(function (queryFun) {
-          return db.query(queryFun).then(function (res) {
-            res.rows[0].key.should.equal('1');
-            return db.bulkDocs([
-              {
-                foo: '2',
-                _id: 'foo',
-                _rev: '1-x',
-                _revisions: {start: 1, ids: ['x']}
-              }
-            ], {new_edits: false}).then(function () {
-              return db.query(queryFun);
-            }).then(function (res) {
-              res.rows[0].key.should.equal('2');
-              return db.bulkDocs([
-                {
-                  foo: '3',
-                  _id: 'foo',
-                  _rev: '1-y',
-                  _deleted: true,
-                  _revisions: {start: 1, ids: ['y']}
-                }
-              ], {new_edits: false});
-            }).then(function () {
-              return db.query(queryFun);
-            }).then(function (res) {
-              res.rows[0].key.should.equal('2');
-            });
-          });
-        });
+      ], {new_edits: false});
+
+      const queryFun = await createView(db, {
+        map: doc => emit(doc.foo)
       });
+
+      let res = await db.query(queryFun);
+
+      res.rows[0].key.should.equal('1');
+
+      await db.bulkDocs([
+        {
+          foo: '2',
+          _id: 'foo',
+          _rev: '1-x',
+          _revisions: {start: 1, ids: ['x']}
+        }
+      ], {new_edits: false});
+
+      res = await db.query(queryFun);
+
+      res.rows[0].key.should.equal('2');
+
+      await db.bulkDocs([
+        {
+          foo: '3',
+          _id: 'foo',
+          _rev: '1-y',
+          _deleted: true,
+          _revisions: {start: 1, ids: ['y']}
+        }
+      ], {new_edits: false});
+
+      res =  await db.query(queryFun);
+
+      res.rows[0].key.should.equal('2');
     });
 
-    it('#242 conflicts at the root+1 level', function () {
+    it('#242 conflicts at the root+1 level', async function () {
       const db = new PouchDB(dbName);
-
-      return db.bulkDocs([
+      await db.bulkDocs([
         {
           foo: '2',
           _id: 'foo',
@@ -1424,291 +1418,277 @@ function tests(suiteName, dbName, dbType, viewType) {
           _deleted: true,
           _revisions: {start: 2, ids: ['y', 'x']}
         }
+      ], {new_edits: false});
 
-      ], {new_edits: false}).then(function () {
-        return createView(db, {
-          map: function (doc) {
-            emit(doc.foo);
-          }
-        }).then(function (queryFun) {
-          return db.query(queryFun).then(function (res) {
-            res.rows.length.should.equal(0);
-            return db.bulkDocs([
-              {
-                foo: '1',
-                _id: 'foo',
-                _rev: '1-w',
-                _revisions: {start: 1, ids: ['w']}
-              }
-            ], {new_edits: false}).then(function () {
-              return db.query(queryFun);
-            }).then(function (res) {
-              res.rows[0].key.should.equal('1');
-              return db.bulkDocs([
-                {
-                  foo: '4',
-                  _id: 'foo',
-                  _rev: '1-z',
-                  _revisions: {start: 1, ids: ['z']}
-                }
-              ], {new_edits: false});
-            }).then(function () {
-              return db.query(queryFun);
-            }).then(function (res) {
-              res.rows[0].key.should.equal('4');
-            });
-          });
-        });
+      const queryFun = await createView(db, {
+        map: doc => emit(doc.foo)
       });
+
+      let res = await db.query(queryFun);
+
+      res.rows.length.should.equal(0);
+
+      await db.bulkDocs([
+        {
+          foo: '1',
+          _id: 'foo',
+          _rev: '1-w',
+          _revisions: {start: 1, ids: ['w']}
+        }
+      ], {new_edits: false});
+
+      res = await db.query(queryFun);
+
+      res.rows[0].key.should.equal('1');
+
+      await db.bulkDocs([
+        {
+          foo: '4',
+          _id: 'foo',
+          _rev: '1-z',
+          _revisions: {start: 1, ids: ['z']}
+        }
+      ], {new_edits: false});
+
+      res = await db.query(queryFun);
+
+      res.rows[0].key.should.equal('4');
     });
 
-    it('Views should include _conflicts', function () {
+    it('Views should include _conflicts', async function () {
       const db2name = testUtils.adapterUrl(dbType, 'test2');
-      const cleanup = function () {
-        return new PouchDB(db2name).destroy();
-      };
+      const cleanup = () =>  new PouchDB(db2name).destroy();
+
       const doc1 = {_id: '1', foo: 'bar'};
       const doc2 = {_id: '1', foo: 'baz'};
       const db = new PouchDB(dbName);
-      return testUtils.fin(db.info().then(function () {
+
+      try {
+        await db.info();
         const remote = new PouchDB(db2name);
-        return remote.info().then(function () {
-          return createView(db, {
-            map : function (doc) {
-              emit(doc._id, !!doc._conflicts);
-            }
-          }).then(function (queryFun) {
-            const replicate = testUtils.promisify(db.replicate.from, db.replicate);
-            return db.post(doc1).then(function () {
-              return remote.post(doc2);
-            }).then(function () {
-              return replicate(remote);
-            }).then(function () {
-              return db.get(doc1._id, {conflicts: true});
-            }).then(function (res) {
-              should.exist(res._conflicts);
-              return db.query(queryFun);
-            }).then(function (res) {
-              res.rows[0].value.should.equal(true);
-            });
-          });
+        await remote.info();
+
+        const queryFun = await createView(db, {
+          map: doc =>  emit(doc._id, !!doc._conflicts)
         });
-      }), cleanup);
+
+        await db.post(doc1);
+        await remote.post(doc2);
+        await db.replicate.from(remote);
+
+        let res = await db.get(doc1._id, {conflicts: true});
+
+        should.exist(res._conflicts);
+
+        res = await db.query(queryFun);
+
+        res.rows[0].value.should.equal(true);
+
+      } finally {
+        await cleanup();
+      }
     });
 
-    it("Test view querying with limit option", function () {
+    it("Test view querying with limit option", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map : function (doc) {
+      const queryFun = await createView(db, {
+        map : (doc) => {
           if (doc.foo === 'bar') {
             emit(doc.foo);
           }
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'bar' },
-            { foo: 'baz' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { limit: 1 });
-        }).then(function (res) {
-          res.total_rows.should.equal(2, 'Correctly returns total rows');
-          res.rows.should.have.length(1, 'Correctly limits returned rows');
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'bar' },
+          { foo: 'baz' }
+        ]
+      });
+
+      const res = await db.query(queryFun, { limit: 1 });
+
+      res.total_rows.should.equal(2, 'Correctly returns total rows');
+      res.rows.should.have.length(1, 'Correctly limits returned rows');
     });
 
-    it("Test view querying with custom reduce function", function () {
+    it("Test view querying with custom reduce function", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        },
-        reduce: function (keys, values) {
+      const queryFun = await createView(db, {
+        map: doc => emit(doc.foo),
+        reduce: (keys, values) => {
           if (keys) {
-            return keys.map(function (keyId) {
-              const key = keyId[0];
-              // const id = keyId[1];
-              return key.join('');
-            });
+            // const id = keyId[1];
+            return keys.map(keyId => keyId[0].join(''));
           } else {
-            const result = [];
-            values.map(function (value) {
-              value.map(function (v) {
-                result.push(v);
-              });
-            });
-            return result;
+            return values.flat();
           }
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: ['foo', 'bar'] },
-            { foo: ['foo', 'bar'] },
-            { foo: ['foo', 'bar', 'baz'] },
-            { foo: ['baz'] },
-            { foo: ['baz', 'bar'] }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { reduce: true });
-        }).then(function (res) {
-          // We're using `chai.assert` here because the usual `chai.should()`
-          // object extension magic won't work when executing functions in a
-          // sandbox using node's `vm` module.
-          // c.f. https://stackoverflow.com/a/16273649/680742
-          assert.lengthOf(res.rows, 1, 'Correctly reduced returned rows');
-          assert.isNull(res.rows[0].key, 'Correct, non-existing key');
-          assert.lengthOf(res.rows[0].value, 5);
-          assert.include(res.rows[0].value, 'foobarbaz');
-          assert.include(res.rows[0].value, 'foobar'); // twice
-          assert.include(res.rows[0].value, 'bazbar');
-          assert.include(res.rows[0].value, 'baz');
-          return db.query(queryFun, { group_level: 1, reduce: true });
-        }).then(function (res) {
-          // We're using `chai.assert` here because the usual `chai.should()`
-          // object extension magic won't work when executing functions in a
-          // sandbox using node's `vm` module.
-          // c.f. https://stackoverflow.com/a/16273649/680742
-          assert.lengthOf(res.rows, 2, 'Correctly group reduced rows');
-          assert.deepEqual(res.rows[0].key, ['baz']);
-          assert.lengthOf(res.rows[0].value, 2);
-          assert.include(res.rows[0].value, 'bazbar');
-          assert.include(res.rows[0].value, 'baz');
-          assert.deepEqual(res.rows[1].key, ['foo']);
-          assert.lengthOf(res.rows[1].value, 3);
-          assert.include(res.rows[1].value, 'foobarbaz');
-          assert.include(res.rows[1].value, 'foobar'); // twice
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: ['foo', 'bar'] },
+          { foo: ['foo', 'bar'] },
+          { foo: ['foo', 'bar', 'baz'] },
+          { foo: ['baz'] },
+          { foo: ['baz', 'bar'] }
+        ]
+      });
+
+      let res = await db.query(queryFun, { reduce: true });
+      // We're using `chai.assert` here because the usual `chai.should()`
+      // object extension magic won't work when executing functions in a
+      // sandbox using node's `vm` module.
+      // c.f. https://stackoverflow.com/a/16273649/680742
+      assert.lengthOf(res.rows, 1, 'Correctly reduced returned rows');
+      assert.isNull(res.rows[0].key, 'Correct, non-existing key');
+      assert.lengthOf(res.rows[0].value, 5);
+      assert.include(res.rows[0].value, 'foobarbaz');
+      assert.include(res.rows[0].value, 'foobar'); // twice
+      assert.include(res.rows[0].value, 'bazbar');
+      assert.include(res.rows[0].value, 'baz');
+
+      res =  await db.query(queryFun, { group_level: 1, reduce: true });
+      // We're using `chai.assert` here because the usual `chai.should()`
+      // object extension magic won't work when executing functions in a
+      // sandbox using node's `vm` module.
+      // c.f. https://stackoverflow.com/a/16273649/680742
+      assert.lengthOf(res.rows, 2, 'Correctly group reduced rows');
+      assert.deepEqual(res.rows[0].key, ['baz']);
+      assert.lengthOf(res.rows[0].value, 2);
+      assert.include(res.rows[0].value, 'bazbar');
+      assert.include(res.rows[0].value, 'baz');
+      assert.deepEqual(res.rows[1].key, ['foo']);
+      assert.lengthOf(res.rows[1].value, 3);
+      assert.include(res.rows[1].value, 'foobarbaz');
+      assert.include(res.rows[1].value, 'foobar'); // twice
     });
 
-    it("Test view querying with group_level option and reduce", function () {
+    it("Test view querying with group_level option and reduce", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        },
+      const queryFun = await createView(db, {
+        map: doc =>  emit(doc.foo),
         reduce: '_count'
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: ['foo', 'bar'] },
-            { foo: ['foo', 'bar'] },
-            { foo: ['foo', 'bar', 'baz'] },
-            { foo: ['baz'] },
-            { foo: ['baz', 'bar'] }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { group_level: 1, reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(2, 'Correctly group returned rows');
-          res.rows[0].key.should.deep.equal(['baz']);
-          res.rows[0].value.should.equal(2);
-          res.rows[1].key.should.deep.equal(['foo']);
-          res.rows[1].value.should.equal(3);
-          return db.query(queryFun, { group_level: 999, reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(4, 'Correctly group returned rows');
-          res.rows[2].key.should.deep.equal(['foo', 'bar']);
-          res.rows[2].value.should.equal(2);
-          return db.query(queryFun, { group_level: '999', reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(4, 'Correctly group returned rows');
-          res.rows[2].key.should.deep.equal(['foo', 'bar']);
-          res.rows[2].value.should.equal(2);
-          return db.query(queryFun, { group_level: 0, reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Correctly group returned rows');
-          res.rows[0].value.should.equal(5);
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: ['foo', 'bar'] },
+          { foo: ['foo', 'bar'] },
+          { foo: ['foo', 'bar', 'baz'] },
+          { foo: ['baz'] },
+          { foo: ['baz', 'bar'] }
+        ]
+      });
+
+      let res = await db.query(queryFun, { group_level: 1, reduce: true});
+
+      res.rows.should.have.length(2, 'Correctly group returned rows');
+      res.rows[0].key.should.deep.equal(['baz']);
+      res.rows[0].value.should.equal(2);
+      res.rows[1].key.should.deep.equal(['foo']);
+      res.rows[1].value.should.equal(3);
+
+      res = await db.query(queryFun, { group_level: 999, reduce: true});
+
+      res.rows.should.have.length(4, 'Correctly group returned rows');
+      res.rows[2].key.should.deep.equal(['foo', 'bar']);
+      res.rows[2].value.should.equal(2);
+
+      res = await db.query(queryFun, { group_level: '999', reduce: true});
+
+      res.rows.should.have.length(4, 'Correctly group returned rows');
+      res.rows[2].key.should.deep.equal(['foo', 'bar']);
+      res.rows[2].value.should.equal(2);
+
+      res = await db.query(queryFun, { group_level: 0, reduce: true});
+
+      res.rows.should.have.length(1, 'Correctly group returned rows');
+      res.rows[0].value.should.equal(5);
     });
 
-    it("Test view querying with invalid group_level options", function () {
+    it("Test view querying with invalid group_level options", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        },
+      const queryFun = await createView(db, {
+        map: doc =>  emit(doc.foo),
         reduce: '_count'
-      }).then(function (queryFun) {
-        return db.query(queryFun, {group_level: -1, reduce: true}).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-          return db.query(queryFun, { group_level: 'exact', reduce: true});
-        }).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-        });
       });
+      try {
+        const res = await db.query(queryFun, {group_level: -1, reduce: true});
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
+
+      try {
+        const res = await db.query(queryFun, { group_level: 'exact', reduce: true});
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
     });
 
-    it("Test view querying with limit option and reduce", function () {
+    it("Test view querying with limit option and reduce", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        },
+      const queryFun = await createView(db, {
+        map: doc =>  emit(doc.foo),
         reduce: '_count'
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'bar' },
-            { foo: 'baz' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { limit: 1, group: true, reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Correctly limits returned rows');
-          res.rows[0].key.should.equal('bar');
-          res.rows[0].value.should.equal(2);
-        }).then(function () {
-          return db.query(queryFun, { limit: '1', group: true, reduce: true});
-        }).then(function (res) {
-          res.rows.should.have.length(1, 'Correctly limits returned rows');
-          res.rows[0].key.should.equal('bar');
-          res.rows[0].value.should.equal(2);
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'bar' },
+          { foo: 'baz' }
+        ]
+      });
+
+      let res = await db.query(queryFun, { limit: 1, group: true, reduce: true});
+
+      res.rows.should.have.length(1, 'Correctly limits returned rows');
+      res.rows[0].key.should.equal('bar');
+      res.rows[0].value.should.equal(2);
+
+      res = await db.query(queryFun, { limit: '1', group: true, reduce: true});
+
+      res.rows.should.have.length(1, 'Correctly limits returned rows');
+      res.rows[0].key.should.equal('bar');
+      res.rows[0].value.should.equal(2);
     });
 
-    it("Test view querying with invalid limit option and reduce", function () {
+    it("Test view querying with invalid limit option and reduce", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
-        map: function (doc) {
-          emit(doc.foo);
-        },
+      const queryFun = await createView(db, {
+        map: doc =>  emit(doc.foo),
         reduce: '_count'
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'bar' },
-            { foo: 'baz' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { limit: -1, group: true, reduce: true});
-        }).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-          return db.query(queryFun, { limit: '1a', group: true, reduce: true});
-        }).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'bar' },
+          { foo: 'baz' }
+        ]
+      });
+
+      try {
+        const res = await db.query(queryFun, { limit: -1, group: true, reduce: true});
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
+      try {
+        const res = await db.query(queryFun, { limit: '1a', group: true, reduce: true});
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
     });
 
     it('Test unsafe object usage (#244)', function () {
