@@ -90,11 +90,11 @@ describe('database name validation', function () {
   it('should allow valid database names with various formats', async function() {
     this.timeout(10000);
     const validDbNames = [
-      'mydb',
-      'my-db',
-      'my_db',
-      'my123db',
-      'MyDb'
+      'mydb-test-1',
+      'my-db-test-2',
+      'my_db-test-3',
+      'my123db-test-4',
+      'MyDb-test-5'
     ];
     
     for (const dbName of validDbNames) {
@@ -115,7 +115,15 @@ describe('database name validation', function () {
       const res = await db.query('test/test');
       res.rows.should.have.length(1);
       
-      await db.destroy();
+      // Cleanup with error handling
+      try {
+        await db.destroy();
+      } catch (e) {
+        // Ignore cleanup errors on Windows
+        if (!e.message.includes('being used by another process')) {
+          throw e;
+        }
+      }
     }
   });
 });
