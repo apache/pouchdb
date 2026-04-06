@@ -1,134 +1,113 @@
 'use strict';
 
-var adapters = ['http', 'local'];
+const adapters = ['http', 'local'];
 
-adapters.forEach(function (adapter) {
-  describe('test.conflicts.js-' + adapter, function () {
+adapters.forEach((adapter) => {
+  describe(`test.conflicts.js-${adapter}`, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapter, 'testdb');
     });
 
-    afterEach(function (done) {
-      testUtils.cleanup([dbs.name], done);
+    afterEach(async () => {
+      await new Promise((resolve, reject) => testUtils.cleanup([dbs.name], (err) => {
+        return err ? reject(err) : resolve();
+      }));
     });
 
-    it('Testing conflicts', function (done) {
-      var db = new PouchDB(dbs.name);
-      var doc = {_id: 'foo', a: 1, b: 1};
-      db.put(doc, function (err, res) {
-        doc._rev = res.rev;
-        should.exist(res.ok, 'Put first document');
-        db.get('foo', function (err, doc2) {
-          doc._id.should.equal(doc2._id);
-          doc.should.have.property('_rev');
-          doc2.should.have.property('_rev');
-          doc.a = 2;
-          doc2.a = 3;
-          db.put(doc, function (err, res) {
-            should.exist(res.ok, 'Put second doc');
-            db.put(doc2, function (err) {
-              err.name.should.equal('conflict', 'Put got a conflicts');
-              db.changes({return_docs: true}).on('complete', function (results) {
-                results.results.should.have.length(1);
-                doc2._rev = undefined;
-                db.put(doc2, function (err) {
-                  err.name.should.equal('conflict', 'Another conflict');
-                  done();
-                });
-              }).on('error', done);
-            });
-          });
-        });
-      });
+    it('Testing conflicts', async () => {
+      const db = new PouchDB(dbs.name);
+      const doc = {_id: 'foo', a: 1, b: 1};
+      const res = await db.put(doc);
+      doc._rev = res.rev;
+      should.exist(res.ok, 'Put first document');
+      const doc2 = await db.get('foo');
+      doc._id.should.equal(doc2._id);
+      doc.should.have.property('_rev');
+      doc2.should.have.property('_rev');
+      doc.a = 2;
+      doc2.a = 3;
+      const res2 = await db.put(doc);
+      should.exist(res2.ok, 'Put second doc');
+      try {
+        await db.put(doc2);
+      } catch (err) {
+        err.name.should.equal('conflict', 'Put got a conflicts');
+      }
+      const results = await db.changes({return_docs: true});
+      results.results.should.have.length(1);
+      doc2._rev = undefined;
+      try {
+        await db.put(doc2);
+      } catch (err) {
+        err.name.should.equal('conflict', 'Another conflict');
+      }
     });
 
-    it('Testing conflicts', function (done) {
-      var doc = {_id: 'fubar', a: 1, b: 1};
-      var db = new PouchDB(dbs.name);
-      db.put(doc, function (err, ndoc) {
-        doc._rev = ndoc.rev;
-        db.remove(doc, function () {
-          delete doc._rev;
-          db.put(doc, function (err, ndoc) {
-            if (err) {
-              return done(err);
-            }
-            should.exist(ndoc.ok, 'written previously deleted doc without rev');
-            done();
-          });
-        });
-      });
+    it('Testing conflicts', async () => {
+      const doc = {_id: 'fubar', a: 1, b: 1};
+      const db = new PouchDB(dbs.name);
+      const ndoc = await db.put(doc);
+      doc._rev = ndoc.rev;
+      await db.remove(doc);
+      delete doc._rev;
+      const ndoc2 = await db.put(doc);
+      should.exist(ndoc2.ok, 'written previously deleted doc without rev');
     });
 
-    it('force put ok on 1st level', function () {
-      var db = new PouchDB(dbs.name);
-      var docId = "docId";
-      var rev1, rev2, rev3, rev2_;
+    it('force put ok on 1st level', async () => {
+      const db = new PouchDB(dbs.name);
+      const docId = "docId";
+      let rev1, rev2, rev3, rev2_;
       // given
-      return db.put({_id: docId, update:1}).then(function (result) {
-        rev1 = result.rev;
-        return db.put({_id: docId, update:2.1, _rev: rev1});
-      }).then(function (result) {
-        rev2 = result.rev;
-        return db.put({_id: docId, update:3, _rev:rev2});
-      })
+      const result1 = await db.put({_id: docId, update:1});
+      rev1 = result1.rev;
+      const result2 = await db.put({_id: docId, update:2.1, _rev: rev1});
+      rev2 = result2.rev;
+      const result3 = await db.put({_id: docId, update:3, _rev:rev2});
       // when
-      .then(function (result) {
-        rev3 = result.rev;
-        return db.put({_id: docId, update:2.2, _rev: rev1}, {force: true});
-      })
+      rev3 = result3.rev;
+      const result4 = await db.put({_id: docId, update:2.2, _rev: rev1}, {force: true});
       // then
-      .then(function (result) {
-        rev2_ = result.rev;
-        rev2_.should.not.equal(rev3);
-        rev2_.substring(0, 2).should.equal('2-');
-        should.exist(result.ok, 'update based on nonleaf revision');
+      rev2_ = result4.rev;
+      rev2_.should.not.equal(rev3);
+      rev2_.substring(0, 2).should.equal('2-');
+      should.exist(result4.ok, 'update based on nonleaf revision');
 
-        return db.get(docId, {conflicts: true, revs: true});
-      }).then(function (doc) {
-        doc._rev.should.equal(rev3);
-        doc._conflicts.should.eql([rev2_]);
+      const doc = await db.get(docId, {conflicts: true, revs: true});
+      doc._rev.should.equal(rev3);
+      doc._conflicts.should.eql([rev2_]);
 
-        return db.get(docId, {conflicts: true, revs: true, rev: rev2_});
-      });
+      await db.get(docId, {conflicts: true, revs: true, rev: rev2_});
     });
 
-    it('force put ok on 2nd level', function () {
-      var db = new PouchDB(dbs.name);
-      var docId = "docId";
-      var rev2, rev3, rev4, rev3_;
+    it('force put ok on 2nd level', async () => {
+      const db = new PouchDB(dbs.name);
+      const docId = "docId";
+      let rev2, rev3, rev4, rev3_;
       // given
-      return db.put({_id: docId, update: 1}).then(function (result) {
-        return db.put({_id: docId, update: 2, _rev: result.rev});
-      }).then(function (result) {
-        rev2 = result.rev;
-        return db.put({_id: docId, update: 3.1, _rev: rev2});
-      }).then(function (result) {
-        rev3 = result.rev;
-        return db.put({_id: docId, update: 4, _rev: rev3});
-      })
+      const result1 = await db.put({_id: docId, update: 1});
+      const result2 = await db.put({_id: docId, update: 2, _rev: result1.rev});
+      rev2 = result2.rev;
+      const result3 = await db.put({_id: docId, update: 3.1, _rev: rev2});
+      rev3 = result3.rev;
+      const result4 = await db.put({_id: docId, update: 4, _rev: rev3});
       // when
-      .then(function (result) {
-        rev4 = result.rev;
-        return db.put({_id: docId, update:3.2, _rev: rev2}, {force: true});
-      })
+      rev4 = result4.rev;
+      const result5 = await db.put({_id: docId, update:3.2, _rev: rev2}, {force: true});
       // then
-      .then(function (result) {
-        rev3_ = result.rev;
-        rev3_.should.not.equal(rev4);
-        rev3_.substring(0, 2).should.equal('3-');
-        should.exist(result.ok, 'update based on nonleaf revision');
+      rev3_ = result5.rev;
+      rev3_.should.not.equal(rev4);
+      rev3_.substring(0, 2).should.equal('3-');
+      should.exist(result5.ok, 'update based on nonleaf revision');
 
-        return db.get(docId, {conflicts: true, revs: true});
-      }).then(function (doc) {
-        doc._rev.should.equal(rev4);
-        doc._conflicts.should.eql([rev3_]);
+      const doc = await db.get(docId, {conflicts: true, revs: true});
+      doc._rev.should.equal(rev4);
+      doc._conflicts.should.eql([rev3_]);
 
-        return db.get(docId, {conflicts: true, revs: true, rev: rev3_});
-      });
+      await db.get(docId, {conflicts: true, revs: true, rev: rev3_});
     });
 
     // Each revision includes a list of previous revisions. The
@@ -138,8 +117,8 @@ adapters.forEach(function (adapter) {
     // example, 2-de0ea16f8621cbac506d23a0fbbde08a beats
     // 2-7c971bb974251ae8541b8fe045964219.
 
-    it('Conflict resolution 1', function () {
-      var docs = [
+    it('Conflict resolution 1', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a',
@@ -163,31 +142,27 @@ adapters.forEach(function (adapter) {
           }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('1-b', 'Correct revision wins');
-        return db.bulkDocs({
-          new_edits: false,
-          docs: [{
-            _id: 'fubar',
-            _rev: '2-2',
-            _revisions: {
-              start: 2,
-              ids: [ '2', '1' ]
-            }
-          }]
-        });
-      }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('2-2', 'Correct revision wins');
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b', 'Correct revision wins');
+      await db.bulkDocs({
+        new_edits: false,
+        docs: [{
+          _id: 'fubar',
+          _rev: '2-2',
+          _revisions: {
+            start: 2,
+            ids: [ '2', '1' ]
+          }
+        }]
       });
+      const doc2 = await db.get('fubar');
+      doc2._rev.should.equal('2-2', 'Correct revision wins');
     });
 
-    it('Conflict resolution 2', function () {
-      var docs = [
+    it('Conflict resolution 2', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '2-a',
@@ -204,19 +179,16 @@ adapters.forEach(function (adapter) {
           }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('2-a', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('2-a', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 3', function () {
-      var docs = [
+    it('Conflict resolution 3', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '10-a',
@@ -233,19 +205,16 @@ adapters.forEach(function (adapter) {
           }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('10-a', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('10-a', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 4-a', function () {
-      var docs = [
+    it('Conflict resolution 4-a', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a1',
@@ -265,19 +234,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 1, ids: [ 'b1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('1-b1', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b1', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 4-b', function () {
-      var docs = [
+    it('Conflict resolution 4-b', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _deleted: true,
@@ -297,19 +263,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 1, ids: [ 'b1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('1-b1', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b1', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 4-c', function () {
-      var docs = [
+    it('Conflict resolution 4-c', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a1',
@@ -329,19 +292,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 3, ids: [ 'a3', 'a2', 'a1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-          doc._rev.should.equal('1-b1', 'Correct revision wins');
-          return db.info();
-        }).then(function (info) {
-          info.doc_count.should.equal(1, 'Correct number of docs');
-        });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b1', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 4-d', function () {
-      var docs = [
+    it('Conflict resolution 4-d', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a1',
@@ -361,19 +321,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 3, ids: [ 'a3', 'a2', 'a1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('1-b1', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b1', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 4-e', function () {
-      var docs = [
+    it('Conflict resolution 4-e', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _deleted: true,
@@ -393,19 +350,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 1, ids: [ 'a1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('1-b1', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('1-b1', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 5-a', function () {
-      var docs = [
+    it('Conflict resolution 5-a', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _rev: '2-a2',
@@ -422,19 +376,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 1, ids: [ 'c1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('2-a2', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('2-a2', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 5-b', function () {
-      var docs = [
+    it('Conflict resolution 5-b', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _deleted: true,
@@ -451,19 +402,16 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 1, ids: [ 'c1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('2-a2', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('2-a2', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('Conflict resolution 5-c', function () {
-      var docs = [
+    it('Conflict resolution 5-c', async () => {
+      const docs = [
         {
           _id: 'fubar',
           _deleted: true,
@@ -480,56 +428,46 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 2, ids: [ 'a2', 'a1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({ docs, new_edits: false }).then(function () {
-        return db.get('fubar');
-      }).then(function (doc) {
-        doc._rev.should.equal('2-a2', 'Correct revision wins');
-        return db.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(1, 'Correct number of docs');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar');
+      doc._rev.should.equal('2-a2', 'Correct revision wins');
+      const info = await db.info();
+      info.doc_count.should.equal(1, 'Correct number of docs');
     });
 
-    it('#2543 excessive recursion with merging', function () {
-      var chain = Promise.resolve();
+    it('#2543 excessive recursion with merging', async () => {
+      const db = new PouchDB(dbs.name);
 
-      var db = new PouchDB(dbs.name);
+      const addTask = (batch) => async () => {
+        const docs = [];
+        for (let i = 0; i < 50; i++) {
+          const hash = batch + 'a' +  i;
+          docs.push({
+            _id: 'foo',
+            _rev: `2-${hash}`,
+            _revisions: {
+              start: 2,
+              ids: [hash, 'a']
+            }
+          });
+        }
+        return db.bulkDocs(docs, {new_edits: false});
+      };
 
-      function addTask(batch) {
-        return function () {
-          var docs = [];
-          for (var i = 0; i < 50; i++) {
-            var hash = batch + 'a' +  i;
-            docs.push({
-              _id: 'foo',
-              _rev: '2-' + hash,
-              _revisions: {
-                start: 2,
-                ids: [hash, 'a']
-              }
-            });
-          }
-          return db.bulkDocs(docs, {new_edits: false});
-        };
+      await db.bulkDocs([{
+        _id: 'foo',
+        _rev: '1-a'
+      }], {new_edits: false});
+
+      for (let i = 0; i < 10; i++) {
+        await addTask(i)();
       }
-
-      chain = chain.then(function () {
-        return db.bulkDocs([{
-          _id: 'foo',
-          _rev: '1-a'
-        }], {new_edits: false});
-      });
-
-      for (var i = 0; i < 10; i++) {
-        chain = chain.then(addTask(i));
-      }
-      return chain;
     });
 
-    it('5832 - update losing leaf returns correct rev', function () {
+    it('5832 - update losing leaf returns correct rev', async () => {
       // given
-      var docs = [
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a1',
@@ -544,18 +482,11 @@ adapters.forEach(function (adapter) {
           _revisions: { start: 2, ids: [ 'b2', 'a1' ] }
         }
       ];
-      var db = new PouchDB(dbs.name);
-      return db.bulkDocs({
-        docs, new_edits: false
-      }).then(function () {
-        return db.get('fubar', { conflicts: true });
-      })
-      .then(function (doc) {
-        return db.remove(doc);
-      })
-      .then(function (result) {
-        result.rev[0].should.equal('3');
-      });
+      const db = new PouchDB(dbs.name);
+      await db.bulkDocs({ docs, new_edits: false });
+      const doc = await db.get('fubar', { conflicts: true });
+      const result = await db.remove(doc);
+      result.rev[0].should.equal('3');
     });
 
   });
