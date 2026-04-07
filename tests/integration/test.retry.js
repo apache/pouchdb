@@ -1,33 +1,33 @@
 'use strict';
 
-var adapters = [
+const adapters = [
   ['local', 'http'],
   ['http', 'http'],
   ['http', 'local'],
   ['local', 'local']
 ];
 
-adapters.forEach(function (adapters) {
-  var suiteName = 'test.retry.js-' + adapters[0] + '-' + adapters[1];
-  describe(suiteName, function () {
+adapters.forEach((adapters) => {
+  const suiteName = `test.retry.js-${adapters[0]}-${adapters[1]}`;
+  describe(suiteName, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapters[0], 'testdb');
       dbs.remote = testUtils.adapterUrl(adapters[1], 'test_repl_remote');
     });
 
-    afterEach(function (done) {
-      testUtils.cleanup([dbs.name, dbs.remote], done);
+    afterEach(async () => {
+      await new Promise(resolve => testUtils.cleanup([dbs.name, dbs.remote], resolve));
     });
 
-    it('retry stuff', function (done) {
-      var remote = new PouchDB(dbs.remote);
-      var bulkGet = remote.bulkGet;
+    it('retry stuff', async () => {
+      const remote = new PouchDB(dbs.remote);
+      const bulkGet = remote.bulkGet;
 
       // Reject attempting to write 'foo' 3 times, then let it succeed
-      var i = 0;
+      let i = 0;
       remote.bulkGet = function (opts) {
         if (opts.docs[0].id === 'foo') {
           if (++i !== 3) {
@@ -37,23 +37,22 @@ adapters.forEach(function (adapters) {
         return bulkGet.apply(remote, arguments);
       };
 
-      var db = new PouchDB(dbs.name);
-      var rep = db.replicate.from(remote, {
+      const db = new PouchDB(dbs.name);
+      const rep = db.replicate.from(remote, {
         live: true,
         retry: true,
-        back_off_function: function () { return 0; }
+        back_off_function: () => { return 0; }
       });
 
-      var paused = 0;
-      rep.on('paused', function (e) {
+      let paused = 0;
+      rep.on('paused', async (e) => {
         ++paused;
         // The first paused event is the replication up to date
         // and waiting on changes (no error)
         if (paused === 1) {
           should.not.exist(e);
-          return remote.put({_id: 'foo'}).then(function () {
-            return remote.put({_id: 'bar'});
-          });
+          await remote.put({_id: 'foo'});
+          await remote.put({_id: 'bar'});
         }
         // Second paused event is due to failed writes, should
         // have an error
@@ -62,21 +61,13 @@ adapters.forEach(function (adapters) {
         }
       });
 
-      var active = 0;
-      rep.on('active', function () {
+      let active = 0;
+      rep.on('active', () => {
         ++active;
       });
 
-      rep.on('complete', function () {
-        active.should.be.at.least(2);
-        paused.should.be.at.least(2);
-        done();
-      });
-
-      rep.catch(done);
-
-      var numChanges = 0;
-      rep.on('change', function (c) {
+      let numChanges = 0;
+      rep.on('change', (c) => {
         numChanges += c.docs_written;
         if (numChanges === 3) {
           rep.cancel();
@@ -84,21 +75,35 @@ adapters.forEach(function (adapters) {
       });
 
       remote.put({_id: 'hazaa'});
+
+      await new Promise((resolve, reject) => {
+        rep.on('complete', () => {
+          try {
+            active.should.be.at.least(2);
+            paused.should.be.at.least(2);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        rep.catch(reject);
+      });
     });
 
-    it('#3687 active event only fired once...', function (done) {
+    it('#3687 active event only fired once...', async () => {
 
-      var remote = new PouchDB(dbs.remote);
-      var db = new PouchDB(dbs.name);
-      var rep = db.replicate.from(remote, {
+      const remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const rep = db.replicate.from(remote, {
         live: true,
         retry: true,
-        back_off_function: function () { return 0; }
+        back_off_function: () => { return 0; }
       });
 
-      var paused = 0;
-      var error;
-      rep.on('paused', function (e) {
+      let paused = 0;
+      let error;
+      rep.on('paused', async (e) => {
         ++paused;
         // The first paused event is the replication up to date
         // and waiting on changes (no error)
@@ -109,45 +114,51 @@ adapters.forEach(function (adapters) {
           rep.cancel();
         }
         if (paused === 1) {
-          return remote.put({_id: 'foo'});
+          await remote.put({_id: 'foo'});
         } else {
           rep.cancel();
         }
       });
 
-      var active = 0;
-      rep.on('active', function () {
+      let active = 0;
+      rep.on('active', () => {
         ++active;
       });
 
-      var numChanges = 0;
-      rep.on('change', function () {
+      let numChanges = 0;
+      rep.on('change', () => {
         ++numChanges;
       });
 
-      rep.on('complete', function () {
-        try {
-          active.should.be.within(1, 2);
-          paused.should.equal(2);
-          numChanges.should.equal(2);
-          done(error);
-        } catch (err) {
-          done(err);
-        }
-      });
-
-      rep.catch(done);
-
       remote.put({_id: 'hazaa'});
+
+      await new Promise((resolve, reject) => {
+        rep.on('complete', () => {
+          try {
+            active.should.be.within(1, 2);
+            paused.should.equal(2);
+            numChanges.should.equal(2);
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        rep.catch(reject);
+      });
     });
 
-    it('source doesn\'t leak "destroyed" event listener', function () {
+    it('source doesn\'t leak "destroyed" event listener', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var bulkGet = remote.bulkGet;
-      var i = 0;
+      const bulkGet = remote.bulkGet;
+      let i = 0;
       remote.bulkGet = function () {
         // Reject three times, every 5th time
         if ((++i % 5 === 0) && i <= 15) {
@@ -156,63 +167,65 @@ adapters.forEach(function (adapters) {
         return bulkGet.apply(remote, arguments);
       };
 
-      var rep = db.replicate.from(remote, {
+      const rep = db.replicate.from(remote, {
         live: true,
         retry: true,
-        back_off_function: function () { return 0; }
+        back_off_function: () => { return 0; }
       });
 
-      var numDocsToWrite = 10;
+      const numDocsToWrite = 10;
 
-      return remote.post({}).then(function () {
-        var originalNumListeners;
-        var posted = 0;
+      await remote.post({});
+      let originalNumListeners;
+      let posted = 0;
 
-        return new Promise(function (resolve, reject) {
+      await new Promise((resolve, reject) => {
 
-          var error;
-          function cleanup(err) {
-            if (err) {
-              error = err;
-            }
-            rep.cancel();
+        let error;
+        const cleanup = (err) => {
+          if (err) {
+            error = err;
           }
-          function finish() {
-            if (error) {
-              return reject(error);
-            }
-            resolve();
+          rep.cancel();
+        };
+        const finish = () => {
+          if (error) {
+            return reject(error);
           }
+          resolve();
+        };
 
-          rep.on('complete', finish).on('error', cleanup);
-          rep.on('change', function () {
-            if (++posted < numDocsToWrite) {
-              remote.post({}).catch(cleanup);
-            } else {
-              db.info().then(function (info) {
-                if (info.doc_count === numDocsToWrite) {
-                  cleanup();
-                }
-              }).catch(cleanup);
-            }
-
+        rep.on('complete', finish).on('error', cleanup);
+        rep.on('change', async () => {
+          if (++posted < numDocsToWrite) {
+            remote.post({}).catch(cleanup);
+          } else {
             try {
-              var numListeners = db.listeners('destroyed').length;
-              if (typeof originalNumListeners !== 'number') {
-                originalNumListeners = numListeners;
-              } else {
-                numListeners.should.equal(originalNumListeners,
-                  'numListeners should never increase');
+              const info = await db.info();
+              if (info.doc_count === numDocsToWrite) {
+                cleanup();
               }
             } catch (err) {
               cleanup(err);
             }
-          });
+          }
+
+          try {
+            const numListeners = db.listeners('destroyed').length;
+            if (typeof originalNumListeners !== 'number') {
+              originalNumListeners = numListeners;
+            } else {
+              numListeners.should.equal(originalNumListeners,
+                'numListeners should never increase');
+            }
+          } catch (err) {
+            cleanup(err);
+          }
         });
       });
     });
 
-    it('target doesn\'t leak "destroyed" event listener', function () {
+    it('target doesn\'t leak "destroyed" event listener', async function () {
 
       if (testUtils.isChrome() && testUtils.adapters()[0] === 'indexeddb') {
         // FIXME this test fails very frequently on chromium+indexeddb.  Skipped
@@ -222,11 +235,11 @@ adapters.forEach(function (adapters) {
         this.skip();
       }
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var remoteBulkGet = remote.bulkGet;
-      var i = 0;
+      const remoteBulkGet = remote.bulkGet;
+      let i = 0;
       remote.bulkGet = function () {
         // Reject three times, every 5th time
         if ((++i % 5 === 0) && i <= 15) {
@@ -235,65 +248,67 @@ adapters.forEach(function (adapters) {
         return remoteBulkGet.apply(remote, arguments);
       };
 
-      var rep = db.replicate.from(remote, {
+      const rep = db.replicate.from(remote, {
         live: true,
         retry: true,
-        back_off_function: function () { return 0; }
+        back_off_function: () => { return 0; }
       });
 
-      var numDocsToWrite = 10;
+      const numDocsToWrite = 10;
 
-      return remote.post({}).then(function () {
-        var originalNumListeners;
-        var posted = 0;
+      await remote.post({});
+      let originalNumListeners;
+      let posted = 0;
 
-        return new Promise(function (resolve, reject) {
+      await new Promise((resolve, reject) => {
 
-          var error;
-          function cleanup(err) {
-            if (err) {
-              error = err;
-            }
-            rep.cancel();
+        let error;
+        const cleanup = (err) => {
+          if (err) {
+            error = err;
           }
-          function finish() {
-            if (error) {
-              return reject(error);
-            }
-            resolve();
+          rep.cancel();
+        };
+        const finish = () => {
+          if (error) {
+            return reject(error);
           }
+          resolve();
+        };
 
-          rep.on('complete', finish).on('error', cleanup);
-          rep.on('change', function () {
-            if (++posted < numDocsToWrite) {
-              remote.post({}).catch(cleanup);
-            } else {
-              db.info().then(function (info) {
-                if (info.doc_count === numDocsToWrite) {
-                  cleanup();
-                }
-              }).catch(cleanup);
-            }
-
+        rep.on('complete', finish).on('error', cleanup);
+        rep.on('change', async () => {
+          if (++posted < numDocsToWrite) {
+            remote.post({}).catch(cleanup);
+          } else {
             try {
-              var numListeners = remote.listeners('destroyed').length;
-              if (typeof originalNumListeners !== 'number') {
-                originalNumListeners = numListeners;
-              } else {
-                // special case for "destroy" - because there are
-                // two Changes() objects for local databases,
-                // there can briefly be one extra listener or one
-                // fewer listener. The point of this test is to ensure
-                // that the listeners don't grow out of control.
-                numListeners.should.be.within(
-                  originalNumListeners - 1,
-                  originalNumListeners + 1,
-                  'numListeners should never increase by +1/-1');
+              const info = await db.info();
+              if (info.doc_count === numDocsToWrite) {
+                cleanup();
               }
             } catch (err) {
               cleanup(err);
             }
-          });
+          }
+
+          try {
+            const numListeners = remote.listeners('destroyed').length;
+            if (typeof originalNumListeners !== 'number') {
+              originalNumListeners = numListeners;
+            } else {
+              // special case for "destroy" - because there are
+              // two Changes() objects for local databases,
+              // there can briefly be one extra listener or one
+              // fewer listener. The point of this test is to ensure
+              // that the listeners don't grow out of control.
+              numListeners.should.be.within(
+                originalNumListeners - 1,
+                originalNumListeners + 1,
+                'numListeners should never increase by +1/-1');
+            }
+          } catch (err) {
+            cleanup(err);
+          }
         });
       });
     });
@@ -301,14 +316,14 @@ adapters.forEach(function (adapters) {
     [
       'complete', 'error', 'paused', 'active',
       'change', 'cancel'
-    ].forEach(function (event) {
-      it('returnValue doesn\'t leak "' + event + '" event listener', function () {
+    ].forEach((event) => {
+      it(`returnValue doesn't leak "${event}" event listener`, async () => {
 
-        var db = new PouchDB(dbs.name);
-        var remote = new PouchDB(dbs.remote);
+        const db = new PouchDB(dbs.name);
+        const remote = new PouchDB(dbs.remote);
 
-        var remoteBulkGet = remote.bulkGet;
-        var i = 0;
+        const remoteBulkGet = remote.bulkGet;
+        let i = 0;
         remote.bulkGet = function () {
           // Reject three times, every 5th time
           if ((++i % 5 === 0) && i <= 15) {
@@ -317,128 +332,59 @@ adapters.forEach(function (adapters) {
           return remoteBulkGet.apply(remote, arguments);
         };
 
-        var rep = db.replicate.from(remote, {
+        const rep = db.replicate.from(remote, {
           live: true,
           retry: true,
-          back_off_function: function () { return 0; }
+          back_off_function: () => { return 0; }
         });
 
-        var numDocsToWrite = 10;
+        const numDocsToWrite = 10;
 
-        return remote.post({}).then(function () {
-          var originalNumListeners;
-          var posted = 0;
+        await remote.post({});
+        let originalNumListeners;
+        let posted = 0;
 
-          return new Promise(function (resolve, reject) {
+        await new Promise((resolve, reject) => {
 
-            var error;
-            function cleanup(err) {
-              if (err) {
-                error = err;
-              }
-              rep.cancel();
-            }
-            function finish() {
-              if (error) {
-                return reject(error);
-              }
-              resolve();
-            }
-
-            rep.on('complete', finish).on('error', cleanup);
-            rep.on('change', function () {
-              if (++posted < numDocsToWrite) {
-                remote.post({}).catch(cleanup);
-              } else {
-                db.info().then(function (info) {
-                  if (info.doc_count === numDocsToWrite) {
-                    cleanup();
-                  }
-                }).catch(cleanup);
-              }
-
-              try {
-                var numListeners = rep.listeners(event).length;
-                if (typeof originalNumListeners !== 'number') {
-                  originalNumListeners = numListeners;
-                } else {
-                  if (event === "paused") {
-                    Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
-                  } else {
-                    Math.abs(numListeners -  originalNumListeners).should.be.eql(0);
-                  }
-                }
-              } catch (err) {
-                cleanup(err);
-              }
-            });
-          });
-        });
-      });
-    });
-
-    it('returnValue doesn\'t leak "change" event listener w/ onChange', function () {
-
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-
-      var remoteBulkGet = remote.bulkGet;
-      var i = 0;
-      remote.bulkGet = function () {
-        // Reject three times, every 5th time
-        if ((++i % 5 === 0) && i <= 15) {
-          return Promise.reject(new Error('flunking you'));
-        }
-        return remoteBulkGet.apply(remote, arguments);
-      };
-
-      var rep = db.replicate.from(remote, {
-        live: true,
-        retry: true,
-        back_off_function: function () { return 0; }
-      }).on('change', function () {});
-
-      var numDocsToWrite = 10;
-
-      return remote.post({}).then(function () {
-        var originalNumListeners;
-        var posted = 0;
-
-        return new Promise(function (resolve, reject) {
-
-          var error;
-          function cleanup(err) {
+          let error;
+          const cleanup = (err) => {
             if (err) {
               error = err;
             }
             rep.cancel();
-          }
-          function finish() {
+          };
+          const finish = () => {
             if (error) {
               return reject(error);
             }
             resolve();
-          }
+          };
 
           rep.on('complete', finish).on('error', cleanup);
-          rep.on('change', function () {
+          rep.on('change', async () => {
             if (++posted < numDocsToWrite) {
               remote.post({}).catch(cleanup);
             } else {
-              db.info().then(function (info) {
+              try {
+                const info = await db.info();
                 if (info.doc_count === numDocsToWrite) {
                   cleanup();
                 }
-              }).catch(cleanup);
+              } catch (err) {
+                cleanup(err);
+              }
             }
 
             try {
-              var numListeners = rep.listeners('change').length;
+              const numListeners = rep.listeners(event).length;
               if (typeof originalNumListeners !== 'number') {
                 originalNumListeners = numListeners;
               } else {
-                numListeners.should.equal(originalNumListeners,
-                  'numListeners should never increase');
+                if (event === "paused") {
+                  Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
+                } else {
+                  Math.abs(numListeners -  originalNumListeners).should.be.eql(0);
+                }
               }
             } catch (err) {
               cleanup(err);
@@ -448,14 +394,87 @@ adapters.forEach(function (adapters) {
       });
     });
 
-    it('retry many times, no leaks on any events', function () {
-      this.timeout(200000);
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('returnValue doesn\'t leak "change" event listener w/ onChange', async () => {
 
-      var flunked = 0;
-      var remoteBulkGet = remote.bulkGet;
-      var i = 0;
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+
+      const remoteBulkGet = remote.bulkGet;
+      let i = 0;
+      remote.bulkGet = function () {
+        // Reject three times, every 5th time
+        if ((++i % 5 === 0) && i <= 15) {
+          return Promise.reject(new Error('flunking you'));
+        }
+        return remoteBulkGet.apply(remote, arguments);
+      };
+
+      const rep = db.replicate.from(remote, {
+        live: true,
+        retry: true,
+        back_off_function: () => { return 0; }
+      }).on('change', () => {});
+
+      const numDocsToWrite = 10;
+
+      await remote.post({});
+      let originalNumListeners;
+      let posted = 0;
+
+      await new Promise((resolve, reject) => {
+
+        let error;
+        const cleanup = (err) => {
+          if (err) {
+            error = err;
+          }
+          rep.cancel();
+        };
+        const finish = () => {
+          if (error) {
+            return reject(error);
+          }
+          resolve();
+        };
+
+        rep.on('complete', finish).on('error', cleanup);
+        rep.on('change', async () => {
+          if (++posted < numDocsToWrite) {
+            remote.post({}).catch(cleanup);
+          } else {
+            try {
+              const info = await db.info();
+              if (info.doc_count === numDocsToWrite) {
+                cleanup();
+              }
+            } catch (err) {
+              cleanup(err);
+            }
+          }
+
+          try {
+            const numListeners = rep.listeners('change').length;
+            if (typeof originalNumListeners !== 'number') {
+              originalNumListeners = numListeners;
+            } else {
+              numListeners.should.equal(originalNumListeners,
+                'numListeners should never increase');
+            }
+          } catch (err) {
+            cleanup(err);
+          }
+        });
+      });
+    });
+
+    it('retry many times, no leaks on any events', async function () {
+      this.timeout(200000);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+
+      let flunked = 0;
+      const remoteBulkGet = remote.bulkGet;
+      let i = 0;
       remote.bulkGet = function () {
         // Reject five times, every 5th time
         if ((++i % 5 === 0) && i <= 25) {
@@ -465,88 +484,90 @@ adapters.forEach(function (adapters) {
         return remoteBulkGet.apply(remote, arguments);
       };
 
-      var rep = db.replicate.from(remote, {
+      const rep = db.replicate.from(remote, {
         live: true,
         retry: true,
-        back_off_function: function () { return 0; }
+        back_off_function: () => { return 0; }
       });
 
-      var active = 0;
-      var paused = 0;
-      var numDocsToWrite = 50;
+      let active = 0;
+      let paused = 0;
+      const numDocsToWrite = 50;
 
-      return remote.post({}).then(function () {
-        var originalNumListeners;
-        var posted = 0;
+      await remote.post({});
+      let originalNumListeners;
+      let posted = 0;
 
-        return new Promise(function (resolve, reject) {
+      await new Promise((resolve, reject) => {
 
-          var error;
-          function cleanup(err) {
-            if (err) {
-              error = err;
-            }
-            rep.cancel();
+        let error;
+        const cleanup = (err) => {
+          if (err) {
+            error = err;
           }
-          function finish() {
-            if (error) {
-              return reject(error);
-            }
-            resolve();
+          rep.cancel();
+        };
+        const finish = () => {
+          if (error) {
+            return reject(error);
           }
-          function getTotalListeners() {
-            var events = ['complete', 'error', 'paused', 'active',
-              'change', 'cancel'];
-            return events.map(function (event) {
-              return rep.listeners(event).length;
-            }).reduce(function (a, b) {return a + b; }, 0);
-          }
+          resolve();
+        };
+        const getTotalListeners = () => {
+          const events = ['complete', 'error', 'paused', 'active',
+            'change', 'cancel'];
+          return events.map((event) => {
+            return rep.listeners(event).length;
+          }).reduce((a, b) => { return a + b; }, 0);
+        };
 
-          rep.on('complete', finish)
-            .on('error', cleanup)
-            .on('active', function () {
-            active++;
-          }).on('paused', function () {
-            paused++;
-          }).on('change', function () {
-            if (++posted < numDocsToWrite) {
-              remote.post({}).catch(cleanup);
-            } else {
-              db.info().then(function (info) {
-                if (info.doc_count === numDocsToWrite) {
-                  cleanup();
-                }
-              }).catch(cleanup);
-            }
-
+        rep.on('complete', finish)
+          .on('error', cleanup)
+          .on('active', () => {
+          active++;
+        }).on('paused', () => {
+          paused++;
+        }).on('change', async () => {
+          if (++posted < numDocsToWrite) {
+            remote.post({}).catch(cleanup);
+          } else {
             try {
-              var numListeners = getTotalListeners();
-              if (typeof originalNumListeners !== 'number') {
-                originalNumListeners = numListeners;
-              } else {
-                Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
+              const info = await db.info();
+              if (info.doc_count === numDocsToWrite) {
+                cleanup();
               }
             } catch (err) {
               cleanup(err);
             }
-          });
+          }
+
+          try {
+            const numListeners = getTotalListeners();
+            if (typeof originalNumListeners !== 'number') {
+              originalNumListeners = numListeners;
+            } else {
+              Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
+            }
+          } catch (err) {
+            cleanup(err);
+          }
         });
-      }).then(function () {
-        flunked.should.equal(5);
-        active.should.be.at.least(5);
-        paused.should.be.at.least(5);
       });
+
+      flunked.should.equal(5);
+      active.should.be.at.least(5);
+      paused.should.be.at.least(5);
     });
 
 
-    it('4049 retry while starting offline', function (done) {
+    it('4049 retry while starting offline', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var ajax = remote._ajax;
-      var _called = 0;
-      var startFailing = false;
+      const ajax = remote._ajax;
+      let _called = 0;
+      let startFailing = false;
 
       remote._ajax = function (opts, cb) {
         if (!startFailing || ++_called > 3) {
@@ -556,23 +577,23 @@ adapters.forEach(function (adapters) {
         }
       };
 
-      remote.post({a: 'doc'}).then(function () {
-        startFailing = true;
-        var rep = db.replicate.from(remote, {live: true, retry: true})
-          .on('change', function () { rep.cancel(); });
+      await remote.post({a: 'doc'});
+      startFailing = true;
+      const rep = db.replicate.from(remote, {live: true, retry: true})
+        .on('change', () => { rep.cancel(); });
 
-        rep.on('complete', function () {
+      await new Promise((resolve) => {
+        rep.on('complete', () => {
           remote._ajax = ajax;
-          done();
+          resolve();
         });
       });
-
     });
 
-    it('#5157 replicate many docs with live+retry', function () {
-      var numDocs = 512; // uneven number
-      var docs = [];
-      for (var i = 0; i < numDocs; i++) {
+    it('#5157 replicate many docs with live+retry', async () => {
+      const numDocs = 512; // uneven number
+      const docs = [];
+      for (let i = 0; i < numDocs; i++) {
         // mix of generation-1 and generation-2 docs
         if (i % 2 === 0) {
           docs.push({
@@ -588,69 +609,67 @@ adapters.forEach(function (adapters) {
           });
         }
       }
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      return db.bulkDocs({
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.bulkDocs({
         docs,
         new_edits: false
-      }).then(function () {
-        function replicatePromise(fromDB, toDB) {
-          return new Promise(function (resolve, reject) {
-            var replication = fromDB.replicate.to(toDB, {
-              live: true,
-              retry: true,
-              batches_limit: 10,
-              batch_size: 20
-            }).on('paused', function (err) {
-              if (!err) {
-                replication.cancel();
-              }
-            }).on('complete', resolve)
-              .on('error', reject);
-          });
-        }
-        return Promise.all([
-          replicatePromise(db, remote),
-          replicatePromise(remote, db)
-        ]);
-      }).then(function () {
-        return remote.info();
-      }).then(function (info) {
-        info.doc_count.should.equal(numDocs);
       });
+
+      const replicatePromise = (fromDB, toDB) => {
+        return new Promise((resolve, reject) => {
+          const replication = fromDB.replicate.to(toDB, {
+            live: true,
+            retry: true,
+            batches_limit: 10,
+            batch_size: 20
+          }).on('paused', (err) => {
+            if (!err) {
+              replication.cancel();
+            }
+          }).on('complete', resolve)
+            .on('error', reject);
+        });
+      };
+
+      await Promise.all([
+        replicatePromise(db, remote),
+        replicatePromise(remote, db)
+      ]);
+
+      const info = await remote.info();
+      info.doc_count.should.equal(numDocs);
     });
 
-    it('6510 no changes live+retry does not call backoff function', function () {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var called = false;
-      var replication;
+    it('6510 no changes live+retry does not call backoff function', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      let called = false;
+      let replication;
 
-      function replicatePromise(fromDB, toDB) {
-        return new Promise(function (resolve, reject) {
-           replication = fromDB.replicate.to(toDB, {
+      const replicatePromise = (fromDB, toDB) => {
+        return new Promise((resolve, reject) => {
+          replication = fromDB.replicate.to(toDB, {
             live: true,
             retry: true,
             heartbeat: 5,
-            back_off_function: function () {
+            back_off_function: () => {
               called = true;
               replication.cancel();
             }
           }).on('complete', resolve)
             .on('error', reject);
         });
-      }
+      };
 
-      setTimeout(function () {
+      setTimeout(() => {
         if (replication) {
           replication.cancel();
         }
       }, 2000);
 
-      return replicatePromise(remote, db)
-      .then(function () {
-        called.should.equal(false);
-      });
+      await replicatePromise(remote, db);
+      called.should.equal(false);
     });
 
   });
