@@ -65,7 +65,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test basic view", async function () {
       const db = new PouchDB(dbName);
       const view = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.foo, doc);
         }
       });
@@ -94,9 +94,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test basic view, no emitted value", async function () {
       const db = new PouchDB(dbName);
       const view = await createView(db, {
-        map: (doc) => {
-            emit(doc.foo);
-          }
+        map: function (doc) {
+          emit(doc.foo);
+        }
       });
 
       await db.bulkDocs({docs: [
@@ -176,8 +176,10 @@ function tests(suiteName, dbName, dbType, viewType) {
         const doc = await db.get('volatile');
         await db.remove(doc);
 
-        const res = await db.query({map:(doc) =>
-          emit(doc.foo, doc)},
+        const res = await db.query({
+          map: function (doc) {
+            emit(doc.foo, doc);
+          }},
           {include_docs: true, reduce: false});
 
         res.rows.should.have.length(1, 'Dont include deleted documents');
@@ -195,7 +197,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test opts.startkey/opts.endkey", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.key, doc);
         }
       });
@@ -231,7 +233,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("#4154 opts.start_key/opts.end_key are synonyms", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.key, doc);
         }
       });
@@ -269,7 +271,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test opts.inclusive_end = false", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.key, doc);
         }
       });
@@ -316,7 +318,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test opts.key", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.key, doc);
         }
       });
@@ -384,8 +386,8 @@ function tests(suiteName, dbName, dbType, viewType) {
       const db = new PouchDB(dbName);
 
       const queryFun = await createView(db, {
-        map: (doc) => {
-        emit(doc.foo);
+        map: function (doc) {
+          emit(doc.foo);
         }
       });
 
@@ -408,7 +410,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     });
 
     it('Test complex key collation', async function () {
-      const map = () => {
+      const map = function () {
         emit(null);
         emit(false);
         emit(true);
@@ -505,7 +507,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'a' }, { b: 'b' });
           emit({ a: 'a' }, { b: 'b' });
         }
@@ -530,7 +532,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit();
           emit(null);
         }
@@ -554,10 +556,10 @@ function tests(suiteName, dbName, dbType, viewType) {
         { _id: '2' }
       ]);
       const queryFun = await createView(db, {
-          map: () => {
-            emit(null);
-            emit();
-          }
+        map: function () {
+          emit(null);
+          emit();
+        }
       });
 
       const res = await db.query(queryFun);
@@ -578,10 +580,10 @@ function tests(suiteName, dbName, dbType, viewType) {
         { _id: '2' }
       ]);
       const queryFun = await createView(db, {
-          map: () => {
-            emit(null);
-            emit(null);
-          }
+        map: function () {
+          emit(null);
+          emit(null);
+        }
       });
 
       const res = await db.query(queryFun);
@@ -603,7 +605,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit(true);
           emit(true);
         }
@@ -628,7 +630,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'b' }, { a: 'a' });
           emit({ a: 'a' }, { b: 'b' });
         }
@@ -653,7 +655,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun =  await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'b', b: 'c' }, { a: 'a' });
           emit({ a: 'a' }, { b: 'b' });
         }
@@ -678,7 +680,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'a' }, { b: 'b' });
           emit({ a: 'b'}, { a: 'a' });
         }
@@ -703,7 +705,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'a'});
           emit({ b: 'b'});
         }
@@ -728,7 +730,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'a'});
           emit({ a: 'a', b: 'b'});
         }
@@ -753,7 +755,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit({ a: 'a'});
           emit({ a: 'a', b: 'b'});
         }
@@ -778,11 +780,11 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-          map: () => {
-            emit(true);
-            emit(false);
-          }
-        });
+        map: function () {
+          emit(true);
+          emit(false);
+        }
+      });
 
       const res = await db.query(queryFun);
       const rows = mapToRows(res);
@@ -803,7 +805,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       ]);
 
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit(false);
           emit(true);
         }
@@ -823,7 +825,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test joins", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           if (doc.doc_id) {
             emit(doc._id, {_id: doc.doc_id});
           }
@@ -844,7 +846,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("No reduce function", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: () => {
+        map: function () {
           emit('key', 'val');
         }
       });
@@ -857,7 +859,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Query after db.close", async function () {
       let db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.foo, 'val');
         }
       });
@@ -889,7 +891,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Built in _sum reduce function", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.val, 1);
         },
         reduce: "_sum"
@@ -912,7 +914,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Built in _count reduce function", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.val, doc.val);
         },
         reduce: "_count"
@@ -1100,7 +1102,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("#6364 Recognize built in reduce functions with trailing garbage", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: (doc) => {
+        map: function (doc) {
           emit(doc.val, 1);
         },
         reduce: "_sum\n \r\nandothergarbage"
@@ -1228,7 +1230,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       await db.bulkDocs(docs);
 
       const queryFun = await createView(db, {
-        map: doc => emit(doc._id)
+        map: function (doc) {
+          emit(doc._id);
+        }
       });
 
       let res = await db.query(queryFun, {
@@ -1279,7 +1283,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
       const db = new PouchDB(dbName, {
-        fetch: (url, opts) => {
+        fetch: function (url, opts) {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
@@ -1300,7 +1304,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       await db.bulkDocs(docs);
 
       const queryFun = await createView(db, {
-        map: doc => emit(doc._id)
+        map: function (doc) {
+          emit(doc._id);
+        }
       });
 
       const res = await db.query(queryFun, {
@@ -1324,7 +1330,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       // Need to avoid the cache to workaround
       // https://issues.apache.org/jira/browse/COUCHDB-2880
       const db = new PouchDB(dbName, {
-        fetch: (url, opts) => {
+        fetch: function (url, opts) {
           opts.cache = 'no-store';
           return PouchDB.fetch(url, opts);
         }
@@ -1339,7 +1345,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       await db.bulkDocs(docs);
 
       const queryFun = await createView(db, {
-        map: doc => emit(doc._id)
+        map: function (doc) {
+          emit(doc._id);
+        }
       });
 
       const res =  await db.query(queryFun, {
@@ -1367,7 +1375,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       ], {new_edits: false});
 
       const queryFun = await createView(db, {
-        map: doc => emit(doc.foo)
+        map: function (doc) {
+          emit(doc.foo);
+        }
       });
 
       let res = await db.query(queryFun);
@@ -1421,7 +1431,9 @@ function tests(suiteName, dbName, dbType, viewType) {
       ], {new_edits: false});
 
       const queryFun = await createView(db, {
-        map: doc => emit(doc.foo)
+        map: function (doc) {
+          emit(doc.foo);
+        }
       });
 
       let res = await db.query(queryFun);
@@ -1469,7 +1481,9 @@ function tests(suiteName, dbName, dbType, viewType) {
         await remote.info();
 
         const queryFun = await createView(db, {
-          map: doc =>  emit(doc._id, !!doc._conflicts)
+          map: function (doc) {
+            emit(doc._id, !!doc._conflicts);
+          }
         });
 
         await db.post(doc1);
@@ -1492,7 +1506,7 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with limit option", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map : (doc) => {
+        map: function (doc) {
           if (doc.foo === 'bar') {
             emit(doc.foo);
           }
@@ -1516,8 +1530,10 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with custom reduce function", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: doc => emit(doc.foo),
-        reduce: (keys, values) => {
+        map: function (doc) {
+          emit(doc.foo);
+        },
+        reduce: function (keys, values) {
           if (keys) {
             // const id = keyId[1];
             return keys.map(keyId => keyId[0].join(''));
@@ -1569,7 +1585,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with group_level option and reduce", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: doc =>  emit(doc.foo),
+        map: function (doc) {
+          emit(doc.foo);
+        },
         reduce: '_count'
       });
 
@@ -1612,7 +1630,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with invalid group_level options", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: doc =>  emit(doc.foo),
+        map: function (doc) {
+          emit(doc.foo);
+        },
         reduce: '_count'
       });
       try {
@@ -1635,7 +1655,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with limit option and reduce", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: doc =>  emit(doc.foo),
+        map: function (doc) {
+          emit(doc.foo);
+        },
         reduce: '_count'
       });
 
@@ -1663,7 +1685,9 @@ function tests(suiteName, dbName, dbType, viewType) {
     it("Test view querying with invalid limit option and reduce", async function () {
       const db = new PouchDB(dbName);
       const queryFun = await createView(db, {
-        map: doc =>  emit(doc.foo),
+        map: function (doc) {
+          emit(doc.foo);
+        },
         reduce: '_count'
       });
 
