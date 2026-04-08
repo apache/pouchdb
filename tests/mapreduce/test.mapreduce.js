@@ -1691,146 +1691,154 @@ function tests(suiteName, dbName, dbType, viewType) {
       }
     });
 
-    it('Test unsafe object usage (#244)', function () {
+    it('Test unsafe object usage (#244)', async function () {
       const db = new PouchDB(dbName);
-      return db.bulkDocs([
+      const writeRes = await db.bulkDocs([
         {_id: 'constructor'}
-      ]).then(function (res) {
-        let rev = res[0].rev;
-        return createView(db, {
-          map: function (doc) {
-            emit(doc._id);
+      ]);
+      const rev = writeRes[0].rev;
+
+      const queryFun =  await createView(db, {
+        map: function (doc) {
+          emit(doc._id);
+        },
+      });
+
+      const queryRes = await db.query(queryFun, {include_docs: true});
+
+      queryRes.rows.should.deep.equal([
+        {
+          "key": "constructor",
+          "id": "constructor",
+          "value": null,
+          "doc": {
+            "_id": "constructor",
+            "_rev": rev
           }
-        }).then(function (queryFun) {
-          return db.query(queryFun, {include_docs: true}).then(function (res) {
-            res.rows.should.deep.equal([
-              {
-                "key": "constructor",
-                "id": "constructor",
-                "value": null,
-                "doc": {
-                  "_id": "constructor",
-                  "_rev": rev
-                }
-              }
-            ]);
-            return db.bulkDocs([
-              {_id: 'constructor', _rev: rev}
-            ]);
-          }).then(function (res) {
-            rev = res[0].rev;
-            return db.query(queryFun, {include_docs: true});
-          }).then(function (res) {
-            res.rows.should.deep.equal([
-              {
-                "key": "constructor",
-                "id": "constructor",
-                "value": null,
-                "doc": {
-                  "_id": "constructor",
-                  "_rev": rev
-                }
-              }
-            ]);
-            return db.bulkDocs([
-              {_id: 'constructor', _rev: rev, _deleted: true}
-            ]);
-          }).then(function (res) {
-            rev = res[0].rev;
-            return db.query(queryFun, {include_docs: true});
-          }).then(function (res) {
-            res.rows.should.deep.equal([]);
-          });
-        });
-      });
+        }
+      ]);
+
+      const writeResWithRev = await db.bulkDocs([
+          {_id: 'constructor', _rev: rev}
+        ]);
+
+      const rev1 = writeResWithRev[0].rev;
+
+      const queryRes1 = await db.query(queryFun, {include_docs: true});
+
+      queryRes1.rows.should.deep.equal([
+        {
+          "key": "constructor",
+          "id": "constructor",
+          "value": null,
+          "doc": {
+            "_id": "constructor",
+            "_rev": rev1
+          }
+        }
+      ]);
+
+      const deletedDoc = await db.bulkDocs([
+        {_id: 'constructor', _rev: rev1, _deleted: true}
+      ]);
+
+      const rev2 = deletedDoc[0].rev;
+
+      const queryRes2 = await db.query(queryFun, {include_docs: true});
+
+      queryRes2.rows.should.deep.equal([]);
+      rev2[0].should.equal('3');
     });
 
-    it("Test view querying with a skip option and reduce", function () {
-      let qf;
+    it("Test view querying with a skip option and reduce", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map: function (doc) {
           emit(doc.foo);
         },
         reduce: '_count'
-      }).then(function (queryFun) {
-        qf = queryFun;
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'bar' },
-            { foo: 'baz' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, {skip: 1, group: true, reduce: true});
-        });
-      }).then(function (res) {
-        res.rows.should.have.length(1, 'Correctly limits returned rows');
-        res.rows[0].key.should.equal('baz');
-        res.rows[0].value.should.equal(1);
-      }).then(function () {
-        return db.query(qf, {skip: '1', group: true, reduce: true});
-      }).then(function (res) {
-        res.rows.should.have.length(1, 'Correctly limits returned rows');
-        res.rows[0].key.should.equal('baz');
-        res.rows[0].value.should.equal(1);
       });
+      const qf = queryFun;
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'bar' },
+          { foo: 'baz' }
+        ]
+      });
+
+      const res = await db.query(queryFun, {skip: 1, group: true, reduce: true});
+
+      res.rows.should.have.length(1, 'Correctly limits returned rows');
+      res.rows[0].key.should.equal('baz');
+      res.rows[0].value.should.equal(1);
+
+      const resQf =  await db.query(qf, {skip: '1', group: true, reduce: true});
+
+      resQf.rows.should.have.length(1, 'Correctly limits returned rows');
+      resQf.rows[0].key.should.equal('baz');
+      resQf.rows[0].value.should.equal(1);
     });
 
-    it("Test view querying with invalid skip option and reduce", function () {
+    it("Test view querying with invalid skip option and reduce", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map: function (doc) {
           emit(doc.foo);
         },
         reduce: '_count'
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'bar' },
-            { foo: 'baz' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { skip: -1, group: true, reduce: true});
-        }).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-          return db.query(queryFun, { skip: '1a', group: true, reduce: true});
-        }).then(function (res) {
-          res.should.not.exist('expected error on invalid group_level');
-        }).catch(function (err) {
-          err.status.should.be.oneOf([400, 500]);
-          err.message.should.be.a('string');
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'bar' },
+          { foo: 'baz' }
+        ]
+      });
+
+      try {
+        const res = await db.query(queryFun, { skip: -1, group: true, reduce: true});
+
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
+
+      try {
+        const res = await db.query(queryFun, { skip: '1a', group: true, reduce: true});
+
+        res.should.not.exist('expected error on invalid group_level');
+      } catch (err) {
+        err.status.should.be.oneOf([400, 500]);
+        err.message.should.be.a('string');
+      }
     });
 
-    it("Special document member _doc_id_rev should never leak outside",
-      function () {
+    it("Special document member _doc_id_rev should never leak outside", async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map: function (doc) {
           if (doc.foo === 'bar') {
             emit(doc.foo);
           }
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, { include_docs: true });
-        }).then(function (res) {
-          should.not.exist(res.rows[0].doc._doc_id_rev, '_doc_id_rev is leaking but should not');
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' }
+        ]
+      });
+
+      const res = await db.query(queryFun, { include_docs: true });
+
+      should.not.exist(res.rows[0].doc._doc_id_rev, '_doc_id_rev is leaking but should not');
     });
 
-    it('multiple view creations and cleanups', function () {
+    it('multiple view creations and cleanups', async function () {
       const db = new PouchDB(dbName);
       const map = function (doc) { emit(doc.num); };
       function createView(name) {
@@ -1842,233 +1850,238 @@ function tests(suiteName, dbName, dbType, viewType) {
           }
         });
       }
-      return db.bulkDocs({
+
+      await db.bulkDocs({
         docs: [
           {_id: 'test1'}
         ]
-      }).then(function () {
-        function sequence(name) {
-          return createView(name).then(function () {
-            return db.query(name + '/theView').then(function () {
-              return db.viewCleanup();
-            });
-          });
-        }
-        const attempts = [];
-        const numAttempts = 10;
-        for (let i = 0; i < numAttempts; i++) {
-          attempts.push(sequence('test' + i));
-        }
-        return Promise.all(attempts).then(function () {
-          const keys = [];
-          for (let i = 0; i < numAttempts; i++) {
-            keys.push('_design/test' + i);
-          }
-          return db.allDocs({keys, include_docs : true});
-        }).then(function (res) {
-          const docs = res.rows.map(function (row) {
-            row.doc._deleted = true;
-            return row.doc;
-          });
-          return db.bulkDocs({docs});
-        }).then(function () {
-          return db.viewCleanup();
-        }).then(function (res) {
-          if (res.error) {
-            res.error.should.equal('not_found');
-          } else {
-            res.ok.should.equal(true);
-          }
-        });
       });
+
+      async function sequence(name) {
+        await createView(name);
+        await db.query(name + '/theView');
+        await db.viewCleanup();
+      }
+
+      const attempts = [];
+      const numAttempts = 10;
+      for (let i = 0; i < numAttempts; i++) {
+        attempts.push(sequence('test' + i));
+      }
+
+      await Promise.all(attempts);
+
+      const keys = [];
+      for (let i = 0; i < numAttempts; i++) {
+        keys.push('_design/test' + i);
+      }
+
+      const res = await db.allDocs({keys, include_docs : true});
+
+      const docs = res.rows.map((row) => {
+        row.doc._deleted = true;
+        return row.doc;
+      });
+
+      await db.bulkDocs({docs});
+
+      const viewCleanUpResult = await db.viewCleanup();
+
+      if (viewCleanUpResult.error) {
+        viewCleanUpResult.error.should.equal('not_found');
+      } else {
+        viewCleanUpResult.ok.should.equal(true);
+      }
     });
 
-    it('If reduce function returns 0, resulting value should not be null', function () {
+    it('If reduce function returns 0, resulting value should not be null', async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map: function (doc) {
           emit(doc.foo);
         },
         reduce: function () {
           return 0;
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' }
-          ]
-        }).then(function () {
-          return db.query(queryFun).then(function (data) {
-            should.exist(data.rows[0].value);
-          });
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' }
+        ]
+      });
+
+      const res = await db.query(queryFun);
+
+      should.exist(res.rows[0].value);
     });
 
-    it('Testing skip with a view', function () {
+    it('Testing skip with a view', async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map : function (doc) {
           emit(doc.foo);
         }
-      }).then(function (queryFun) {
-        return db.bulkDocs({
-          docs: [
-            { foo: 'bar' },
-            { foo: 'baz' },
-            { foo: 'baf' }
-          ]
-        }).then(function () {
-          return db.query(queryFun, {skip: 1});
-        }).then(function (data) {
-          data.rows.should.have.length(2);
-          data.offset.should.equal(1);
-          data.total_rows.should.equal(3);
-        });
       });
+
+      await db.bulkDocs({
+        docs: [
+          { foo: 'bar' },
+          { foo: 'baz' },
+          { foo: 'baf' }
+        ]
+      });
+
+      const res = await db.query(queryFun, {skip: 1});
+
+      res.rows.should.have.length(2);
+      res.offset.should.equal(1);
+      res.total_rows.should.equal(3);
     });
 
-    it('Map documents on 0/null/undefined/empty string', function () {
+    it('Map documents on 0/null/undefined/empty string', async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map : function (doc) {
           emit(doc.num);
         }
-      }).then(function (mapFunction) {
-        const docs = [
-          {_id: '0', num: 0},
-          {_id: '1', num: 1},
-          {_id: 'undef' /* num is undefined */},
-          {_id: 'null', num: null},
-          {_id: 'empty', num: ''},
-          {_id: 'nan', num: NaN},
-          {_id: 'inf', num: Infinity},
-          {_id: 'neginf', num: -Infinity}
-        ];
-        return db.bulkDocs({docs}).then(function () {
-          return db.query(mapFunction, {key: 0});
-        }).then(function (data) {
-          data.rows.should.have.length(1);
-          data.rows[0].id.should.equal('0');
-
-          return db.query(mapFunction, {key: ''});
-        }).then(function (data) {
-          data.rows.should.have.length(1);
-          data.rows[0].id.should.equal('empty');
-
-          return db.query(mapFunction, {key: undefined});
-        }).then(function (data) {
-          data.rows.should.have.length(8); // everything
-
-          // keys that should all resolve to null
-          const emptyKeys = [null, NaN, Infinity, -Infinity];
-          return Promise.all(emptyKeys.map(function (emptyKey) {
-            return db.query(mapFunction, {key: emptyKey}).then(function (data) {
-              data.rows.map(function (row) {
-                return row.id;
-              }).should.deep.equal(['inf', 'nan', 'neginf', 'null', 'undef']);
-            });
-          }));
-        });
       });
+
+      const docs = [
+        {_id: '0', num: 0},
+        {_id: '1', num: 1},
+        {_id: 'undef' /* num is undefined */},
+        {_id: 'null', num: null},
+        {_id: 'empty', num: ''},
+        {_id: 'nan', num: NaN},
+        {_id: 'inf', num: Infinity},
+        {_id: 'neginf', num: -Infinity}
+      ];
+
+      await db.bulkDocs({docs});
+
+      const res = await db.query(queryFun, {key: 0});
+
+      res.rows.should.have.length(1);
+      res.rows[0].id.should.equal('0');
+
+      const resEmptyKey = await db.query(queryFun, {key: ''});
+
+      resEmptyKey.rows.should.have.length(1);
+      resEmptyKey.rows[0].id.should.equal('empty');
+
+      const resUndefinedKey = await db.query(queryFun, {key: undefined});
+
+      resUndefinedKey.rows.should.have.length(8); // everything
+
+      // keys that should all resolve to null
+      const emptyKeys = [null, NaN, Infinity, -Infinity];
+      await Promise.all(emptyKeys.map(async function (emptyKey) {
+        const data = await db.query(queryFun, {key: emptyKey});
+        const rows = data.rows.map(row => row.id);
+
+        rows.should.deep.equal(['inf', 'nan', 'neginf', 'null', 'undef']);
+      }));
     });
 
-    it('Testing query with keys', function () {
+    it('Testing query with keys', async function () {
       const db = new PouchDB(dbName);
-      return createView(db, {
+      const queryFun = await createView(db, {
         map: function (doc) {
           emit(doc.field);
         }
-      }).then(function (queryFun) {
-        const opts = {include_docs: true};
-        return db.bulkDocs({
-          docs: [
-            {_id: 'doc_0', field: 0},
-            {_id: 'doc_1', field: 1},
-            {_id: 'doc_2', field: 2},
-            {_id: 'doc_empty', field: ''},
-            {_id: 'doc_null', field: null},
-            {_id: 'doc_undefined' /* field undefined */},
-            {_id: 'doc_foo', field: 'foo'}
-          ]
-        }).then(function () {
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          data.rows.should.have.length(7, 'returns all docs');
-          opts.keys = [];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          data.rows.should.have.length(0, 'returns 0 docs');
-          opts.keys = [0];
-          // When passed an empty keys array (above), query mutates opts by deleting the
-          // keys array and adding limit = 0. That behavior breaks this test result when
-          // implementing limit and skip (#8370); it is correct (and necessary) to clean
-          // up that side effect here.
-          delete opts.limit;
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          data.rows.should.have.length(1, 'returns one doc');
-          data.rows[0].doc._id.should.equal('doc_0');
-
-          opts.keys = [2, 'foo', 1, 0, null, ''];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          // check that the returned ordering fits opts.keys
-          data.rows.should.have.length(7, 'returns 7 docs in correct order');
-          data.rows[0].doc._id.should.equal('doc_2');
-          data.rows[1].doc._id.should.equal('doc_foo');
-          data.rows[2].doc._id.should.equal('doc_1');
-          data.rows[3].doc._id.should.equal('doc_0');
-          data.rows[4].doc._id.should.equal('doc_null');
-          data.rows[5].doc._id.should.equal('doc_undefined');
-          data.rows[6].doc._id.should.equal('doc_empty');
-
-          opts.keys = [3, 1, 4, 2];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          // nonexistent keys just give us holes in the list
-          data.rows.should.have.length(2, 'returns 2 non-empty docs');
-          data.rows[0].key.should.equal(1);
-          data.rows[0].doc._id.should.equal('doc_1');
-          data.rows[1].key.should.equal(2);
-          data.rows[1].doc._id.should.equal('doc_2');
-
-          opts.keys = [2, 1, 2, 0, 2, 1];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          // with duplicates, we return multiple docs
-          data.rows.should.have.length(6, 'returns 6 docs with duplicates');
-          data.rows[0].doc._id.should.equal('doc_2');
-          data.rows[1].doc._id.should.equal('doc_1');
-          data.rows[2].doc._id.should.equal('doc_2');
-          data.rows[3].doc._id.should.equal('doc_0');
-          data.rows[4].doc._id.should.equal('doc_2');
-          data.rows[5].doc._id.should.equal('doc_1');
-
-          opts.keys = [2, 1, 2, 3, 2];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          // duplicates and unknowns at the same time, for maximum weirdness
-          data.rows.should.have.length(4, 'returns 2 docs with duplicates/unknowns');
-          data.rows[0].doc._id.should.equal('doc_2');
-          data.rows[1].doc._id.should.equal('doc_1');
-          data.rows[2].doc._id.should.equal('doc_2');
-          data.rows[3].doc._id.should.equal('doc_2');
-
-          opts.keys = [3];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          data.rows.should.have.length(0, 'returns 0 doc due to unknown key');
-
-          opts.include_docs = false;
-          opts.keys = [3, 2];
-          return db.query(queryFun, opts);
-        }).then(function (data) {
-          data.rows.should.have.length(1, 'returns 1 doc due to unknown key');
-          data.rows[0].id.should.equal('doc_2');
-          should.not.exist(data.rows[0].doc, 'no doc, since include_docs=false');
-        });
       });
+      const opts = {include_docs: true};
+      await db.bulkDocs({
+        docs: [
+          {_id: 'doc_0', field: 0},
+          {_id: 'doc_1', field: 1},
+          {_id: 'doc_2', field: 2},
+          {_id: 'doc_empty', field: ''},
+          {_id: 'doc_null', field: null},
+          {_id: 'doc_undefined' /* field undefined */},
+          {_id: 'doc_foo', field: 'foo'}
+        ]
+      });
+
+        const res = await db.query(queryFun, opts);
+
+        res.rows.should.have.length(7, 'returns all docs');
+
+        opts.keys = [];
+        const resEmptyKeys = await db.query(queryFun, opts);
+
+        resEmptyKeys.rows.should.have.length(0, 'returns 0 docs');
+
+        // When passed an empty keys array (above), query mutates opts by deleting the
+        // keys array and adding limit = 0. That behavior breaks this test result when
+        // implementing limit and skip (#8370); it is correct (and necessary) to clean
+        // up that side effect here.
+        opts.keys = [0];
+        delete opts.limit;
+        const resDeletedLimit = await db.query(queryFun, opts);
+
+        resDeletedLimit.rows.should.have.length(1, 'returns one doc');
+        resDeletedLimit.rows[0].doc._id.should.equal('doc_0');
+
+        // check that the returned ordering fits opts.keys
+        opts.keys = [2, 'foo', 1, 0, null, ''];
+        const resWithKeys = await db.query(queryFun, opts);
+
+        resWithKeys.rows.should.have.length(7, 'returns 7 docs in correct order');
+        resWithKeys.rows[0].doc._id.should.equal('doc_2');
+        resWithKeys.rows[1].doc._id.should.equal('doc_foo');
+        resWithKeys.rows[2].doc._id.should.equal('doc_1');
+        resWithKeys.rows[3].doc._id.should.equal('doc_0');
+        resWithKeys.rows[4].doc._id.should.equal('doc_null');
+        resWithKeys.rows[5].doc._id.should.equal('doc_undefined');
+        resWithKeys.rows[6].doc._id.should.equal('doc_empty');
+
+        // nonexistent keys just give us holes in the list
+        opts.keys = [3, 1, 4, 2];
+        const resInclNonExistentKeys = await db.query(queryFun, opts);
+
+        resInclNonExistentKeys.rows.should.have.length(2, 'returns 2 non-empty docs');
+        resInclNonExistentKeys.rows[0].key.should.equal(1);
+        resInclNonExistentKeys.rows[0].doc._id.should.equal('doc_1');
+        resInclNonExistentKeys.rows[1].key.should.equal(2);
+        resInclNonExistentKeys.rows[1].doc._id.should.equal('doc_2');
+
+        // with duplicates, we return multiple docs
+        opts.keys = [2, 1, 2, 0, 2, 1];
+        const resWithDuplicateKeys = await db.query(queryFun, opts);
+
+        resWithDuplicateKeys.rows.should.have.length(6, 'returns 6 docs with duplicates');
+        resWithDuplicateKeys.rows[0].doc._id.should.equal('doc_2');
+        resWithDuplicateKeys.rows[1].doc._id.should.equal('doc_1');
+        resWithDuplicateKeys.rows[2].doc._id.should.equal('doc_2');
+        resWithDuplicateKeys.rows[3].doc._id.should.equal('doc_0');
+        resWithDuplicateKeys.rows[4].doc._id.should.equal('doc_2');
+        resWithDuplicateKeys.rows[5].doc._id.should.equal('doc_1');
+
+        // duplicates and unknowns at the same time, for maximum weirdness
+        opts.keys = [2, 1, 2, 3, 2];
+        const resWithDuplicateAndUnknownKeys = await db.query(queryFun, opts);
+
+        resWithDuplicateAndUnknownKeys.rows.should.have.length(4, 'returns 2 docs with duplicates/unknowns');
+        resWithDuplicateAndUnknownKeys.rows[0].doc._id.should.equal('doc_2');
+        resWithDuplicateAndUnknownKeys.rows[1].doc._id.should.equal('doc_1');
+        resWithDuplicateAndUnknownKeys.rows[2].doc._id.should.equal('doc_2');
+        resWithDuplicateAndUnknownKeys.rows[3].doc._id.should.equal('doc_2');
+
+        opts.keys = [3];
+        const resWithUnknownKey = await db.query(queryFun, opts);
+
+        resWithUnknownKey.rows.should.have.length(0, 'returns 0 doc due to unknown key');
+
+        opts.include_docs = false;
+        opts.keys = [3, 2];
+
+        const resWithoutDocs = await db.query(queryFun, opts);
+
+        resWithoutDocs.rows.should.have.length(1, 'returns 1 doc due to unknown key');
+        resWithoutDocs.rows[0].id.should.equal('doc_2');
+        should.not.exist(resWithoutDocs.rows[0].doc, 'no doc, since include_docs=false');
     });
 
     it('Testing query with multiple keys, multiple docs', function () {
