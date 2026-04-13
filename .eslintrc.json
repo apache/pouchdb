@@ -15,11 +15,9 @@
   "globals": {
     "Map": "readonly",
     "Set": "readonly",
-    "Symbol": "readonly",
     "Promise": "readonly",
     "Uint8Array": "readonly",
     "ArrayBuffer": "readonly",
-    "FileReaderSync": "readonly",
     "emit": "readonly",
     "PouchDB": "readonly"
   },
