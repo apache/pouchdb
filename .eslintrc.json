@@ -14,8 +14,6 @@
   },
 
   "globals": {
-    "Symbol": "readonly",
-    "FileReaderSync": "readonly",
     "emit": "readonly",
     "PouchDB": "readonly"
   },

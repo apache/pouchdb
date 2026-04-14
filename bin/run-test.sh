@@ -83,11 +83,14 @@ pouchdb-build-node() {
 }
 
 if [[ $CI = true ]] && [[ $CLIENT != node ]]; then
-  # npx playwright install --with-deps "$CLIENT"
-  # The full install with deps was glacially slow on CI 
-  npx playwright install "$CLIENT"
-  sudo apt-get update
-  sudo apt-get install -y libwoff1 libvpx9 libevent-2.1-7t64 libopus0 libgstreamer-plugins-base1.0-0 libgstreamer-gl1.0-0 libgstreamer-plugins-bad1.0-0 libflite1 libavif16 libharfbuzz-icu0 libsecret-1-0 libhyphen0 libwayland-server0 libmanette-0.2-0 libgles2 gstreamer1.0-libav
+  # Change Ubuntu mirror priorities. 
+  # azure.archive.ubuntu.com is very slow, especially if the US is awake.
+  # From https://github.com/servo/servo/pull/39190
+  sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
+  sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
+  sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
+  sudo cat /etc/apt/apt-mirrors.txt
+  npx playwright install --with-deps "$CLIENT"
 fi
 
 if [[ -n $SERVER ]]; then

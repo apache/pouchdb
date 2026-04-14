@@ -245,23 +245,6 @@ const db = new PouchDB('mydb', {adapter: 'localstorage'});
 console.log(db.adapter); // 'localstorage'
 ```
 
-### [pouchdb-adapter-fruitdown](https://npmjs.org/package/pouchdb-adapter-fruitdown)
-
-An optional adapter that works in the browser using IndexedDB via [fruitdown](https://github.com/nolanlawson/fruitdown). The adapter name
-is `'fruitdown'`.
-
-#### Example usage
-
-```bash
-npm install pouchdb-adapter-fruitdown
-```
-
-```js
-PouchDB.plugin(require('pouchdb-adapter-fruitdown'));
-const db = new PouchDB('mydb', {adapter: 'fruitdown'});
-console.log(db.adapter); // 'fruitdown'
-```
-
 ### [pouchdb-adapter-node-websql](https://npmjs.org/package/pouchdb-adapter-node-websql)
 
 An optional adapter that works in Node.js using SQLite via [node-websql](https://github.com/nolanlawson/node-websql). The adapter name
