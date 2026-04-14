@@ -38,7 +38,6 @@
   "dependencies": {
     "double-ended-queue": "2.1.0-0",
     "fetch-cookie": "2.2.0",
-    "fruitdown": "1.0.2",
     "level": "6.0.1",
     "level-codec": "9.0.2",
     "level-write-stream": "1.0.0",
