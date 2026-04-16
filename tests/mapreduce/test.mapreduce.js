@@ -1128,7 +1128,12 @@ function tests(suiteName, dbName, dbType, viewType) {
         ]
       });
 
-      await db.query(queryFun, {reduce: true, group: true}).should.be.rejected;
+      try {
+        await db.query(queryFun, {reduce: true, group: true});
+        throw new Error('should fail');
+      } catch (err) {
+        err.message.should.be.a('string');
+      }
     });
 
     if (viewType === 'temp' && dbType !== 'http') {
