@@ -355,7 +355,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
       var values = [];
 
-      // special values sort before all other types
+      // special values sort beforeAll other types
       values.push(null);
       values.push(false);
       values.push(true);

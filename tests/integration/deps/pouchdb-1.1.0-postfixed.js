@@ -92,7 +92,7 @@ module.exports = function (Pouch) {
 
     var auto_compaction = (opts.auto_compaction === true);
 
-    // wraps a callback with a function that runs compaction after each edit
+    // wraps a callback with a function that runs compaction afterEach edit
     function autoCompact(callback) {
       if (!auto_compaction) {
         return callback;

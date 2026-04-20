@@ -4539,7 +4539,7 @@ var Promise = _dereq_('../utils').Promise;
 
 // this is essentially the "update sugar" function from daleharvey/pouchdb#1388
 // the diffFun tells us what delta to apply to the doc.  it either returns
-// the doc, or false if it doesn't need to do an update after all
+// the doc, or false if it doesn't need to do an update afterAll
 function upsert(db, docId, diffFun) {
   return new Promise(function (fulfill, reject) {
     if (docId && typeof docId === 'object') {
@@ -8604,7 +8604,7 @@ var Promise = _dereq_('./utils').Promise;
 
 // this is essentially the "update sugar" function from daleharvey/pouchdb#1388
 // the diffFun tells us what delta to apply to the doc.  it either returns
-// the doc, or false if it doesn't need to do an update after all
+// the doc, or false if it doesn't need to do an update afterAll
 function upsert(db, docId, diffFun) {
   return new Promise(function (fulfill, reject) {
     if (docId && typeof docId === 'object') {
