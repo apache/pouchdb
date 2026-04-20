@@ -997,7 +997,7 @@ function HttpPouch(opts, callback) {
             callback(null, api);
           }
         });
-        // If there were no errros or if the only error is "Precondition Failed"
+        // If there were no errors or if the only error is "Precondition Failed"
         // (note: "Precondition Failed" occurs when we try to create a database
         // that already exists)
       } else if (!err || err.status === 412) {
@@ -1475,7 +1475,7 @@ function HttpPouch(opts, callback) {
     }
 
     // If opts.endkey exists, add the endkey value to the list of parameters.
-    // If endkey is given then the returned list of docuemnts will
+    // If endkey is given then the returned list of documents will
     // end with the document whose id is endkey.
     if (opts.endkey) {
       params.push('endkey=' + encodeURIComponent(JSON.stringify(opts.endkey)));
@@ -1601,7 +1601,7 @@ function HttpPouch(opts, callback) {
     var xhr;
     var lastFetchedSeq;
 
-    // Get all the changes starting wtih the one immediately after the
+    // Get all the changes starting with the one immediately after the
     // sequence number given by since.
     var fetch = function (since, callback) {
       if (opts.aborted) {
@@ -2357,7 +2357,7 @@ function init(api, opts, callback) {
     function insertDoc(docInfo, resultsIdx, callback) {
       var winningRev = merge.winningRev(docInfo.metadata);
       var deleted = utils.isDeleted(docInfo.metadata, winningRev);
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       if ('was_delete' in opts && deleted) {
         results[resultsIdx] = errors.MISSING_DOC;
         return callback();
@@ -3873,7 +3873,7 @@ function WebSqlPouch(opts, callback) {
     }
 
     function insertDoc(docInfo, resultsIdx, callback) {
-      // Cant insert new deleted documents
+      // Can't insert new deleted documents
       var winningRev = merge.winningRev(docInfo.metadata);
       var deleted = utils.isDeleted(docInfo.metadata, winningRev);
       if ('was_delete' in opts && deleted) {
@@ -4641,7 +4641,7 @@ Changes.prototype.doChanges = function (opts) {
     }, function (err) {
       if (err.id === 'idbNull') {
         //db closed before this returned
-        //thats ok
+        //that's ok
         return;
       }
       throw err;
@@ -5504,7 +5504,7 @@ var Promise = _dereq_('../utils').Promise;
 
 // this is essentially the "update sugar" function from daleharvey/pouchdb#1388
 // the diffFun tells us what delta to apply to the doc.  it either returns
-// the doc, or false if it doesn't need to do an update after all
+// the doc, or false if it doesn't need to do an update afterAll
 function upsert(db, docId, diffFun) {
   return new Promise(function (fulfill, reject) {
     if (docId && typeof docId === 'object') {
@@ -5836,7 +5836,7 @@ function doMerge(tree, path, dontExpand) {
     }
   });
 
-  // We didnt find
+  // We didn't find
   if (!merged) {
     restree.push(path);
   }
@@ -6123,7 +6123,7 @@ Checkpointer.prototype.getCheckpoint = function () {
     return 0;
   });
 };
-function replicate(repId, src, target, opts, returnValue) {
+function replicate(rapid, src, target, opts, returnValue) {
   var batches = [];               // list of batches to be processed
   var currentBatch;               // the batch currently being processed
   var pendingBatch = {
@@ -6140,7 +6140,7 @@ function replicate(repId, src, target, opts, returnValue) {
   var batches_limit = opts.batches_limit || 10;
   var changesPending = false;     // true while src.changes is running
   var doc_ids = opts.doc_ids;
-  var checkpointer = new Checkpointer(src, target, repId, returnValue);
+  var checkpointer = new Checkpointer(src, target, rapid, returnValue);
   var result = {
     ok: true,
     start_time: new Date(),
@@ -6565,8 +6565,8 @@ function replicateWrapper(src, target, opts, callback) {
   var replicateRet = new Replication(opts);
   toPouch(src, opts).then(function (src) {
     return toPouch(target, opts).then(function (target) {
-      return genReplicationId(src, target, opts).then(function (repId) {
-        replicate(repId, src, target, opts, replicateRet);
+      return genReplicationId(src, target, opts).then(function (rapid) {
+        replicate(rapid, src, target, opts, replicateRet);
       });
     });
   })["catch"](function (err) {
@@ -8380,7 +8380,7 @@ function immediate(task) {
 exports.test = function () {
   if (global.setImmediate) {
     // we can only get here in IE10
-    // which doesn't handel postMessage well
+    // which doesn't handle postMessage well
     return false;
   }
   return typeof global.MessageChannel !== 'undefined';
@@ -9964,7 +9964,7 @@ var Promise = _dereq_('./utils').Promise;
 
 // this is essentially the "update sugar" function from daleharvey/pouchdb#1388
 // the diffFun tells us what delta to apply to the doc.  it either returns
-// the doc, or false if it doesn't need to do an update after all
+// the doc, or false if it doesn't need to do an update afterAll
 function upsert(db, docId, diffFun) {
   return new Promise(function (fulfill, reject) {
     if (docId && typeof docId === 'object') {
@@ -10250,7 +10250,7 @@ exports.MD5 = function (string) {
        * like UTF-8 before transformation; speed cost is
        * utterly prohibitive. The JavaScript standard
        * itself needs to look at this: it should start
-       * providing access to strings as preformed UTF-8
+       * providing access to strings as performed UTF-8
        * 8-bit unsigned value arrays.
        */
     md5blk = function (s) {
@@ -10454,7 +10454,7 @@ exports.MD5 = function (string) {
     };
 
     /**
-     * Finishes the incremental computation, reseting the internal state and
+     * Finishes the incremental computation, resetting the internal state and
      * returning the result.
      * Use the raw parameter to obtain the raw result instead of the hex one.
      *
@@ -10527,7 +10527,7 @@ exports.MD5 = function (string) {
     };
 
     /**
-     * Releases memory used by the incremental buffer and other aditional
+     * Releases memory used by the incremental buffer and other additional
      * resources. If you plan to use the instance again, use reset instead.
      */
     SparkMD5.prototype.destroy = function () {
@@ -10610,7 +10610,7 @@ exports.MD5 = function (string) {
     };
 
     /**
-     * Finishes the incremental computation, reseting the internal state and
+     * Finishes the incremental computation, resetting the internal state and
      * returning the result.
      * Use the raw parameter to obtain the raw result instead of the hex one.
      *
@@ -10653,7 +10653,7 @@ exports.MD5 = function (string) {
     };
 
     /**
-     * Releases memory used by the incremental buffer and other aditional
+     * Releases memory used by the incremental buffer and other additional
      * resources. If you plan to use the instance again, use reset instead.
      */
     SparkMD5.ArrayBuffer.prototype.destroy = SparkMD5.prototype.destroy;

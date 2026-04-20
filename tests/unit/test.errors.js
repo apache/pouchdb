@@ -535,7 +535,7 @@ describe('test.errors.js', function () {
   it('test generateErrorFromResponse() via map/reduce #9', function () {
     var response = {
       "error": "query_parse_error",
-      "reason": "Multi-key fetchs for reduce views must use `group=true`"
+      "reason": "Multi-key fetches for reduce views must use `group=true`"
     };
     var err = generateErrorFromResponse(response);
     err.status.should.equal(500);

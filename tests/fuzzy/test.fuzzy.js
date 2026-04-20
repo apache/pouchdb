@@ -13,7 +13,7 @@
 
 // We can take an optional seed from the url (?seed=hello) otherwise we just
 // generate an arbitrary one. With any given seed the 'random' generations
-// are deteministic so if we find a seed that fails the test we can provide
+// are deterministic so if we find a seed that fails the test we can provide
 // that seed again to rerun the same actions and generate the same failure
 
 // This is the amount of random actions we do

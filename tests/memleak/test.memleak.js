@@ -14,7 +14,7 @@ var default_opts = {
    * classes defined below (maybe they are just plain buggy, but most
    * of what heapdump reveals leads to nextTickQueue, so I suspect
    * this is inherent to the way the tests are ran).
-   * Therefor we define the following as the maximum size and maximum
+   * Therefore we define the following as the maximum size and maximum
    * percentage growth we will accept as "normal".
    */
   max_growth: 50000, // Up to 50ko lost in heap

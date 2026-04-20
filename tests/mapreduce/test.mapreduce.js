@@ -355,7 +355,7 @@ function tests(suiteName, dbName, dbType, viewType) {
 
       var values = [];
 
-      // special values sort before all other types
+      // special values sort beforeAll other types
       values.push(null);
       values.push(false);
       values.push(true);
@@ -367,7 +367,7 @@ function tests(suiteName, dbName, dbType, viewType) {
       values.push(4);
 
       // then text, case sensitive
-      // currently chrome uses ascii ordering and so wont handle caps properly
+      // currently chrome uses ascii ordering and so won't handle caps properly
       values.push("a");
       //values.push("A");
       values.push("aa");

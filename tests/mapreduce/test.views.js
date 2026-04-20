@@ -167,7 +167,7 @@ describe('test.views.js', function () {
 
   it.skip('Test basic view collation', function (done) {
     var values = [];
-    // special values sort before all other types
+    // special values sort beforeAll other types
     values.push(null);
     values.push(false);
     values.push(true);
@@ -177,7 +177,7 @@ describe('test.views.js', function () {
     values.push(3);
     values.push(4);
     // then text, case sensitive
-    // currently chrome uses ascii ordering and so wont handle
+    // currently chrome uses ascii ordering and so won't handle
     // capitals properly
     values.push('a');
     //values.push("A");

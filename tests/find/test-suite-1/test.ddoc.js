@@ -255,7 +255,7 @@ describe('test.ddoc.js', function () {
       context.db.createIndex({index: {fields: ['series', 'debut', 'rank']}}),
       context.db.createIndex({index: {fields: ['rank', 'debut']}})
     ]).then(function () {
-      // At time of writing the createIndex implentation also performs a
+      // At time of writing the createIndex implementation also performs a
       // search to "warm" the indexes. If this changes to happen async, or not
       // at all, these queries will force the collision to be tested.
       return Promise.all([

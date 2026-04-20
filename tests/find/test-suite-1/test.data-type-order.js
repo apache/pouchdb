@@ -55,7 +55,7 @@ describe('test.data-type-order.js', function () {
     });
   });
 
-  // IndexedDB does not index obejcts, so this test fails in idbnext. It is probably
+  // IndexedDB does not index objects, so this test fails in idbnext. It is probably
   // impossible to fix this. Unlike booleans and null, we can't remap objects cleanly,
   // because:
   //   a) they aren't constants, they could have anything in them

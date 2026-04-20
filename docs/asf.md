@@ -116,7 +116,7 @@ The project aims to graduate within 6–12 months based on the experience of the
 Apache CouchDB incubation in 2008 and general maturity of the project itself.
 
 
-#### Homogenous Developers
+#### Homogeneous Developers
 
 The current PouchDB maintainers consist of people from around the world,
 collaborating across all timezones.
