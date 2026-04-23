@@ -1,9 +1,9 @@
 'use strict';
 
-describe('test.deep-fields.js', function () {
-  it('deep fields', function () {
-    var db = context.db;
-    var index = {
+describe('test.deep-fields.js', () => {
+  it('deep fields', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo.bar"
@@ -12,23 +12,20 @@ describe('test.deep-fields.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        {_id: 'doc', foo: {bar: 'a'}},
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {'foo.bar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{"_id": "doc"}]);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      {_id: 'doc', foo: {bar: 'a'}},
+    ]);
+    const res = await db.find({
+      selector: {'foo.bar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{"_id": "doc"}]);
   });
 
-  it('deeper fields', function () {
-    var db = context.db;
-    var index = {
+  it('deeper fields', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo.bar.baz"
@@ -37,91 +34,78 @@ describe('test.deep-fields.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        {_id: 'doc', foo: {bar: {baz: 'a'}}},
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {'foo.bar.baz': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{"_id": "doc"}]);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      {_id: 'doc', foo: {bar: {baz: 'a'}}},
+    ]);
+    const res = await db.find({
+      selector: {'foo.bar.baz': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{"_id": "doc"}]);
   });
 
-  it('should create a deep multi mapper', function () {
-    var db = context.db;
-    var index = {
+  it('should create a deep multi mapper', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo.bar", "bar.baz"
         ]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        {_id: 'a', foo: {bar: 'yo'}, bar: {baz: 'hey'}},
-        {_id: 'b', foo: {bar: 'sup'}, bar: {baz: 'dawg'}}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {"foo.bar": 'yo', "bar.baz": 'hey'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{_id: 'a'}]);
-      return db.find({
-        selector: {"foo.bar": 'yo', "bar.baz": 'sup'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.have.length(0);
-      return db.find({
-        selector: {"foo.bar": 'bruh', "bar.baz": 'nah'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.have.length(0);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      {_id: 'a', foo: {bar: 'yo'}, bar: {baz: 'hey'}},
+      {_id: 'b', foo: {bar: 'sup'}, bar: {baz: 'dawg'}}
+    ]);
+    const res1 = await db.find({
+      selector: {"foo.bar": 'yo', "bar.baz": 'hey'},
+      fields: ['_id']
     });
+    res1.docs.should.deep.equal([{_id: 'a'}]);
+    const res2 = await db.find({
+      selector: {"foo.bar": 'yo', "bar.baz": 'sup'},
+      fields: ['_id']
+    });
+    res2.docs.should.have.length(0);
+    const res3 = await db.find({
+      selector: {"foo.bar": 'bruh', "bar.baz": 'nah'},
+      fields: ['_id']
+    });
+    res3.docs.should.have.length(0);
   });
 
-  it('should create a deep multi mapper, tricky docs', function () {
-    var db = context.db;
-    var index = {
+  it('should create a deep multi mapper, tricky docs', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo.bar", "bar.baz"
         ]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        {_id: 'a', foo: {bar: 'yo'}, bar: {baz: 'hey'}},
-        {_id: 'b', foo: {bar: 'sup'}, bar: {baz: 'dawg'}},
-        {_id: 'c', foo: true, bar: "yo"},
-        {_id: 'd', foo: null, bar: []}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {"foo.bar": 'yo', "bar.baz": 'hey'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{_id: 'a'}]);
-      return db.find({
-        selector: {"foo.bar": 'yo', "bar.baz": 'sup'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.have.length(0);
-      return db.find({
-        selector: {"foo.bar": 'bruh', "bar.baz": 'nah'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.have.length(0);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      {_id: 'a', foo: {bar: 'yo'}, bar: {baz: 'hey'}},
+      {_id: 'b', foo: {bar: 'sup'}, bar: {baz: 'dawg'}},
+      {_id: 'c', foo: true, bar: "yo"},
+      {_id: 'd', foo: null, bar: []}
+    ]);
+    const res1 = await db.find({
+      selector: {"foo.bar": 'yo', "bar.baz": 'hey'},
+      fields: ['_id']
     });
+    res1.docs.should.deep.equal([{_id: 'a'}]);
+    const res2 = await db.find({
+      selector: {"foo.bar": 'yo', "bar.baz": 'sup'},
+      fields: ['_id']
+    });
+    res2.docs.should.have.length(0);
+    const res3 = await db.find({
+      selector: {"foo.bar": 'bruh', "bar.baz": 'nah'},
+      fields: ['_id']
+    });
+    res3.docs.should.have.length(0);
   });
 });

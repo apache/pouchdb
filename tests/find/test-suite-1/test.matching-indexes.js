@@ -1,10 +1,10 @@
 'use strict';
 
-describe('test.matching-indexes.js', function () {
-  var sortById = testUtils.sortById;
+describe('test.matching-indexes.js', () => {
+  const sortById = testUtils.sortById;
 
-  beforeEach(function () {
-    return context.db.bulkDocs([
+  beforeEach(async () => {
+    await context.db.bulkDocs([
       { name: 'Mario', _id: 'mario', rank: 5, series: 'Mario', debut: 1981 },
       { name: 'Jigglypuff', _id: 'puff', rank: 8, series: 'Pokemon', debut: 1996 },
       { name: 'Link', rank: 10, _id: 'link', series: 'Zelda', debut: 1986 },
@@ -20,37 +20,33 @@ describe('test.matching-indexes.js', function () {
     ]);
   });
 
-  it('should pick a better matching index 1', function () {
-    var db = context.db;
-    return db.createIndex({
+  it('should pick a better matching index 1', async () => {
+    const db = context.db;
+    await db.createIndex({
       "index": {
         "fields": ["series"]
       }
-    }).then(function () {
-      return db.createIndex({
-        "index": {
-          "fields": ["series", "debut"]
-        }
-      });
-    }).then(function () {
-      return db.createIndex({
-        "index": {
-          "fields": ["debut"]
-        }
-      });
-    }).then(function () {
-      return db.find({
-        selector: {
-          $and: [
-            {series: 'Mario'},
-            {debut: {$gte: 1983}}
-          ]
-        },
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.sort(sortById);
-      res.docs.should.deep.equal([{_id: 'luigi'}, {_id: 'yoshi'}]);
     });
+    await db.createIndex({
+      "index": {
+        "fields": ["series", "debut"]
+      }
+    });
+    await db.createIndex({
+      "index": {
+        "fields": ["debut"]
+      }
+    });
+    const res = await db.find({
+      selector: {
+        $and: [
+          {series: 'Mario'},
+          {debut: {$gte: 1983}}
+        ]
+      },
+      fields: ['_id']
+    });
+    res.docs.sort(sortById);
+    res.docs.should.deep.equal([{_id: 'luigi'}, {_id: 'yoshi'}]);
   });
 });

@@ -40,4 +40,5 @@
 - [ ] This is my own work, I did not use AI, LLM's or similar technology for code or docs generation
 - [ ] Code is written and works correctly
 - [ ] Changes are covered by tests
+- [ ] I modified the [types](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/pouchdb) to reflect the changes, if necessary
 - [ ] Documentation changes were made in the `docs` folder
