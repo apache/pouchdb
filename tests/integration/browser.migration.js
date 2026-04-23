@@ -218,14 +218,14 @@ describe('migration', () => {
             { key: 3, id: '2', value: null },
             { key: 4, id: '3', value: null }
           ];
-            await oldPouch.bulkDocs({docs});
-            should.not.exist(null, 'bulkDocs');
-            const queryRes = await oldPouch.query('myview');
-            queryRes.rows.should.deep.equal(expectedRows);
-            await oldPouch.close();
-            const newPouch = new dbs.second.pouch(dbs.second.local);
-            const newRes = await newPouch.query('myview', {stale: 'ok'});
-            newRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.bulkDocs({docs});
+          should.not.exist(null, 'bulkDocs');
+          const queryRes = await oldPouch.query('myview');
+          queryRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const newRes = await newPouch.query('myview', {stale: 'ok'});
+          newRes.rows.should.deep.equal(expectedRows);
         });
 
         it("Test persistent views don't require update, with a value",
@@ -247,13 +247,13 @@ describe('migration', () => {
             { key: 3, id: '2', value: 9 },
             { key: 4, id: '3', value: 16 }
           ];
-            await oldPouch.bulkDocs({docs});
-            const queryRes = await oldPouch.query('myview');
-            queryRes.rows.should.deep.equal(expectedRows);
-            await oldPouch.close();
-            const newPouch = new dbs.second.pouch(dbs.second.local);
-            const newRes = await newPouch.query('myview', {stale: 'ok'});
-            newRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.bulkDocs({docs});
+          const queryRes = await oldPouch.query('myview');
+          queryRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const newRes = await newPouch.query('myview', {stale: 'ok'});
+          newRes.rows.should.deep.equal(expectedRows);
         });
 
         it('Returns ok for viewCleanup after modifying view', async () => {
@@ -313,14 +313,14 @@ describe('migration', () => {
           ];
 
           const oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
-            await oldPouch.bulkDocs({docs: origDocs});
-            await oldPouch.close();
-            const newPouch = new dbs.second.pouch(dbs.second.local);
-            const res = await newPouch.allDocs();
-            res.total_rows.should.equal(2);
-            res.rows.should.have.length(2);
-            res.rows[1].id.should.equal(origDocs[0]._id);
-            res.rows[0].id.should.equal(origDocs[1]._id);
+          await oldPouch.bulkDocs({docs: origDocs});
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const res = await newPouch.allDocs();
+          res.total_rows.should.equal(2);
+          res.rows.should.have.length(2);
+          res.rows[1].id.should.equal(origDocs[0]._id);
+          res.rows[0].id.should.equal(origDocs[1]._id);
         });
       }
 
