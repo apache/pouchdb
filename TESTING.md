@@ -66,7 +66,7 @@ The main test suite can be run using the following command:
 
 PouchDB runs in the browser and on Node.js, and has multiple different storage
 backends known as _adapters_. In the browser these are `idb`, `indexeddb` and
-`memory` and on Node.js they're `leveldb` and `memory`.
+`memory` and on Node.js they're `nodesqlite`, `leveldb` and `memory`.
 
 It also includes an adapter named `http`, which works by delegating operations
 to CouchDB (or anything that's API-compatible with it) over the network. Since
@@ -92,7 +92,7 @@ databases. These are selected automatically based on the execution environment,
 but this variable overrides the default choice and causes additional adapters to
 be loaded if they're not part of the default distribution.
 
-On Node.js the available local adapters are `leveldb` and `memory`. In the
+On Node.js the available local adapters are `nodesqlite`, `leveldb` and `memory`. In the
 browser they're `idb`, `indexeddb` and `memory`.
 
 You can also set `ADAPTERS=http` to force all PouchDB databases to be created on
@@ -187,7 +187,7 @@ Comma-separated list of preferred view adapter backends that PouchDB will use.
 This variable overrides the default choice and causes additional adapters to
 be loaded if they're not part of the default distribution.
 
-On Node.js the available adapters are `leveldb` and `memory`. In the
+On Node.js the available adapters are `nodesqlite`, `leveldb` and `memory`. In the
 browser they're `idb`, `indexeddb` and `memory`.
 
 

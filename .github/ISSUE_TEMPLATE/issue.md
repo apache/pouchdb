@@ -15,7 +15,7 @@ Write the description of the issue here
 ### Info
 - Environment: (Node.js/browser/hybrid app/etc.)
 - Platform: (Chrome/FF/Safari/Edge/iOS/Android/etc.)
-- Adapter: (idb/indexeddb/memory/leveldb/etc.)
+- Adapter: (idb/indexeddb/memory/leveldb/nodesqlite/etc.)
 - Server: (CouchDB/Cloudant/PouchDB Server/etc.)
 
 ### Reproduce
