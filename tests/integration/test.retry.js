@@ -46,17 +46,17 @@ adapters.forEach((adapters) => {
 
       let paused = 0;
       rep.on('paused', async (e) => {
-        ++paused;
+        const currentPaused = ++paused;
         // The first paused event is the replication up to date
         // and waiting on changes (no error)
-        if (paused === 1) {
+        if (currentPaused === 1) {
           should.not.exist(e);
           await remote.put({_id: 'foo'});
           await remote.put({_id: 'bar'});
         }
         // Second paused event is due to failed writes, should
         // have an error
-        if (paused === 2) {
+        if (currentPaused === 2) {
           should.exist(e);
         }
       });
@@ -104,7 +104,7 @@ adapters.forEach((adapters) => {
       let paused = 0;
       let error;
       rep.on('paused', async (e) => {
-        ++paused;
+        const currentPaused = ++paused;
         // The first paused event is the replication up to date
         // and waiting on changes (no error)
         try {
@@ -113,7 +113,7 @@ adapters.forEach((adapters) => {
           error = err;
           rep.cancel();
         }
-        if (paused === 1) {
+        if (currentPaused === 1) {
           await remote.put({_id: 'foo'});
         } else {
           rep.cancel();
