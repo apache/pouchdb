@@ -23,7 +23,7 @@ const myMemPouch = new MyMemPouch('dbname');
 const MyPrefixedPouch = PouchDB.defaults({
   prefix: '/path/to/my/db/'
 });
-// db will be named '/path/to/my/db/dbname', useful for LevelDB
+// db will be named '/path/to/my/db/dbname'
 const myPrefixedPouch = new MyPrefixedPouch('dbname');
 
 const HTTPPouch = PouchDB.defaults({

@@ -16,8 +16,15 @@ fi
 
 : "${CLIENT:=node}"
 : "${COUCH_HOST:=http://127.0.0.1:5984}"
-: "${VIEW_ADAPTERS:=memory}"
-export VIEW_ADAPTERS
+
+if [ -z "$VIEW_ADAPTERS" ]; then
+  if [ "$CLIENT" == "node" ]; then
+      export VIEW_ADAPTERS="nodesqlite"
+  else
+    export VIEW_ADAPTERS="indexeddb"
+  fi
+fi
+
 
 pouchdb-setup-server() {
   # in CI, link pouchdb-servers dependencies on pouchdb

@@ -31,8 +31,7 @@ var AGGRESSIVELY_BUNDLED_PACKAGES =
 var BROWSER_ONLY_PACKAGES =
   ['pouchdb-browser'];
 // packages that only use the browser field to ignore dependencies
-var BROWSER_DEPENDENCY_ONLY_PACKAGES =
-  ['pouchdb-adapter-leveldb'];
+var BROWSER_DEPENDENCY_ONLY_PACKAGES = ['pouchdb-adapter-nodesqlite'];
 
 function buildModule(filepath) {
   var pkg = require(path.resolve(filepath, 'package.json'));

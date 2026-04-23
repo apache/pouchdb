@@ -519,7 +519,7 @@ adapters.forEach(function (adapter) {
     // NO MORE HTTP TESTS AFTER THIS POINT!
     //
     // We're testing some functionality specific to the implementation
-    // of pouch-adapter-(idb|websql|leveldb), skip the tests if
+    // of pouch-adapter-(idb|websql), skip the tests if
     // HTTP or if using new adapters (NEXT=1).
 
     // TODO BEFORE MERGING: Do we still need to block this off for the indexeddb

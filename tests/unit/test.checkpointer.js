@@ -4,11 +4,10 @@ require("chai").should();
 
 var PouchDB = require("../../packages/node_modules/pouchdb-for-coverage");
 var Checkpointer = require("../../packages/node_modules/pouchdb-checkpointer");
-var memdown = require("memdown");
 
 var genReplicationId = PouchDB.utils.generateReplicationId;
-var sourceDb = new PouchDB({ name: "local_test_db", db: memdown });
-var targetDb = new PouchDB({ name: "target_test_db", db: memdown });
+var sourceDb = new PouchDB({ name: "local_test_db" });
+var targetDb = new PouchDB({ name: "target_test_db" });
 
 describe("test.checkpointer.js", () => {
   it("create checkpointer instance", async () => {

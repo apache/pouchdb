@@ -63,7 +63,7 @@ PouchDB has two types of data: documents and attachments.
 
 As in CouchDB, the documents you store must be serializable as JSON. Modifying the `Object` prototype or storing classes is not supported.
 
-IndexedDB will actually support non-JSON data (e.g. `Date`s aren't stringified), but you should not rely on this, because CouchDB, LevelDB, and Web SQL do not behave the same.
+IndexedDB will actually support non-JSON data (e.g. `Date`s aren't stringified), but you should not rely on this, because CouchDB and Web SQL do not behave the same.
 
 #### Attachments
 

@@ -55,7 +55,7 @@ viewAdapters.forEach(viewAdapter => {
         return done();
       }
 
-      if (db.adapter !== 'leveldb' && db.adapter !== 'idb') {
+      if (db.adapter !== 'idb') {
         return done();
       }
 
@@ -109,7 +109,7 @@ viewAdapters.forEach(viewAdapter => {
     it('Create pouch with no view adapters', function (done) {
       const db = new PouchDB(dbs.name);
 
-      if (db.adapter !== 'leveldb' && db.adapter !== 'idb') {
+      if (db.adapter !== 'idb') {
         return done();
       }
 

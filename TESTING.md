@@ -65,8 +65,7 @@ The main test suite can be run using the following command:
 > If the tests don‘t pass on `main`, try building once before running the tests: `$npm run build`.
 
 PouchDB runs in the browser and on Node.js, and has multiple different storage
-backends known as _adapters_. In the browser these are `idb`, `indexeddb` and
-`memory` and on Node.js they're `leveldb` and `memory`.
+backends known as _adapters_. In the browser these are `idb` and `indexeddb` and on Node.js there is `nodesqlite`.
 
 It also includes an adapter named `http`, which works by delegating operations
 to CouchDB (or anything that's API-compatible with it) over the network. Since
@@ -92,8 +91,8 @@ databases. These are selected automatically based on the execution environment,
 but this variable overrides the default choice and causes additional adapters to
 be loaded if they're not part of the default distribution.
 
-On Node.js the available local adapters are `leveldb` and `memory`. In the
-browser they're `idb`, `indexeddb` and `memory`.
+On Node.js the available local adapter is `nodesqlite`. In the
+browser they're `idb` and `indexeddb`.
 
 You can also set `ADAPTERS=http` to force all PouchDB databases to be created on
 a remote server, identified by `COUCH_HOST`. This is not necessary for
@@ -181,14 +180,14 @@ following values:
 
 Set this to `1` to skip the migration tests.
 
-#### `VIEW_ADAPTERS` (default: `memory`) <!-- omit from toc -->
+#### `VIEW_ADAPTERS` (default: `nodesqlite`) <!-- omit from toc -->
 
 Comma-separated list of preferred view adapter backends that PouchDB will use. 
 This variable overrides the default choice and causes additional adapters to
 be loaded if they're not part of the default distribution.
 
-On Node.js the available adapters are `leveldb` and `memory`. In the
-browser they're `idb`, `indexeddb` and `memory`.
+On Node.js the available adapter is `nodesqlite`. In the
+browser they're `idb` and `indexeddb`.
 
 
 ## Other sets of tests
@@ -213,8 +212,8 @@ These suites support most of the same options as the integration tests.
 You'll want to test specific adapters by specifying them on the command-line,
 for example:
 
-    # run the "find" tests with the memory client on node.js
-    $ TYPE=find PLUGINS=pouchdb-find CLIENT=node ADAPTERS=memory npm test
+    # run the "find" tests with the nodesqlite client on node.js
+    $ TYPE=find PLUGINS=pouchdb-find CLIENT=node ADAPTERS=nodesqlite npm test
 
     # run the "mapreduce" tests with indexeddb in firefox
     $ TYPE=mapreduce CLIENT=firefox ADAPTERS=indexeddb npm test

@@ -41,7 +41,7 @@ commonUtils.plugins = function () {
   return plugins ? plugins.split(',') : [];
 };
 
-var PLUGIN_ADAPTERS = ['indexeddb', 'localstorage', 'memory', 'node-websql'];
+var PLUGIN_ADAPTERS = ['indexeddb', 'node-websql', 'nodesqlite'];
 
 commonUtils.loadPouchDB = function (opts) {
   opts = opts || {};

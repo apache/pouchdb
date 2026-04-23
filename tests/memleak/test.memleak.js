@@ -428,31 +428,3 @@ describe('test.memleak.js -- http adapter', function () {
     Runner(measure,Run);
   });
 });
-
-describe('test.memleak.js -- leveldown adapter', function () {
-
-  it('Test basic memory leak in PouchDB leveldown adapter', function (next) {
-    this.timeout(360*1000);
-
-    var opts = {
-      dump_snapshots: default_opts.dump_snapshots,
-      max_growth: 33000,
-      max_percent: 1,
-      runs: 2000
-    };
-
-    var measure = new MeasureHeap(next,opts,'level');
-
-    function Run() {
-      var db = new PouchDB('goodluck');
-      function Finally() { return db.close(); }
-      return db.info()
-      .then( Finally, Finally )
-      .then(function () {
-        return sleep(20);
-      });
-    }
-
-    Runner(measure,Run);
-  });
-});

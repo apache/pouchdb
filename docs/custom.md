@@ -60,7 +60,7 @@ for the browser. In particular, it ships with the IndexedDB adapter
 as its default adapter. It also contains the replication, HTTP, and map/reduce plugins.
 
 Use this preset if you only want to use PouchDB in the browser,
-and don't want to use it in Node.js. (E.g. to avoid installing LevelDB.)
+and don't want to use it in Node.js. (E.g. to avoid installing nodesqlite.)
 
 #### Example Usage
 
@@ -86,7 +86,7 @@ const PouchDB = require('pouchdb-core')
 ### [pouchdb-node](https://npmjs.org/package/pouchdb-node)
 
 The `pouchdb-node` preset contains the version of PouchDB that is designed for
-Node.js. In particular, it uses the LevelDB adapter and doesn't ship with the
+Node.js. In particular, it uses the nodesqlite adapter and doesn't ship with the
 IndexedDB or WebSQL adapters. It also contains the replication, HTTP, and map/reduce plugins.
 
 Use this preset if you are only using PouchDB in Node, and not in the browser.
@@ -106,7 +106,6 @@ const db = new PouchDB('mydb');
 
 ```js
 const PouchDB = require('pouchdb-core')
-  .plugin(require('pouchdb-adapter-leveldb'))
   .plugin(require('pouchdb-adapter-http'))
   .plugin(require('pouchdb-mapreduce'))
   .plugin(require('pouchdb-replication'));
@@ -133,7 +132,7 @@ PouchDB.plugin(/* attach plugins to make me more interesting! */);
 
 Plugins contain functionality that can be added to a `PouchDB` instance using `PouchDB.plugin()`. There are many [third-party plugins](/external.html), but the ones described below are first-party plugins, which are given the same level of support as PouchDB itself. Some first-party plugins are included in the default `pouchdb` build, whereas others aren't.
 
-There is also a special type of plugin called an _adapter plugin_.  Adapter plugins (such as IndexedDB, WebSQL, LevelDB, and HTTP) determine the storage format that
+There is also a special type of plugin called an _adapter plugin_.  Adapter plugins (such as IndexedDB, WebSQL, and HTTP) determine the storage format that
 PouchDB uses. For the non-HTTP adapters, the plugin order matters, i.e. if you
 want IndexedDB to be preferred to WebSQL, then you should load it first.
 
@@ -173,23 +172,6 @@ const db = new PouchDB('mydb', {adapter: 'websql'});
 console.log(db.adapter); // 'websql'
 ```
 
-### [pouchdb-adapter-leveldb](https://npmjs.org/package/pouchdb-adapter-leveldb)
-
-The primary adapter used by PouchDB in Node.js, using LevelDB. The adapter name
-is `'leveldb'`.
-
-#### Example usage
-
-```bash
-npm install pouchdb-adapter-leveldb
-```
-
-```js
-PouchDB.plugin(require('pouchdb-adapter-leveldb'));
-const db = new PouchDB('mydb', {adapter: 'leveldb'});
-console.log(db.adapter); // 'leveldb'
-```
-
 ### [pouchdb-adapter-http](https://npmjs.org/package/pouchdb-adapter-http)
 
 The primary adapter used by PouchDB in both Node.js and the browser for communicating
@@ -211,38 +193,21 @@ const db = new PouchDB('http://127.0.0.1:5984/mydb');
 console.log(db.adapter); // 'http'
 ```
 
-### [pouchdb-adapter-memory](https://npmjs.org/package/pouchdb-adapter-memory)
+### [pouchdb-adapter-fruitdown](https://npmjs.org/package/pouchdb-adapter-fruitdown)
 
-An optional adapter that works in the browser and Node.js, fully in-memory. The adapter name
-is `'memory'`.
-
-#### Example usage
-
-```bash
-npm install pouchdb-adapter-memory
-```
-
-```js
-PouchDB.plugin(require('pouchdb-adapter-memory'));
-const db = new PouchDB('mydb', {adapter: 'memory'});
-console.log(db.adapter); // 'memory'
-```
-
-### [pouchdb-adapter-localstorage](https://npmjs.org/package/pouchdb-adapter-localstorage)
-
-An optional adapter that works in the browser using LocalStorage. The adapter name
-is `'localstorage'`.
+An optional adapter that works in the browser using IndexedDB via [fruitdown](https://github.com/nolanlawson/fruitdown). The adapter name
+is `'fruitdown'`.
 
 #### Example usage
 
 ```bash
-npm install pouchdb-adapter-localstorage
+npm install pouchdb-adapter-fruitdown
 ```
 
 ```js
-PouchDB.plugin(require('pouchdb-adapter-localstorage'));
-const db = new PouchDB('mydb', {adapter: 'localstorage'});
-console.log(db.adapter); // 'localstorage'
+PouchDB.plugin(require('pouchdb-adapter-fruitdown'));
+const db = new PouchDB('mydb', {adapter: 'fruitdown'});
+console.log(db.adapter); // 'fruitdown'
 ```
 
 ### [pouchdb-adapter-node-websql](https://npmjs.org/package/pouchdb-adapter-node-websql)

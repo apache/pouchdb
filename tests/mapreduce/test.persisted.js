@@ -655,14 +655,14 @@ describe('test.persisted.js', function () {
 
   var isNode = typeof window === 'undefined';
   if (dbType === 'local' && isNode) {
-    it('#239 test memdown db', function () {
+    it('#239 test db', function () {
       var destroyedDBs = [];
       PouchDB.on('destroyed', function (db) {
         destroyedDBs.push(db);
       });
 
       // make sure prefixed DBs are tied to regular DBs
-      var db = new PouchDB(dbName, {db: require('memdown')});
+      var db = new PouchDB(dbName, 'nodesqlite');
       return testUtils.fin(createView(db, {
         map: function (doc) {
           emit(doc.name);

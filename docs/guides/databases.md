@@ -130,7 +130,7 @@ In Safari, you can simply click *Safari* &#8594; *Clear History and Website Data
 
 {% include anchor.html title="Differences between the local and remote databases" hash="differences-between-the-local-and-remote-databases" %}
 
-When you create a local PouchDB database, it uses whatever underlying datastore is available - IndexedDB in most browsers, WebSQL in older browsers, and LevelDB in Node.js.
+When you create a local PouchDB database, it uses whatever underlying datastore is available - IndexedDB in most browsers, WebSQL in older browsers, and nodesqlite in Node.js.
 
 When you create a remote PouchDB database, it communicates directly with the remote database &ndash; CouchDB, Cloudant, Couchbase, etc.
 

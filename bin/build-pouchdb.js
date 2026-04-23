@@ -27,7 +27,7 @@ var builtInModules = require('builtin-modules');
 var external = Object.keys(require('../package.json').dependencies)
   .concat(builtInModules);
 
-var plugins = ['indexeddb', 'localstorage', 'memory', 'find'];
+var plugins = ['indexeddb', 'find'];
 
 var currentYear = new Date().getFullYear();
 
@@ -41,24 +41,6 @@ var comments = {
   '\n// http://pouchdb.com\n',
 
   'indexeddb': '// PouchDB indexeddb plugin ' + version + '\n',
-
-  'memory': '// PouchDB in-memory plugin ' + version +
-  '\n// Based on MemDOWN: https://github.com/rvagg/memdown' +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
-
-  'localstorage': '// PouchDB localStorage plugin ' + version +
-  '\n// Based on localstorage-down: https://github.com/No9/localstorage-down' +
-  '\n// ' +
-  '\n// (c) 2012-' + currentYear + ' Dale Harvey and the PouchDB team' +
-  '\n// PouchDB may be freely distributed under the Apache license, ' +
-  'version 2.0.' +
-  '\n// For all details and documentation:' +
-  '\n// http://pouchdb.com\n',
 
   'find': '// pouchdb-find plugin ' + version +
   '\n// Based on Mango: https://github.com/cloudant/mango' +

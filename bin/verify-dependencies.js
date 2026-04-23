@@ -25,12 +25,10 @@ getReqs('pouchdb/lib/index.js').should.not.contain('pouchdb-core');
 getReqs('pouchdb/lib/index-browser.js').should.not.contain('vm');
 getReqs('pouchdb/lib/index-browser.js').should.not.contain('pouchdb-mapreduce');
 getReqs('pouchdb/lib/index-browser.js').should.not.contain('pouchdb');
-getReqs('pouchdb/lib/index-browser.js').should.not.contain('leveldown');
 getReqs('pouchdb/lib/index-browser.js').should.not.contain('pouchdb-core');
 
 // pouchdb-node and pouchdb-browser are also aggressively bundled
 getReqs('pouchdb-node/lib/index.js').should.not.contain('pouchdb-core');
-getReqs('pouchdb-node/lib/index.js').should.contain('leveldown');
 getReqs('pouchdb-browser/lib/index.js').should.not.contain('pouchdb-core');
 
 // pouchdb-for-coverage is super-duper aggressively bundled

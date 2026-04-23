@@ -1,10 +1,9 @@
 'use strict';
 
-var memdown = require('memdown');
 var PouchDB = require('../../packages/node_modules/pouchdb-for-coverage');
 var genReplicationId = PouchDB.utils.generateReplicationId;
-var sourceDb = new PouchDB({name: 'local_db', db: memdown});
-var targetDb = new PouchDB({name: 'target_db', db: memdown});
+var sourceDb = new PouchDB({name: 'local_db'});
+var targetDb = new PouchDB({name: 'target_db'});
 
 require('chai').should();
 
