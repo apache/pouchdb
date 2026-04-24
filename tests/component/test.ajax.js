@@ -15,9 +15,9 @@ describe('test.ajax.js', function () {
         res.end(JSON.stringify({ok: req.headers.cookie === 'Test=test'}));
       }
     });
-    server.listen(6000, function () {
-      PouchDB.fetch('http://127.0.0.1:6000/install-cookie').then(function () {
-        return PouchDB.fetch('http://127.0.0.1:6000/check-cookie');
+    server.listen(6100, function () {
+      PouchDB.fetch('http://127.0.0.1:6100/install-cookie').then(function () {
+        return PouchDB.fetch('http://127.0.0.1:6100/check-cookie');
       }).then(function (response) {
         return response.json();
       }).then(function (res) {
@@ -32,8 +32,8 @@ describe('test.ajax.js', function () {
     var server = http.createServer(function (req, res) {
       res.end(JSON.stringify({ok: req.url === '/testdb/path'}));
     });
-    server.listen(6000, function () {
-      var db = new PouchDB('http://127.0.0.1:6000/testdb', { skip_setup: true });
+    server.listen(6100, function () {
+      var db = new PouchDB('http://127.0.0.1:6100/testdb', { skip_setup: true });
       db.fetch('path').then(function (response) {
         return response.json();
       }).then(function (res) {
@@ -48,8 +48,8 @@ describe('test.ajax.js', function () {
     var server = http.createServer(function (req, res) {
       res.end(JSON.stringify({ok: req.url === '/root-path'}));
     });
-    server.listen(6000, function () {
-      var db = new PouchDB('http://127.0.0.1:6000/testdb', { skip_setup: true });
+    server.listen(6100, function () {
+      var db = new PouchDB('http://127.0.0.1:6100/testdb', { skip_setup: true });
       db.fetch('/root-path').then(function (response) {
         return response.json();
       }).then(function (res) {

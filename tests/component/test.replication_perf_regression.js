@@ -35,6 +35,8 @@ describe('test.replication_perf_regression.js', function () {
   });
 
   after(function (done) {
+    // server.close takes surprisingly long
+    this.timeout(10000);
     server.close(done);
   });
 
