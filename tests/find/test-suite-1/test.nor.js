@@ -1,8 +1,8 @@
 'use strict';
 
-describe('test.nor.js', function () {
-  beforeEach(function () {
-    return context.db.bulkDocs([
+describe('test.nor.js', () => {
+  beforeEach(async () => {
+    await context.db.bulkDocs([
       { name: 'Mario', _id: 'mario', rank: 5, series: 'Mario', debut: 1981, awesome: true },
       { name: 'Jigglypuff', _id: 'puff', rank: 8, series: 'Pokemon', debut: 1996,
         awesome: false },
@@ -14,45 +14,43 @@ describe('test.nor.js', function () {
     ]);
   });
 
-  it('#6366 should do a basic $nor', function () {
-    var db = context.db;
-    return db.find({
+  it('#6366 should do a basic $nor', async () => {
+    const db = context.db;
+    const res = await db.find({
       selector: {
         "$nor": [
           { "series": "Mario" },
           { "series": "Pokemon" }
         ]
       }
-    }).then(function (res) {
-      var docs = res.docs.map(function (doc) {
-        return {
-          _id: doc._id
-        };
-      });
-      docs.should.deep.equal([
-        {'_id': 'link'}
-      ]);
     });
+    const docs = res.docs.map((doc) => {
+      return {
+        _id: doc._id
+      };
+    });
+    docs.should.deep.equal([
+      {'_id': 'link'}
+    ]);
   });
 
-  it('#6366 should do a basic $nor, with explicit $eq', function () {
-    var db = context.db;
-    return db.find({
+  it('#6366 should do a basic $nor, with explicit $eq', async () => {
+    const db = context.db;
+    const res = await db.find({
       selector: {
         "$nor": [
           { "series": {$eq: "Mario"} },
           { "series": {$eq: "Pokemon"} }
         ]
       }
-    }).then(function (res) {
-      var docs = res.docs.map(function (doc) {
-        return {
-          _id: doc._id
-        };
-      });
-      docs.should.deep.equal([
-        {'_id': 'link'}
-      ]);
     });
+    const docs = res.docs.map((doc) => {
+      return {
+        _id: doc._id
+      };
+    });
+    docs.should.deep.equal([
+      {'_id': 'link'}
+    ]);
   });
 });

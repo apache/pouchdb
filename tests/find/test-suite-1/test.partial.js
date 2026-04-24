@@ -1,7 +1,7 @@
 'use strict';
 
-describe('test.partial.js', function () {
-  beforeEach(function () {
+describe('test.partial.js', () => {
+  beforeEach(async () => {
     const write = context.db.bulkDocs({ docs: [
       { _id: 'a', type: 'x', hello: 'world' },
       { _id: 'b', type: 'y', hello: 'world' }
@@ -17,7 +17,7 @@ describe('test.partial.js', function () {
     return Promise.all([write, index]);
   });
 
-  it('should write the partial filter to the ddoc', async function () {
+  it('should write the partial filter to the ddoc', async () => {
     const result = await context.db.get('_design/test-partial');
     const map = result.views['type-x'].map;
     map.should.have.property('partial_filter_selector');
@@ -28,7 +28,7 @@ describe('test.partial.js', function () {
     });
   });
 
-  it('should apply the partial filter', async function () {
+  it('should apply the partial filter', async () => {
     const result = await context.db.find({
       selector: { hello: 'world' },
       use_index: ['_design/test-partial', 'type-x']

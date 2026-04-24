@@ -1,9 +1,9 @@
 'use strict';
 
-describe('test.escaping.js', function () {
-  it('period can be escaped', function () {
-    var db = context.db;
-    var index = {
+describe('test.escaping.js', () => {
+  it('period can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo\\.bar"
@@ -12,24 +12,21 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc1', foo: {bar: 'a'}},
       {_id: 'doc2', 'foo.bar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo\\.bar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc2"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo\\.bar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc2"}]);
   });
 
-  it('space can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('space can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo bar"
@@ -38,23 +35,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', 'foo bar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo bar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo bar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc"}]);
   });
 
-  it('dash can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('dash can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo-bar"
@@ -63,23 +57,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', 'foo-bar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo-bar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo-bar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc"}]);
   });
 
-  it('initial digits can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('initial digits can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "0foobar"
@@ -88,23 +79,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', '0foobar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'0foobar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'0foobar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc"}]);
   });
 
-  it('initial dollar sign can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('initial dollar sign can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "$foobar"
@@ -113,23 +101,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', '$foobar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'\\$foobar': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'\\$foobar': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc"}]);
   });
 
-  it('unicode can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('unicode can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "授人以鱼不如授人以渔。"
@@ -138,23 +123,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', '授人以鱼不如授人以渔。': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'授人以鱼不如授人以渔。': 'a'},
-        fields: ['_id']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc"}]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'授人以鱼不如授人以渔。': 'a'},
+      fields: ['_id']
     });
+    res.docs.should.deep.equal([{ "_id": "doc"}]);
   });
 
-  it('deeper values can be escaped', function () {
-    var db = context.db;
-    var index = {
+  it('deeper values can be escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo.bar.0foobar"
@@ -163,7 +145,7 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    var doc = {
+    const doc = {
       _id: 'doc',
       foo: {
         bar: {
@@ -175,22 +157,18 @@ describe('test.escaping.js', function () {
         }
       }
     };
-    return db.bulkDocs([doc])
-    .then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo.bar.0foobar': 'a'},
-        fields: ['_id', 'foo']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([doc]);
+    await db.bulkDocs([doc]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo.bar.0foobar': 'a'},
+      fields: ['_id', 'foo']
     });
+    res.docs.should.deep.equal([doc]);
   });
 
-  it('internal digits are not escaped', function () {
-    var db = context.db;
-    var index = {
+  it('internal digits are not escaped', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo0bar"
@@ -199,23 +177,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', 'foo0bar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo0bar': 'a'},
-        fields: ['_id', 'foo0bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc", "foo0bar": "a" }]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo0bar': 'a'},
+      fields: ['_id', 'foo0bar']
     });
+    res.docs.should.deep.equal([{ "_id": "doc", "foo0bar": "a" }]);
   });
 
-  it('handles escape patterns', function () {
-    var db = context.db;
-    var index = {
+  it('handles escape patterns', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           "foo_c46_bar"
@@ -224,23 +199,20 @@ describe('test.escaping.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc', 'foo_c46_bar': 'a'}
-    ]).then(function () {
-      return db.createIndex(index);
-    }).then(function () {
-      return db.find({
-        selector: {'foo_c46_bar': 'a'},
-        fields: ['_id', 'foo_c46_bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ "_id": "doc", "foo_c46_bar": "a" }]);
+    ]);
+    await db.createIndex(index);
+    const res = await db.find({
+      selector: {'foo_c46_bar': 'a'},
+      fields: ['_id', 'foo_c46_bar']
     });
+    res.docs.should.deep.equal([{ "_id": "doc", "foo_c46_bar": "a" }]);
   });
 
-  it('#8808 handles escape patterns without collisions (with indexes)', function () {
-    var db = context.db;
-    var index1 = {
+  it('#8808 handles escape patterns without collisions (with indexes)', async () => {
+    const db = context.db;
+    const index1 = {
       "index": {
         "fields": [
           "foo/bar"
@@ -249,7 +221,7 @@ describe('test.escaping.js', function () {
       "name": "foo-index-1",
       "type": "json"
     };
-    var index2 = {
+    const index2 = {
       "index": {
         "fields": [
           "foo_c47_bar"
@@ -258,56 +230,46 @@ describe('test.escaping.js', function () {
       "name": "foo-index-2",
       "type": "json"
     };
-    return db.bulkDocs([
+    await db.bulkDocs([
       {_id: 'doc1', 'foo/bar': 'a'},
       {_id: 'doc2', 'foo_c47_bar': 'a'},
-    ]).then(function () {
-      return db.createIndex(index1);
-    }).then(function () {
-      return db.createIndex(index2);
-    }).then(function () {
-      return db.find({
-        selector: {'foo/bar': 'a'},
-        fields: ['_id', 'foo/bar', 'foo_c47_bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc1', 'foo/bar': 'a' }]);
-    }).then(function () {
-      return db.find({
-        selector: {'foo_c47_bar': 'a'},
-        fields: ['_id', 'foo/bar', 'foo_c47_bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc2', foo_c47_bar: 'a' }]);
+    ]);
+    await db.createIndex(index1);
+    await db.createIndex(index2);
+    const res1 = await db.find({
+      selector: {'foo/bar': 'a'},
+      fields: ['_id', 'foo/bar', 'foo_c47_bar']
     });
+    res1.docs.should.deep.equal([{ _id: 'doc1', 'foo/bar': 'a' }]);
+    const res2 = await db.find({
+      selector: {'foo_c47_bar': 'a'},
+      fields: ['_id', 'foo/bar', 'foo_c47_bar']
+    });
+    res2.docs.should.deep.equal([{ _id: 'doc2', foo_c47_bar: 'a' }]);
   });
 
-  it('#8808 handles escape patterns without collisions (no indexes)', function () {
-    var db = context.db;
-    return db.bulkDocs([
+  it('#8808 handles escape patterns without collisions (no indexes)', async () => {
+    const db = context.db;
+    await db.bulkDocs([
       {_id: 'doc1', 'foo/bar': 'a'},
       {_id: 'doc2', 'foo_c47_bar': 'a'},
-    ]).then(function () {
-      return db.find({
-        selector: {'foo/bar': 'a'},
-        fields: ['_id', 'foo/bar', 'foo_c47_bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc1', 'foo/bar': 'a' }]);
-    }).then(function () {
-      return db.find({
-        selector: {'foo_c47_bar': 'a'},
-        fields: ['_id', 'foo/bar', 'foo_c47_bar']
-      });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc2', foo_c47_bar: 'a' }]);
+    ]);
+    const res1 = await db.find({
+      selector: {'foo/bar': 'a'},
+      fields: ['_id', 'foo/bar', 'foo_c47_bar']
     });
+    res1.docs.should.deep.equal([{ _id: 'doc1', 'foo/bar': 'a' }]);
+    const res2 = await db.find({
+      selector: {'foo_c47_bar': 'a'},
+      fields: ['_id', 'foo/bar', 'foo_c47_bar']
+    });
+    res2.docs.should.deep.equal([{ _id: 'doc2', foo_c47_bar: 'a' }]);
   });
 
-  it('#8808 bulk docs id escaping collisions in same doc (with indexes)', function () {
-    var db = context.db;
-    var docs = [ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ];
-    var index1 = {
+  it('#8808 bulk docs id escaping collisions in same doc (with indexes)', async () => {
+    const db = context.db;
+    const docs = [ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ];
+    const index1 = {
       "index": {
         "fields": [
           "foo/bar"
@@ -316,7 +278,7 @@ describe('test.escaping.js', function () {
       "name": "foo-index-1",
       "type": "json"
     };
-    var index2 = {
+    const index2 = {
       "index": {
         "fields": [
           "foo_c47_bar"
@@ -325,71 +287,47 @@ describe('test.escaping.js', function () {
       "name": "foo-index-2",
       "type": "json"
     };
-    return db.bulkDocs(docs).then(function (results) {
-      results.should.have.length(1, 'results length did not match');
-      results[0].ok.should.equal(true);
-    }).then(function () {
-      return db.allDocs({ include_docs: true });
-    }).then(function (results) {
-      results.rows.should.have.length(1, 'results length did not match');
+    const results = await db.bulkDocs(docs);
+    results.should.have.length(1, 'results length did not match');
+    results[0].ok.should.equal(true);
+    const allDocsResults = await db.allDocs({ include_docs: true });
+    allDocsResults.rows.should.have.length(1, 'results length did not match');
 
-      results.rows[0].doc._id.should.equal('doc');
-      results.rows[0].doc['foo/bar'].should.equal(-1);
-      results.rows[0].doc['foo_c47_bar'].should.equal(2);
-    }).then(function () {
-      return db.createIndex(index1);
-    }).then(function () {
-      return db.createIndex(index2);
-    }).then(function () {
-      return db.find({ selector: {'foo/bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.length.should.equal(0, 'foo/bar should not be greater than 0');
-    }).then(function () {
-      return db.find({ selector: {'foo/bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 }]);
-    }).then(function () {
-      return db.find({ selector: {'foo_c47_bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.length.should.equal(0, 'foo_c47_bar should not be less than 0');
-    }).then(function () {
-      return db.find({ selector: {'foo_c47_bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.should.deep.equal([{ _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
-    });
+    allDocsResults.rows[0].doc._id.should.equal('doc');
+    allDocsResults.rows[0].doc['foo/bar'].should.equal(-1);
+    allDocsResults.rows[0].doc['foo_c47_bar'].should.equal(2);
+    await db.createIndex(index1);
+    await db.createIndex(index2);
+    const res1 = await db.find({ selector: {'foo/bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res1.docs.length.should.equal(0, 'foo/bar should not be greater than 0');
+    const res2 = await db.find({ selector: {'foo/bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res2.docs.should.deep.equal([{ _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 }]);
+    const res3 = await db.find({ selector: {'foo_c47_bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res3.docs.length.should.equal(0, 'foo_c47_bar should not be less than 0');
+    const res4 = await db.find({ selector: {'foo_c47_bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res4.docs.should.deep.equal([{ _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
   });
 
-  it('#8808 bulk docs id escaping collisions in same doc (no indexes)', function () {
-    var db = context.db;
-    var docs = [ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ];
-    return db.bulkDocs(docs).then(function (results) {
-      results.should.have.length(1, 'results length did not match');
-      results[0].ok.should.equal(true);
-    }).then(function () {
-      return db.allDocs({ include_docs: true });
-    }).then(function (results) {
-      results.rows.should.have.length(1, 'results length did not match');
+  it('#8808 bulk docs id escaping collisions in same doc (no indexes)', async () => {
+    const db = context.db;
+    const docs = [ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ];
+    const results = await db.bulkDocs(docs);
+    results.should.have.length(1, 'results length did not match');
+    results[0].ok.should.equal(true);
+    const allDocsResults = await db.allDocs({ include_docs: true });
+    allDocsResults.rows.should.have.length(1, 'results length did not match');
 
-      results.rows[0].doc._id.should.equal('doc');
-      results.rows[0].doc['foo/bar'].should.equal(-1);
-      results.rows[0].doc['foo_c47_bar'].should.equal(2);
-    }).then(function () {
-      return db.find({ selector: {'foo/bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.length.should.equal(0, 'foo/bar should not be greater than 0');
-    }).then(function () {
-      return db.find({ selector: {'foo/bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.should.deep.equal([ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
-    }).then(function () {
-      return db.find({ selector: {'foo_c47_bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.length.should.equal(0, 'foo_c47_bar should not be less than 0');
-    }).then(function () {
-      return db.find({ selector: {'foo_c47_bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
-    }).then(function (res) {
-      res.docs.should.deep.equal([ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
-    });
+    allDocsResults.rows[0].doc._id.should.equal('doc');
+    allDocsResults.rows[0].doc['foo/bar'].should.equal(-1);
+    allDocsResults.rows[0].doc['foo_c47_bar'].should.equal(2);
+    const res1 = await db.find({ selector: {'foo/bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res1.docs.length.should.equal(0, 'foo/bar should not be greater than 0');
+    const res2 = await db.find({ selector: {'foo/bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res2.docs.should.deep.equal([ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
+    const res3 = await db.find({ selector: {'foo_c47_bar': {$lt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res3.docs.length.should.equal(0, 'foo_c47_bar should not be less than 0');
+    const res4 = await db.find({ selector: {'foo_c47_bar': {$gt: 0}}, fields: ['_id', 'foo/bar', 'foo_c47_bar'] });
+    res4.docs.should.deep.equal([ { _id: 'doc', 'foo/bar': -1, foo_c47_bar: 2 } ]);
   });
 
   it('#9002: query works without rewrite in nested object', async () => {

@@ -122,6 +122,12 @@ The LocalStorage plugin should be considered highly experimental, and the underl
 
 #### In-memory
 
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `memory` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163). 
+{% endmarkdown %}
+{% include alert/end.html%}
+
 Just as in the browser, you can also create a pure in-memory PouchDB:
 
 ```
@@ -139,22 +145,22 @@ This implementation is based on [MemDOWN](https://github.com/level/memdown), and
 
 #### Node SQLite adapter
 
-You can also use PouchDB over [SQLite3](https://github.com/mapbox/node-sqlite3) in Node, using the WebSQL adapter and
-[node-websql](https://github.com/nolanlawson/node-websql):
+You can also use PouchDB in Node.js' [native SQLite module](https://nodejs.org/api/sqlite.html), when using Node.js' `>22.5.0` version. 
 
 ```js
 const PouchDB = require('pouchdb');
-PouchDB.plugin(require('pouchdb-adapter-node-websql'));
+PouchDB.plugin(require('pouchdb-adapter-node-sqlite'));
 
-const db = new PouchDB('mydatabase.db', {adapter: 'websql'});
+const db = new PouchDB('mydatabase.db', {adapter: 'nodesqlite'});
 ```
 
-In this case, PouchDB is directly using SQLite queries to build the database, exactly as the WebSQL adapter would.
-
-See ["Prebuilt databases with PouchDB"]({{ site.baseurl }}/2016/04/28/prebuilt-databases-with-pouchdb.html)
-for a guide to how you might use this adapter to create prebuilt SQLite database files for adapters such as Cordova or Electron.
-
 #### Other LevelDOWN adapters
+
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `leveldb` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163).
+{% endmarkdown %}
+{% include alert/end.html%}
 
 Technically you are free to use
 [any LevelDOWN-based implementation](https://github.com/rvagg/node-levelup/wiki/Modules#storage-back-ends) in either Node or the browser.

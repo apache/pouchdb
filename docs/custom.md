@@ -175,6 +175,12 @@ console.log(db.adapter); // 'websql'
 
 ### [pouchdb-adapter-leveldb](https://npmjs.org/package/pouchdb-adapter-leveldb)
 
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `leveldb` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163). 
+{% endmarkdown %}
+{% include alert/end.html%}
+
 The primary adapter used by PouchDB in Node.js, using LevelDB. The adapter name
 is `'leveldb'`.
 
@@ -212,6 +218,12 @@ console.log(db.adapter); // 'http'
 ```
 
 ### [pouchdb-adapter-memory](https://npmjs.org/package/pouchdb-adapter-memory)
+
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `memory` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163). 
+{% endmarkdown %}
+{% include alert/end.html%}
 
 An optional adapter that works in the browser and Node.js, fully in-memory. The adapter name
 is `'memory'`.
