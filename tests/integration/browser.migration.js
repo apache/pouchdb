@@ -1,23 +1,21 @@
 'use strict';
 
-describe('migration', function () {
+describe('migration', () => {
 
-  function usingIdb() {
-    var pref = PouchDB.preferredAdapters;
+  const usingIdb = () => {
+    const pref = PouchDB.preferredAdapters;
     // Firefox will have ['idb'], Chrome will have ['idb', 'websql']
     return (pref.length === 1 && pref[0] === 'idb') ||
       (pref.length === 2 && pref[0] === 'idb' && pref[1] === 'websql');
-  }
+  };
 
-  function usingIndexeddb() {
+  const usingIndexeddb = () => {
     const pref = PouchDB.preferredAdapters;
     // FUTURE: treat indexeddb adapter as the preferred option?
     return pref.length === 1 && pref[0] === 'indexeddb';
-  }
+  };
 
-  function usingDefaultPreferredAdapters() {
-    return usingIdb() || usingIndexeddb();
-  }
+  const usingDefaultPreferredAdapters = () => usingIdb() || usingIndexeddb();
 
   const scenarios = [
     { scenario: 'PouchDB v1.1.0', constructorName: 'PouchDBVersion110'} ,
@@ -31,13 +29,13 @@ describe('migration', function () {
     { scenario: 'websql',         constructorName: 'PouchDB'} ,
   ];
 
-  var skip = false;
+  let skip = false;
 
-  before(function () {
-    var isNodeWebkit = typeof window !== 'undefined' &&
+  before(() => {
+    const isNodeWebkit = typeof window !== 'undefined' &&
       typeof process !== 'undefined';
 
-    var skipMigration = 'SKIP_MIGRATION' in testUtils.params() &&
+    const skipMigration = 'SKIP_MIGRATION' in testUtils.params() &&
       testUtils.params().SKIP_MIGRATION;
 
     if (!usingDefaultPreferredAdapters() || window.msIndexedDB ||
@@ -48,24 +46,21 @@ describe('migration', function () {
 
     // conditionally load all legacy PouchDB scripts to avoid pulling them in
     // for test runs that don't test migrations
-    return Promise.all(scenarios.map(function ({ scenario }) {
-      var match = scenario.match(/PouchDB v([.\d]+)/);
+    return Promise.all(scenarios.map(async ({ scenario }) => {
+      const match = scenario.match(/PouchDB v([.\d]+)/);
       if (!match) {
-        return Promise.resolve();
+        return;
       }
 
-      const loader = testUtils.asyncLoadScript('deps/pouchdb-' + match[1] + '-postfixed.js');
+      await testUtils.asyncLoadScript(`deps/pouchdb-${match[1]}-postfixed.js`);
 
       if (usingIndexeddb() && versionGte(scenario, '7.2.1')) {
-        return loader
-            .then(() => testUtils.asyncLoadScript('deps/pouchdb-' + match[1] + '-indexeddb-postfixed.js'));
-      } else {
-        return loader;
+        await testUtils.asyncLoadScript(`deps/pouchdb-${match[1]}-indexeddb-postfixed.js`);
       }
     }));
   });
 
-  after(function () {
+  after(() => {
     // free memory
     scenarios.forEach(({ constructorName }) => {
       if (constructorName !== 'PouchDB') {
@@ -74,11 +69,11 @@ describe('migration', function () {
     });
   });
 
-  scenarios.forEach(function ({ scenario, constructorName }) {
+  scenarios.forEach(({ scenario, constructorName }) => {
 
-    describe('migrate from ' + scenario, function () {
+    describe(`migrate from ${scenario}`, () => {
 
-      var dbs = {};
+      let dbs = {};
 
       before(function () {
         if (usingIndexeddb() && !versionGte(scenario, '7.2.1')) {
@@ -99,8 +94,8 @@ describe('migration', function () {
         }
 
         // need actual unique db names for these tests
-        var localName = testUtils.adapterUrl('local', 'test_migration_local');
-        var remoteName = testUtils.adapterUrl('http', 'test_migration_remote');
+        const localName = testUtils.adapterUrl('local', 'test_migration_local');
+        const remoteName = testUtils.adapterUrl('http', 'test_migration_remote');
 
         dbs.first = {
           pouch : window[constructorName] || PouchDB,
@@ -131,51 +126,34 @@ describe('migration', function () {
 
       });
 
-      afterEach(function (done) {
+      afterEach((done) => {
         testUtils.cleanup([dbs.first.local, dbs.second.local], done);
       });
 
-      var origDocs = [
+      const origDocs = [
         {_id: '0', a: 1, b: 1},
         {_id: '3', a: 4, b: 16},
         {_id: '1', a: 2, b: 4},
         {_id: '2', a: 3, b: 9}
       ];
 
-      it('Testing basic migration integrity', function (done) {
-        var oldPouch =
-          new dbs.first.pouch(dbs.first.local, dbs.first.localOpts,
-          function (err) {
-          should.not.exist(err, 'got error: ' + JSON.stringify(err));
-          if (err) {
-            done();
-          }
-        });
-        oldPouch.bulkDocs({docs: origDocs}, function (err, res) {
-          var removedDoc = {_deleted: true, _rev: res[0].rev, _id: res[0].id};
-          oldPouch.remove(removedDoc, function () {
-            oldPouch.close(function (err) {
-              should.not.exist(err, 'got error: ' + JSON.stringify(err));
-              var newPouch = new dbs.second.pouch(dbs.second.local);
-              return newPouch.allDocs({key: '2'}).then(function (res) {
-                res.total_rows.should.equal(3);
-                res.rows.should.have.length(1);
-                return newPouch.allDocs({key: '0'});
-              }).then(function (res) {
-                res.total_rows.should.equal(3);
-                res.rows.should.have.length(0);
-                done();
-              }).catch(function (err) {
-                should.not.exist(err, 'got error: ' + JSON.stringify(err));
-                done();
-              });
-            });
-          });
-        });
+      it('Testing basic migration integrity', async () => {
+        const oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+        const bulkRes = await oldPouch.bulkDocs({docs: origDocs});
+        const removedDoc = {_deleted: true, _rev: bulkRes[0].rev, _id: bulkRes[0].id};
+        await oldPouch.remove(removedDoc);
+        await oldPouch.close();
+        const newPouch = new dbs.second.pouch(dbs.second.local);
+        let res = await newPouch.allDocs({key: '2'});
+        res.total_rows.should.equal(3);
+        res.rows.should.have.length(1);
+        res = await newPouch.allDocs({key: '0'});
+        res.total_rows.should.equal(3);
+        res.rows.should.have.length(0);
       });
 
-      it("Test basic replication with migration", function (done) {
-        var docs = [
+      it("Test basic replication with migration", async () => {
+        const docs = [
           {_id: "0", integer: 0, string: '0'},
           {_id: "1", integer: 1, string: '1'},
           {_id: "2", integer: 2, string: '2'},
@@ -183,55 +161,23 @@ describe('migration', function () {
           {_id: "4", integer: 4, string: '4', _deleted : true}
         ];
 
-        var oldPouch = new dbs.first.pouch(dbs.first.remote);
-        oldPouch.bulkDocs({docs}, {}, function (err) {
-          should.not.exist(err, 'got error in bulkDocs: ' +
-                           JSON.stringify(err));
-          var oldLocalPouch =  new dbs.first.pouch(dbs.first.local,
+        const oldPouch = new dbs.first.pouch(dbs.first.remote);
+        await oldPouch.bulkDocs({docs}, {});
+        const oldLocalPouch = new dbs.first.pouch(dbs.first.local,
                                                    dbs.first.localOpts);
-          oldPouch.replicate.to(oldLocalPouch, function (err, result) {
-            should.not.exist(err, 'got error in replicate: ' +
-                             JSON.stringify(err));
-            if (err) {
-              done();
-            }
-            should.exist(result.ok, 'replication was ok');
-            oldPouch.close(function (err) {
-              should.not.exist(err, 'got error in close: ' +
-                               JSON.stringify(err));
-              if (err) {
-                done();
-              }
-              should.not.exist(err, 'got error: ' + JSON.stringify(err));
-              if (err) {
-                done();
-              }
-              oldLocalPouch.close(function (err) {
-                should.not.exist(err, 'got error in close: ' +
-                                 JSON.stringify(err));
-                if (err) {
-                  done();
-                }
-                var newPouch = new dbs.second.pouch(dbs.second.local);
-                if (err) {
-                  done();
-                }
-                newPouch.allDocs({}, function (err, res) {
-                  should.not.exist(err, 'got error in allDocs: ' +
-                                   JSON.stringify(err));
-                  res.rows.should.have.length(3, 'unexpected rows: ' +
-                                              JSON.stringify(res.rows));
-                  res.total_rows.should.equal(3);
-                  done();
-                });
-              });
-            });
-          });
-        });
+        const result = await oldPouch.replicate.to(oldLocalPouch);
+        should.exist(result.ok, 'replication was ok');
+        await oldPouch.close();
+        await oldLocalPouch.close();
+        const newPouch = new dbs.second.pouch(dbs.second.local);
+        const res = await newPouch.allDocs({});
+        res.rows.should.have.length(3, 'unexpected rows: ' +
+                                    JSON.stringify(res.rows));
+        res.total_rows.should.equal(3);
       });
 
-      it("Test basic replication with migration + changes()", function (done) {
-        var docs = [
+      it("Test basic replication with migration + changes()", async () => {
+        const docs = [
           {_id: "0", integer: 0, string: '0'},
           {_id: "1", integer: 1, string: '1'},
           {_id: "2", integer: 2, string: '2'},
@@ -239,52 +185,24 @@ describe('migration', function () {
           {_id: "4", integer: 4, string: '4', _deleted : true}
         ];
 
-        var oldPouch = new dbs.first.pouch(dbs.first.remote);
-        oldPouch.bulkDocs({docs}, {}, function (err) {
-          should.not.exist(err, 'got error in bulkDocs: ' +
-                           JSON.stringify(err));
-          var oldLocalPouch = new dbs.first.pouch(dbs.first.local,
+        const oldPouch = new dbs.first.pouch(dbs.first.remote);
+        await oldPouch.bulkDocs({docs}, {});
+        const oldLocalPouch = new dbs.first.pouch(dbs.first.local,
                                                   dbs.first.localOpts);
-          oldPouch.replicate.to(oldLocalPouch, function (err, result) {
-            should.not.exist(err, 'got error in replicate: ' +
-                             JSON.stringify(err));
-            if (err) {
-              done();
-            }
-            should.exist(result.ok, 'replication was ok');
-            oldPouch.close(function (err) {
-              should.not.exist(err, 'got error in close: ' +
-                               JSON.stringify(err));
-              if (err) {
-                done();
-              }
-              should.not.exist(err, 'got error: ' + JSON.stringify(err));
-              if (err) {
-                done();
-              }
-              oldLocalPouch.close(function (err) {
-                should.not.exist(err, 'got error in close: ' +
-                                 JSON.stringify(err));
-                if (err) {
-                  done();
-                }
-                var newPouch = new dbs.second.pouch(dbs.second.local);
-                newPouch.changes({include_docs: true, return_docs: true})
-                  .on('complete', function (complete) {
-                    complete.results.should.have
-                      .length(5, 'no _local docs in changes()');
-                    done();
-                  }).on('error', done);
-              });
-            });
-          });
-        });
+        const result = await oldPouch.replicate.to(oldLocalPouch);
+        should.exist(result.ok, 'replication was ok');
+        await oldPouch.close();
+        await oldLocalPouch.close();
+        const newPouch = new dbs.second.pouch(dbs.second.local);
+        const complete = await newPouch.changes({include_docs: true, return_docs: true});
+        complete.results.should.have
+          .length(5, 'no _local docs in changes()');
       });
 
       if (versionGte(scenario, '2.2.0')) {
-        it("Test persistent views don't require update", function (done) {
-          var oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
-          var docs = origDocs.slice().concat([{
+        it("Test persistent views don't require update", async () => {
+          const oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+          const docs = origDocs.slice().concat([{
             _id: '_design/myview',
             views: {
               myview: {
@@ -294,36 +212,26 @@ describe('migration', function () {
               }
             }
           }]);
-          var expectedRows = [
+          const expectedRows = [
             { key: 1, id: '0', value: null },
             { key: 2, id: '1', value: null },
             { key: 3, id: '2', value: null },
             { key: 4, id: '3', value: null }
           ];
-          oldPouch.bulkDocs({docs}, function (err) {
-            should.not.exist(err, 'bulkDocs');
-            oldPouch.query('myview', function (err, res) {
-              should.not.exist(err, 'query');
-              res.rows.should.deep.equal(expectedRows);
-              oldPouch.close(function (err) {
-                should.not.exist(err, 'close');
-                var newPouch = new dbs.second.pouch(dbs.second.local);
-                newPouch.query('myview', {stale: 'ok'}).then(function (res) {
-                  res.rows.should.deep.equal(expectedRows);
-                  done();
-                }).catch(function (err) {
-                  should.not.exist(err, 'catch');
-                  done();
-                });
-              });
-            });
-          });
+          await oldPouch.bulkDocs({docs});
+          should.not.exist(null, 'bulkDocs');
+          const queryRes = await oldPouch.query('myview');
+          queryRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const newRes = await newPouch.query('myview', {stale: 'ok'});
+          newRes.rows.should.deep.equal(expectedRows);
         });
 
         it("Test persistent views don't require update, with a value",
-            function (done) {
-          var oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
-          var docs = origDocs.slice().concat([{
+            async () => {
+          const oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+          const docs = origDocs.slice().concat([{
             _id: '_design/myview',
             views: {
               myview: {
@@ -333,42 +241,25 @@ describe('migration', function () {
               }
             }
           }]);
-          var expectedRows = [
+          const expectedRows = [
             { key: 1, id: '0', value: 1 },
             { key: 2, id: '1', value: 4 },
             { key: 3, id: '2', value: 9 },
             { key: 4, id: '3', value: 16 }
           ];
-          oldPouch.bulkDocs({docs}, function (err) {
-            should.not.exist(err, 'bulkDocs');
-            oldPouch.query('myview', function (err, res) {
-              should.not.exist(err, 'query');
-              res.rows.should.deep.equal(expectedRows);
-              oldPouch.close(function (err) {
-                should.not.exist(err, 'close');
-                var newPouch = new dbs.second.pouch(dbs.second.local);
-                newPouch.query('myview', {stale: 'ok'}).then(function (res) {
-                  res.rows.should.deep.equal(expectedRows);
-                  done();
-                }).catch(function (err) {
-                  should.not.exist(err, 'catch');
-                  done();
-                });
-              });
-            });
-          });
+          await oldPouch.bulkDocs({docs});
+          const queryRes = await oldPouch.query('myview');
+          queryRes.rows.should.deep.equal(expectedRows);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const newRes = await newPouch.query('myview', {stale: 'ok'});
+          newRes.rows.should.deep.equal(expectedRows);
         });
 
-        it('Returns ok for viewCleanup after modifying view', function (done) {
-          var oldPouch =
-            new dbs.first.pouch(dbs.first.local, dbs.first.localOpts,
-              function (err) {
-                should.not.exist(err, 'got error: ' + JSON.stringify(err));
-                if (err) {
-                  done();
-                }
-              });
-          var ddoc = {
+        it('Returns ok for viewCleanup after modifying view', async () => {
+          const oldPouch =
+            new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+          const ddoc = {
             _id: '_design/myview',
             views: {
               myview: {
@@ -378,89 +269,65 @@ describe('migration', function () {
               }
             }
           };
-          var doc = {
+          const doc = {
             _id: 'foo',
             firstName: 'Foobar',
             lastName: 'Bazman'
           };
-          oldPouch.bulkDocs({docs: [ddoc, doc]}).then(function (info) {
-            ddoc._rev = info[0].rev;
-            return oldPouch.query('myview');
-          }).then(function (res) {
-            res.rows.should.deep.equal([
-              {id: 'foo', key: 'Foobar', value: null}
-            ]);
-            ddoc.views.myview.map = function (doc) {
-              emit(doc.lastName);
-            }.toString();
-            return oldPouch.put(ddoc);
-          }).then(function () {
-            return oldPouch.query('myview');
-          }).then(function (res) {
-            res.rows.should.deep.equal([
-              {id: 'foo', key: 'Bazman', value: null}
-            ]);
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local);
-            newPouch.viewCleanup().then(function () {
-              done();
-            }, done);
-          }, done);
+          const info = await oldPouch.bulkDocs({docs: [ddoc, doc]});
+          ddoc._rev = info[0].rev;
+          let res = await oldPouch.query('myview');
+          res.rows.should.deep.equal([
+            {id: 'foo', key: 'Foobar', value: null}
+          ]);
+          ddoc.views.myview.map = function (doc) {
+            emit(doc.lastName);
+          }.toString();
+          await oldPouch.put(ddoc);
+          res = await oldPouch.query('myview');
+          res.rows.should.deep.equal([
+            {id: 'foo', key: 'Bazman', value: null}
+          ]);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          await newPouch.viewCleanup();
         });
-        it('Remembers local docs', function (done) {
-          var oldPouch =
-            new dbs.first.pouch(dbs.first.local, dbs.first.localOpts,
-              function (err) {
-                should.not.exist(err, 'got error: ' + JSON.stringify(err));
-                if (err) {
-                  done();
-                }
-              });
-          var docs = [
+        it('Remembers local docs', async () => {
+          const oldPouch =
+            new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+          const docs = [
             { _id: '_local/foo' },
             { _id: '_local/bar' }
           ];
-          oldPouch.bulkDocs({docs}).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local);
-            newPouch.get('_local/foo').then(function () {
-              return newPouch.get('_local/bar');
-            }).then(function () {
-              done();
-            }, done);
-          }, done);
+          await oldPouch.bulkDocs({docs});
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          await newPouch.get('_local/foo');
+          await newPouch.get('_local/bar');
         });
 
-        it('Testing migration with weird doc ids', function (done) {
-          var origDocs = [
+        it('Testing migration with weird doc ids', async () => {
+          const origDocs = [
             {_id: 'foo::bar::baz'},
             {_id: '\u0000foo\u0000'}
           ];
 
-          var oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
-          oldPouch.bulkDocs({docs: origDocs}, function (err) {
-            should.not.exist(err, 'got error: ' + JSON.stringify(err));
-            oldPouch.close(function (err) {
-              should.not.exist(err, 'got error: ' + JSON.stringify(err));
-              var newPouch = new dbs.second.pouch(dbs.second.local);
-              newPouch.allDocs().then(function (res) {
-                res.total_rows.should.equal(2);
-                res.rows.should.have.length(2);
-                res.rows[1].id.should.equal(origDocs[0]._id);
-                res.rows[0].id.should.equal(origDocs[1]._id);
-                done();
-              });
-            });
-          });
+          const oldPouch = new dbs.first.pouch(dbs.first.local, dbs.first.localOpts);
+          await oldPouch.bulkDocs({docs: origDocs});
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local);
+          const res = await newPouch.allDocs();
+          res.total_rows.should.equal(2);
+          res.rows.should.have.length(2);
+          res.rows[1].id.should.equal(origDocs[0]._id);
+          res.rows[0].id.should.equal(origDocs[1]._id);
         });
       }
 
       if (versionGte(scenario, '3.0.6')) {
         // attachments didn't really work until this release
-        it('#2818 Testing attachments with compaction of dups', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups', async () => {
+          const docs = [
             {
               _id: 'doc1',
               _attachments: {
@@ -481,27 +348,21 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.get('doc1').then(function (doc1) {
-              return newPouch.remove(doc1);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc2', {attachments: true});
-            }).then(function (doc2) {
-              doc2._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-            });
-          });
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          const doc1 = await newPouch.get('doc1');
+          await newPouch.remove(doc1);
+          await newPouch.compact();
+          const doc2 = await newPouch.get('doc2', {attachments: true});
+          doc2._attachments['att.txt'].data.should.equal('Zm9vYmFy');
         });
 
-        it('#2818 Testing attachments with compaction of dups 2', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups 2', async () => {
+          const docs = [
             {
               _id: 'doc1',
               _attachments: {
@@ -513,37 +374,30 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.put({
-              _id: 'doc2',
-              _attachments: {
-                'att.txt': {
-                  data: 'Zm9vYmFy', // 'foobar'
-                  content_type: 'text/plain'
-                }
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.put({
+            _id: 'doc2',
+            _attachments: {
+              'att.txt': {
+                data: 'Zm9vYmFy', // 'foobar'
+                content_type: 'text/plain'
               }
-            }).then(function () {
-              return newPouch.get('doc2');
-            }).then(function (doc2) {
-              return newPouch.remove(doc2);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc1', {attachments: true});
-            }).then(function (doc1) {
-              doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-            });
+            }
           });
+          const doc2 = await newPouch.get('doc2');
+          await newPouch.remove(doc2);
+          await newPouch.compact();
+          const doc1 = await newPouch.get('doc1', {attachments: true});
+          doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
         });
 
-        it('#2818 Testing attachments with compaction of dups 3', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups 3', async () => {
+          const docs = [
             {
               _id: 'doc1',
               _attachments: {
@@ -562,44 +416,37 @@ describe('migration', function () {
             }
           ];
 
-          for (var i = 0; i < 25; i++) {
+          for (let i = 0; i < 25; i++) {
             // test paging in the migration
             docs.push({
-              _id: 'some_other_doc_' + i
+              _id: `some_other_doc_${i}`
             });
           }
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.put({
-              _id: 'doc2',
-              _attachments: {
-                'att.txt': {
-                  data: 'Zm9vYmFy', // 'foobar'
-                  content_type: 'text/plain'
-                }
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.put({
+            _id: 'doc2',
+            _attachments: {
+              'att.txt': {
+                data: 'Zm9vYmFy', // 'foobar'
+                content_type: 'text/plain'
               }
-            }).then(function () {
-              return newPouch.get('doc2');
-            }).then(function (doc2) {
-              return newPouch.remove(doc2);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc1', {attachments: true});
-            }).then(function (doc1) {
-              doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-            });
+            }
           });
+          const doc2 = await newPouch.get('doc2');
+          await newPouch.remove(doc2);
+          await newPouch.compact();
+          const doc1 = await newPouch.get('doc1', {attachments: true});
+          doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
         });
 
-        it('#2818 Testing attachments with compaction of dups 4', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups 4', async () => {
+          const docs = [
             {
               _id: 'doc1',
               _attachments: {
@@ -619,39 +466,32 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.put({
-              _id: 'doc2',
-              _attachments: {
-                'att.txt': {
-                  data: 'Zm9vYmFy', // 'foobar'
-                  content_type: 'text/plain'
-                }
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.put({
+            _id: 'doc2',
+            _attachments: {
+              'att.txt': {
+                data: 'Zm9vYmFy', // 'foobar'
+                content_type: 'text/plain'
               }
-            }).then(function () {
-              return newPouch.get('doc2');
-            }).then(function (doc2) {
-              return newPouch.remove(doc2);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc1', {attachments: true});
-            }).then(function (doc1) {
-              doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-              doc1._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
-              doc1._attachments['att3.txt'].data.should.equal('Zm9v');
-            });
+            }
           });
+          const doc2 = await newPouch.get('doc2');
+          await newPouch.remove(doc2);
+          await newPouch.compact();
+          const doc1 = await newPouch.get('doc1', {attachments: true});
+          doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
+          doc1._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
+          doc1._attachments['att3.txt'].data.should.equal('Zm9v');
         });
 
-        it('#2818 Testing attachments with compaction of dups 5', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups 5', async () => {
+          const docs = [
             {
               _id: 'doc1',
               _attachments: {
@@ -687,48 +527,40 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.put({
-              _id: 'doc2',
-              _attachments: {
-                'att.txt': {
-                  data: 'YmFy', // 'bar'
-                  content_type: 'text/plain'
-                }
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.put({
+            _id: 'doc2',
+            _attachments: {
+              'att.txt': {
+                data: 'YmFy', // 'bar'
+                content_type: 'text/plain'
               }
-            }).then(function () {
-              return newPouch.get('doc2');
-            }).then(function (doc2) {
-              return newPouch.remove(doc2);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc1', {attachments: true});
-            }).then(function (doc1) {
-              doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-              doc1._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
-              doc1._attachments['att3.txt'].data.should.equal('Zm9v');
-              return newPouch.get('doc3', {attachments: true});
-            }).then(function (doc3) {
-              doc3._attachments['att-a.txt'].data.should.equal('Zm9vYmFy');
-              doc3._attachments['att-b.txt'].data.should.equal('Zm9v');
-              doc3._attachments['att-c.txt'].data.should.equal('YmFy');
-            });
+            }
           });
+          const doc2 = await newPouch.get('doc2');
+          await newPouch.remove(doc2);
+          await newPouch.compact();
+          const doc1 = await newPouch.get('doc1', {attachments: true});
+          doc1._attachments['att.txt'].data.should.equal('Zm9vYmFy');
+          doc1._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
+          doc1._attachments['att3.txt'].data.should.equal('Zm9v');
+          const doc3 = await newPouch.get('doc3', {attachments: true});
+          doc3._attachments['att-a.txt'].data.should.equal('Zm9vYmFy');
+          doc3._attachments['att-b.txt'].data.should.equal('Zm9v');
+          doc3._attachments['att-c.txt'].data.should.equal('YmFy');
         });
 
-        it('#2818 Testing attachments with compaction of dups 6', function () {
-          var docs = [];
+        it('#2818 Testing attachments with compaction of dups 6', async () => {
+          const docs = [];
 
-          for (var i = 0; i < 40; i++) {
+          for (let i = 0; i < 40; i++) {
             docs.push({
-              _id: 'doc' + i,
+              _id: `doc${i}`,
               _attachments: {
                 'att.txt' : {
                   data: testUtils.btoa(Math.random().toString()),
@@ -754,67 +586,52 @@ describe('migration', function () {
               }
             }
           });
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.put({
-              _id: 'doc_b',
-              _attachments: {
-                'att.txt': {
-                  data: 'Zm9v', // 'foo'
-                  content_type: 'text/plain'
-                }
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.put({
+            _id: 'doc_b',
+            _attachments: {
+              'att.txt': {
+                data: 'Zm9v', // 'foo'
+                content_type: 'text/plain'
               }
-            }).then(function () {
-              return newPouch.get('doc_b');
-            }).then(function (doc) {
-              return newPouch.remove(doc);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('doc_a', {attachments: true});
-            }).then(function (doc) {
-              doc._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-              doc._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
-              doc._attachments['att3.txt'].data.should.equal('Zm9v');
-            });
+            }
           });
+          const docB = await newPouch.get('doc_b');
+          await newPouch.remove(docB);
+          await newPouch.compact();
+          const docA = await newPouch.get('doc_a', {attachments: true});
+          docA._attachments['att.txt'].data.should.equal('Zm9vYmFy');
+          docA._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
+          docA._attachments['att3.txt'].data.should.equal('Zm9v');
         });
 
-        it('#2818 compaction of atts after many revs', function () {
-          var oldPouch = new dbs.first.pouch(
+        it('#2818 compaction of atts after many revs', async () => {
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
 
-          return oldPouch.put({_id: 'foo'}).then(function (res) {
-            return oldPouch.putAttachment('foo', 'att', res.rev, 'Zm9v',
-              'text/plain');
-          }).then(function () {
-            return oldPouch.get('foo', {attachments: true});
-          }).then(function (doc) {
-            doc._attachments['att'].content_type.should.equal('text/plain');
-            should.exist(doc._attachments['att'].data);
-            return oldPouch.get('foo');
-          }).then(function (doc) {
-            return oldPouch.put(doc);
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.compact().then(function () {
-              return newPouch.get('foo', {attachments: true});
-            }).then(function (doc) {
-              doc._attachments['att'].content_type.should.equal('text/plain');
-              doc._attachments['att'].data.length.should.be.above(0,
-                'attachment exists');
-            });
-          });
+           const res = await oldPouch.put({_id: 'foo'});
+          await oldPouch.putAttachment('foo', 'att', res.rev, 'Zm9v', 'text/plain');
+          let doc = await oldPouch.get('foo', {attachments: true});
+          doc._attachments['att'].content_type.should.equal('text/plain');
+          should.exist(doc._attachments['att'].data);
+          doc = await oldPouch.get('foo');
+          await oldPouch.put(doc);
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.compact();
+          doc = await newPouch.get('foo', {attachments: true});
+          doc._attachments['att'].content_type.should.equal('text/plain');
+          doc._attachments['att'].data.length.should.be.above(0,
+            'attachment exists');
         });
 
-        it('#2818 Testing attachments with compaction of dups (local docs)', function () {
-          var docs = [
+        it('#2818 Testing attachments with compaction of dups (local docs)', async () => {
+          const docs = [
             {
               _id: '_local/doc1',
               _attachments: {
@@ -835,71 +652,54 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          return oldPouch.bulkDocs(docs).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.get('_local/doc1').then(function (doc1) {
-              return newPouch.remove(doc1);
-            }).then(function () {
-              return newPouch.compact();
-            }).then(function () {
-              return newPouch.get('_local/doc2', {attachments: true});
-            }).then(function (doc2) {
-              doc2._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-            });
-          });
+          await oldPouch.bulkDocs(docs);
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          const doc1 = await newPouch.get('_local/doc1');
+          await newPouch.remove(doc1);
+          await newPouch.compact();
+          const doc2 = await newPouch.get('_local/doc2', {attachments: true});
+          doc2._attachments['att.txt'].data.should.equal('Zm9vYmFy');
         });
 
-        it('#2890 PNG content after migration', function () {
-          var oldPouch = new dbs.first.pouch(
+        it('#2890 PNG content after migration', async () => {
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
 
-          var transparent1x1Png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HA' +
+          const transparent1x1Png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HA' +
               'wCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEA' +
               'AAAASUVORK5CYII=';
-          var black1x1Png =
+          const black1x1Png =
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACkl' +
               'EQVR4nGNiAAAABgADNjd8qAAA' +
               'AABJRU5ErkJggg==';
 
-          return oldPouch.put({_id: 'foo'}).then(function (res) {
-            return oldPouch.putAttachment('foo', 'att', res.rev,
-              transparent1x1Png, 'image/png');
-          }).then(function () {
-            return oldPouch.get('foo', {attachments: true});
-          }).then(function (doc) {
-            doc._attachments['att'].content_type.should.equal('image/png');
-            should.exist(doc._attachments['att'].data);
-            return oldPouch.get('foo');
-          }).then(function (doc) {
-            return oldPouch.put(doc);
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.compact().then(function () {
-              return newPouch.get('foo', {attachments: true});
-            }).then(function (doc) {
-              doc._attachments['att'].content_type.should.equal('image/png');
-              doc._attachments['att'].data.should.equal(transparent1x1Png);
-              return newPouch.putAttachment('bar', 'att', null,
-                black1x1Png, 'image/png');
-            }).then(function () {
-              return newPouch.get('bar', {attachments: true});
-            }).then(function (doc) {
-              doc._attachments['att'].content_type.should.equal('image/png');
-              doc._attachments['att'].data.should.equal(black1x1Png);
-            });
-          });
+          const res = await oldPouch.put({_id: 'foo'});
+          await oldPouch.putAttachment('foo', 'att', res.rev, transparent1x1Png, 'image/png');
+          let doc = await oldPouch.get('foo', {attachments: true});
+          doc._attachments['att'].content_type.should.equal('image/png');
+          should.exist(doc._attachments['att'].data);
+          doc = await oldPouch.get('foo');
+          await oldPouch.put(doc);
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          await newPouch.compact();
+          doc = await newPouch.get('foo', {attachments: true});
+          doc._attachments['att'].content_type.should.equal('image/png');
+          doc._attachments['att'].data.should.equal(transparent1x1Png);
+          await newPouch.putAttachment('bar', 'att', null, black1x1Png, 'image/png');
+          const barDoc = await newPouch.get('bar', {attachments: true});
+          barDoc._attachments['att'].content_type.should.equal('image/png');
+          barDoc._attachments['att'].data.should.equal(black1x1Png);
         });
       }
 
       if (versionGte(scenario, '3.2.0')) {
-        it('#3136 Testing later winningSeqs', function () {
-          var tree = [
+        it('#3136 Testing later winningSeqs', async () => {
+          const tree = [
             [
               {
                 _id: 'foo',
@@ -928,57 +728,49 @@ describe('migration', function () {
             ]
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
             dbs.first.local, dbs.first.localOpts);
-          var chain = Promise.resolve();
-          tree.forEach(function (docs) {
-            chain = chain.then(function () {
-              return oldPouch.bulkDocs(docs, {new_edits: false});
+          for (const docs of tree) {
+            await oldPouch.bulkDocs(docs, {new_edits: false});
+          }
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+            {auto_compaction: false});
+          const result = await newPouch.changes({
+            return_docs: true,
+            include_docs: true,
+            style: 'all_docs'
+          });
+          // order don't matter
+          result.results.forEach((ch) => {
+            ch.changes = ch.changes.sort((a, b) => {
+              return a.rev < b.rev ? -1 : 1;
             });
           });
-
-          return chain.then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            var newPouch = new dbs.second.pouch(dbs.second.local,
-              {auto_compaction: false});
-            return newPouch.changes({
-              return_docs: true,
-              include_docs: true,
-              style: 'all_docs'
-            });
-          }).then(function (result) {
-            // order don't matter
-            result.results.forEach(function (ch) {
-              ch.changes = ch.changes.sort(function (a, b) {
-                return a.rev < b.rev ? -1 : 1;
-              });
-            });
-            var expected = {
-              "results": [
-                {
-                  "seq": 3,
-                  "id": "bar",
-                  "changes": [{"rev": "1-x"}],
-                  "doc": {"_id": "bar", "_rev": "1-x"}
-                },
-                {
-                  "seq": 4,
-                  "id": "foo",
-                  "changes": [{"rev": "2-b"}, {"rev": "2-c"}],
-                  "doc": {"_id": "foo", "_rev": "2-b"}
-                }
-              ],
-              "last_seq": 4
-            };
-            result.should.deep.equal(expected);
-          });
+          const expected = {
+            "results": [
+              {
+                "seq": 3,
+                "id": "bar",
+                "changes": [{"rev": "1-x"}],
+                "doc": {"_id": "bar", "_rev": "1-x"}
+              },
+              {
+                "seq": 4,
+                "id": "foo",
+                "changes": [{"rev": "2-b"}, {"rev": "2-c"}],
+                "doc": {"_id": "foo", "_rev": "2-b"}
+              }
+            ],
+            "last_seq": 4
+          };
+          result.should.deep.equal(expected);
         });
       }
 
       if (versionGte(scenario, '3.6.0')) {
-        it('#3646 - Should finish with 0 documents', function () {
-          var data = [
+        it('#3646 - Should finish with 0 documents', async () => {
+          const data = [
             {
               "docs": [
                 {
@@ -1175,40 +967,30 @@ describe('migration', function () {
             }
           ];
 
-          var oldPouch = new dbs.first.pouch(
+          const oldPouch = new dbs.first.pouch(
               dbs.first.local, dbs.first.localOpts);
-          var newPouch;
 
-          return oldPouch.bulkDocs(data[0], {
-            new_edits: false
-          }).then(function () {
-            return oldPouch.bulkDocs(data[1], {new_edits: false});
-          }).then(function () {
-            return oldPouch.close();
-          }).then(function () {
-            newPouch = new dbs.second.pouch(dbs.second.local,
-                {auto_compaction: false});
-            return newPouch.allDocs();
-          }).then(function (res) {
-            res.rows.should.have.length(0, 'all docs length is 0');
-            res.total_rows.should.equal(0);
-            return newPouch.allDocs({keys: ['b74e3b45'], include_docs: true});
-          }).then(function (res) {
-            var first = res.rows[0];
-            should.equal(first.value.deleted, true, 'all docs value.deleted');
-            first.value.rev.should.equal('6-441f43a31c89dc68a7cc934ce5779bf8');
-            res.total_rows.should.equal(0);
-            return newPouch.info();
-          }).then(function (info) {
-            info.doc_count.should.equal(0, 'doc_count is 0');
-            return newPouch.changes({include_docs: true, return_docs: true});
-          }).then(function (changes) {
-            changes.results.should.have.length(1);
-            var first = changes.results[0];
-            first.doc._rev.should.equal('6-441f43a31c89dc68a7cc934ce5779bf8');
-            should.equal(first.deleted, true, 'changes metadata.deleted');
-            should.equal(first.doc._deleted, true, 'changes doc._deleted');
-          });
+          await oldPouch.bulkDocs(data[0], {new_edits: false});
+          await oldPouch.bulkDocs(data[1], {new_edits: false});
+          await oldPouch.close();
+          const newPouch = new dbs.second.pouch(dbs.second.local,
+              {auto_compaction: false});
+          let res = await newPouch.allDocs();
+          res.rows.should.have.length(0, 'all docs length is 0');
+          res.total_rows.should.equal(0);
+          res = await newPouch.allDocs({keys: ['b74e3b45'], include_docs: true});
+          const first = res.rows[0];
+          should.equal(first.value.deleted, true, 'all docs value.deleted');
+          first.value.rev.should.equal('6-441f43a31c89dc68a7cc934ce5779bf8');
+          res.total_rows.should.equal(0);
+          const info = await newPouch.info();
+          info.doc_count.should.equal(0, 'doc_count is 0');
+          const changes = await newPouch.changes({include_docs: true, return_docs: true});
+          changes.results.should.have.length(1);
+          const firstChange = changes.results[0];
+          firstChange.doc._rev.should.equal('6-441f43a31c89dc68a7cc934ce5779bf8');
+          should.equal(firstChange.deleted, true, 'changes metadata.deleted');
+          should.equal(firstChange.doc._deleted, true, 'changes doc._deleted');
         });
       }
     });
