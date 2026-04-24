@@ -1,441 +1,403 @@
 'use strict';
 
-var adapters = [
+const adapters = [
   ['local', 'http'],
   ['http', 'http'],
   ['http', 'local'],
   ['local', 'local']
 ];
 
-adapters.forEach(function (adapters) {
-  describe('test.sync.js-' + adapters[0] + '-' + adapters[1], function () {
+adapters.forEach((adapters) => {
+  describe(`test.sync.js-${adapters[0]}-${adapters[1]}`, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapters[0], 'testdb');
       dbs.remote = testUtils.adapterUrl(adapters[1], 'test_repl_remote');
     });
 
-    afterEach(function (done) {
+    afterEach((done) => {
       testUtils.cleanup([dbs.name, dbs.remote], done);
     });
 
-    it('PouchDB.sync event', function (done) {
-      var doc1 = {
+    it('PouchDB.sync event', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1, function () {
-        remote.put(doc2, function () {
-          PouchDB.sync(db, remote).on('complete', function (result) {
-            result.pull.ok.should.equal(true);
-            result.pull.docs_read.should.equal(1);
-            result.pull.docs_written.should.equal(1);
-            result.pull.errors.should.have.length(0);
-            done();
-          });
-        });
-      });
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await PouchDB.sync(db, remote);
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it('sync throws errors in promise', function () {
-      var doc1 = {
+    it('sync throws errors in promise', async () => {
+      const doc1 = {
         _id: 'adoc',
         foo: 'bar'
       };
-      var doc2 = {
+      const doc2 = {
         _id: 'anotherdoc',
         foo: 'baz'
       };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
       // intentionally throw an error during replication
-      remote.bulkGet = function () {
-        return Promise.reject(new Error('flunking you'));
-      };
+      remote.bulkGet = () => Promise.reject(new Error('flunking you'));
 
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return db.sync(remote);
-      }).then(function () {
+      await db.put(doc1);
+      await remote.put(doc2);
+      try {
+        await db.sync(remote);
         throw new Error('expected an error');
-      }, function (err) {
-        should.exist(err);
-        err.should.be.instanceof(Error);
-      });
-    });
-
-    it('sync throws errors in promise catch()', function () {
-      var doc1 = {
-        _id: 'adoc',
-        foo: 'bar'
-      };
-      var doc2 = {
-        _id: 'anotherdoc',
-        foo: 'baz'
-      };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-
-      // intentionally throw an error during replication
-      remote.bulkGet = function () {
-        return Promise.reject(new Error('flunking you'));
-      };
-
-      var landedInCatch = false;
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return db.sync(remote).catch(function (err) {
-          landedInCatch = true;
-          should.exist(err);
-          err.should.be.instanceof(Error);
-        });
-      }).then(function () {
-        if (!landedInCatch) {
-          throw new Error('expected catch(), not then()');
+      } catch (err) {
+        if (err.message === 'expected an error') {
+          throw err;
         }
-      });
-    });
-
-    it('sync throws errors in error listener', function () {
-      var doc1 = {
-        _id: 'adoc',
-        foo: 'bar'
-      };
-      var doc2 = {
-        _id: 'anotherdoc',
-        foo: 'baz'
-      };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-
-      // intentionally throw an error during replication
-      remote.bulkGet = function () {
-        return Promise.reject(new Error('flunking you'));
-      };
-
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return new Promise(function (resolve) {
-          db.sync(remote).on('error', resolve);
-        });
-      }).then(function (err) {
         should.exist(err);
         err.should.be.instanceof(Error);
-      });
+      }
     });
 
-    it('sync throws errors in callback', function () {
-      var doc1 = {
+    it('sync throws errors in promise catch()', async () => {
+      const doc1 = {
         _id: 'adoc',
         foo: 'bar'
       };
-      var doc2 = {
+      const doc2 = {
         _id: 'anotherdoc',
         foo: 'baz'
       };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
       // intentionally throw an error during replication
-      remote.bulkGet = function () {
-        return Promise.reject(new Error('flunking you'));
-      };
+      remote.bulkGet = () => Promise.reject(new Error('flunking you'));
 
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return new Promise(function (resolve) {
-          db.sync(remote, function (err) {
-            resolve(err);
-          }).catch(function () {
-            // avoid annoying chrome warning about uncaught (in promise)
-          });
-        });
-      }).then(function (err) {
+      let landedInCatch = false;
+      await db.put(doc1);
+      await remote.put(doc2);
+      try {
+        await db.sync(remote);
+      } catch (err) {
+        landedInCatch = true;
         should.exist(err);
         err.should.be.instanceof(Error);
-      });
+      }
+      if (!landedInCatch) {
+        throw new Error('expected catch(), not then()');
+      }
     });
 
-    it('sync returns result in callback', function () {
-      var doc1 = {
+    it('sync throws errors in error listener', async () => {
+      const doc1 = {
         _id: 'adoc',
         foo: 'bar'
       };
-      var doc2 = {
+      const doc2 = {
         _id: 'anotherdoc',
         foo: 'baz'
       };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return new Promise(function (resolve, reject) {
-          db.sync(remote, function (err, res) {
-            if (err) {
-              return reject(err);
-            }
-            resolve(res);
-          });
-        });
-      }).then(function (res) {
-        should.exist(res);
+      // intentionally throw an error during replication
+      remote.bulkGet = () => Promise.reject(new Error('flunking you'));
+
+      await db.put(doc1);
+      await remote.put(doc2);
+      const err = await new Promise((resolve) => {
+        db.sync(remote).on('error', resolve);
       });
+      should.exist(err);
+      err.should.be.instanceof(Error);
     });
 
-    it('PouchDB.sync callback', function (done) {
-      var doc1 = {
+    it('sync throws errors in callback', async () => {
+      const doc1 = {
+        _id: 'adoc',
+        foo: 'bar'
+      };
+      const doc2 = {
+        _id: 'anotherdoc',
+        foo: 'baz'
+      };
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+
+      // intentionally throw an error during replication
+      remote.bulkGet = () => Promise.reject(new Error('flunking you'));
+
+      await db.put(doc1);
+      await remote.put(doc2);
+      const err = await new Promise((resolve) => {
+        db.sync(remote, (err) => {
+          resolve(err);
+        }).catch(() => {
+          // avoid annoying chrome warning about uncaught (in promise)
+        });
+      });
+      should.exist(err);
+      err.should.be.instanceof(Error);
+    });
+
+    it('sync returns result in callback', async () => {
+      const doc1 = {
+        _id: 'adoc',
+        foo: 'bar'
+      };
+      const doc2 = {
+        _id: 'anotherdoc',
+        foo: 'baz'
+      };
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+
+      await db.put(doc1);
+      await remote.put(doc2);
+      const res = await new Promise((resolve, reject) => {
+        db.sync(remote, (err, res) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(res);
+        });
+      });
+      should.exist(res);
+    });
+
+    it('PouchDB.sync callback', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1, function () {
-        remote.put(doc2, function () {
-          PouchDB.sync(db, remote, function (err, result) {
-            result.pull.ok.should.equal(true);
-            result.pull.docs_read.should.equal(1);
-            result.pull.docs_written.should.equal(1);
-            result.pull.errors.should.have.length(0);
-            done();
-          });
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await new Promise((resolve) => {
+        PouchDB.sync(db, remote, (err, result) => {
+          resolve(result);
         });
       });
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it('PouchDB.sync promise', function (done) {
-      var doc1 = {
+    it('PouchDB.sync promise', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return PouchDB.sync(db, remote);
-      }).then(function (result) {
-        result.pull.ok.should.equal(true);
-        result.pull.docs_read.should.equal(1);
-        result.pull.docs_written.should.equal(1);
-        result.pull.errors.should.have.length(0);
-        done();
-      }, done);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await PouchDB.sync(db, remote);
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it('db.sync event', function (done) {
-      var doc1 = {
+    it('db.sync event', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1, function () {
-        remote.put(doc2, function () {
-          db.sync(remote).on('complete', function (result) {
-            result.pull.ok.should.equal(true);
-            result.pull.docs_read.should.equal(1);
-            result.pull.docs_written.should.equal(1);
-            result.pull.errors.should.have.length(0);
-            done();
-          });
-        });
-      });
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await db.sync(remote);
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it('db.sync callback', function (done) {
-      var doc1 = {
+    it('db.sync callback', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1, function () {
-        remote.put(doc2, function () {
-          db.sync(remote, function (err, result) {
-            result.pull.ok.should.equal(true);
-            result.pull.docs_read.should.equal(1);
-            result.pull.docs_written.should.equal(1);
-            result.pull.errors.should.have.length(0);
-            done();
-          });
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await new Promise((resolve) => {
+        db.sync(remote, (err, result) => {
+          resolve(result);
         });
       });
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it('db.sync promise', function (done) {
-      var doc1 = {
+    it('db.sync promise', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return db.sync(remote);
-      }).then(function (result) {
-        result.pull.ok.should.equal(true);
-        result.pull.docs_read.should.equal(1);
-        result.pull.docs_written.should.equal(1);
-        result.pull.errors.should.have.length(0);
-        done();
-      }, done);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await db.sync(remote);
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
-    it.skip('Test sync cancel', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var replications = db.sync(remote).on('complete', function () {
-        done();
+    it.skip('Test sync cancel', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await new Promise((resolve) => {
+        const replications = db.sync(remote).on('complete', resolve);
+        should.exist(replications);
+        replications.cancel();
       });
-      should.exist(replications);
-      replications.cancel();
     });
 
-    it.skip('Test sync cancel called twice', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var replications = db.sync(remote).on('complete', function () {
-        setTimeout(done); // let cancel() get called twice before finishing
+    it.skip('Test sync cancel called twice', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await new Promise((resolve) => {
+        const replications = db.sync(remote).on('complete', () => {
+          setTimeout(resolve); // let cancel() get called twice before finishing
+        });
+        should.exist(replications);
+        replications.cancel();
+        replications.cancel();
       });
-      should.exist(replications);
-      replications.cancel();
-      replications.cancel();
     });
 
-    it('Test syncing two endpoints (issue 838)', function () {
-      var doc1 = {
+    it('Test syncing two endpoints (issue 838)', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      return db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return new Promise(function (resolve, reject) {
-          db.sync(remote).on('complete', resolve).on('error', reject);
-        });
-      }).then(function () {
-        // Replication isn't finished until onComplete has been called twice
-        return db.allDocs().then(function (res1) {
-          return remote.allDocs().then(function (res2) {
-            res1.total_rows.should.equal(res2.total_rows);
-          });
-        });
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      await new Promise((resolve, reject) => {
+        db.sync(remote).on('complete', resolve).on('error', reject);
       });
+      // Replication isn't finished until onComplete has been called twice
+      const res1 = await db.allDocs();
+      const res2 = await remote.allDocs();
+      res1.total_rows.should.equal(res2.total_rows);
     });
 
-    it.skip('3894 re-sync after immediate cancel', function () {
+    it.skip('3894 re-sync after immediate cancel', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      let db = new PouchDB(dbs.name);
+      let remote = new PouchDB(dbs.remote);
 
       db.setMaxListeners(100);
       remote.setMaxListeners(100);
 
-      var promise = Promise.resolve();
-
-      function syncThenCancel() {
-        promise = promise.then(function () {
-          return new Promise(function (resolve, reject) {
-            db = new PouchDB(dbs.name);
-            remote = new PouchDB(dbs.remote);
-            var sync = db.sync(remote)
-              .on('error', reject)
-              .on('complete', resolve);
-            sync.cancel();
-          }).then(function () {
-            return Promise.all([
-              db.destroy(),
-              remote.destroy()
-            ]);
-          });
+      const syncThenCancel = async () => {
+        db = new PouchDB(dbs.name);
+        remote = new PouchDB(dbs.remote);
+        await new Promise((resolve, reject) => {
+          const sync = db.sync(remote)
+            .on('error', reject)
+            .on('complete', resolve);
+          sync.cancel();
         });
-      }
+        await Promise.all([
+          db.destroy(),
+          remote.destroy()
+        ]);
+      };
 
-      for (var i = 0; i < 5; i++) {
-        syncThenCancel();
+      for (let i = 0; i < 5; i++) {
+        await syncThenCancel();
       }
-
-      return promise;
     });
 
     it('Syncing should stop if one replication fails (issue 838)',
-      function (done) {
-      var doc1 = {_id: 'adoc', foo: 'bar'};
-      var doc2 = {_id: 'anotherdoc', foo: 'baz'};
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var replications = db.sync(remote, {live: true});
+      async () => {
+      const doc1 = {_id: 'adoc', foo: 'bar'};
+      const doc2 = {_id: 'anotherdoc', foo: 'baz'};
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      const replications = db.sync(remote, {live: true});
 
-      replications.on('complete', function () {
-        remote.put(doc2, function () {
-          changes.should.equal(1);
-          done();
-        });
-      });
-
-      var changes = 0;
-      replications.on('change', function () {
+      let changes = 0;
+      replications.on('change', () => {
         changes++;
         if (changes === 1) {
           replications.pull.cancel();
         }
       });
+
       db.put(doc1);
+
+      await new Promise((resolve) => {
+        replications.on('complete', async () => {
+          await remote.put(doc2);
+          changes.should.equal(1);
+          resolve();
+        });
+      });
     });
 
-    it('Push and pull changes both fire (issue 2555)', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var correct = false;
-      db.post({}).then(function () {
-        return remote.post({});
-      }).then(function () {
-        var numChanges = 0;
-        var lastChange;
-        var sync = db.sync(remote);
-        sync.on('change', function (change) {
+    it('Push and pull changes both fire (issue 2555)', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      let correct = false;
+      await db.post({});
+      await remote.post({});
+
+      let numChanges = 0;
+      let lastChange;
+      const sync = db.sync(remote);
+
+      await new Promise((resolve) => {
+        sync.on('change', (change) => {
           ['push', 'pull'].should.contain(change.direction);
           change.change.docs_read.should.equal(1);
           change.change.docs_written.should.equal(1);
@@ -448,176 +410,227 @@ adapters.forEach(function (adapters) {
             correct = true;
             sync.cancel();
           }
-        }).on('complete', function () {
+        }).on('complete', () => {
           correct.should.equal(true, 'things happened right');
-          done();
+          resolve();
         });
       });
     });
 
-    it('Change event should be called exactly once per listener (issue 5479)', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.post({}).then(function () {
-        var counter = 0;
-        var sync = db.sync(remote);
-        var increaseCounter = function () {
-          counter++;
-        };
+    it('Change event should be called exactly once per listener (issue 5479)', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.post({});
+
+      let counter = 0;
+      const sync = db.sync(remote);
+      const increaseCounter = () => {
+        counter++;
+      };
+
+      await new Promise((resolve) => {
         sync.on('change', increaseCounter)
             .on('change', increaseCounter)
-            .on('complete', function () {
+            .on('complete', () => {
               counter.should.equal(2);
-              done();
+              resolve();
             });
       });
     });
 
-    it('Remove an event listener', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('Remove an event listener', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{}, {}, {}]).then(function () {
-        return remote.bulkDocs([{}, {}, {}]);
-      }).then(function () {
+      await db.bulkDocs([{}, {}, {}]);
+      await remote.bulkDocs([{}, {}, {}]);
 
-        function changesCallback() {
-          changeCalled = true;
-        }
+      let changeCalled = false;
+      const changesCallback = () => {
+        changeCalled = true;
+      };
 
-        var sync = db.replicate.to(remote);
-        var changeCalled = false;
-        sync.on('change', changesCallback);
-        sync.removeListener('change', changesCallback);
-        sync.on('error', function () {});
-        sync.on('complete', function () {
-          setTimeout(function () {
+      const sync = db.replicate.to(remote);
+      sync.on('change', changesCallback);
+      sync.removeListener('change', changesCallback);
+      sync.on('error', () => {});
+
+      await new Promise((resolve) => {
+        sync.on('complete', () => {
+          setTimeout(() => {
             Object.keys(sync._events).should.have.length(0);
             changeCalled.should.equal(false);
-            done();
+            resolve();
           });
         });
       });
     });
 
-    it('Remove an invalid event listener', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('Remove an invalid event listener', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{}, {}, {}]).then(function () {
-        return remote.bulkDocs([{}, {}, {}]);
-      }).then(function () {
-        function otherCallback() {}
-        function realCallback() {
-          changeCalled = true;
-        }
-        var sync = db.replicate.to(remote);
-        var changeCalled = false;
-        sync.on('change', realCallback);
-        sync.removeListener('change', otherCallback);
-        sync.on('error', function () {});
-        sync.on('complete', function () {
-          setTimeout(function () {
+      await db.bulkDocs([{}, {}, {}]);
+      await remote.bulkDocs([{}, {}, {}]);
+
+      const otherCallback = () => {};
+      let changeCalled = false;
+      const realCallback = () => {
+        changeCalled = true;
+      };
+
+      const sync = db.replicate.to(remote);
+      sync.on('change', realCallback);
+      sync.removeListener('change', otherCallback);
+      sync.on('error', () => {});
+
+      await new Promise((resolve) => {
+        sync.on('complete', () => {
+          setTimeout(() => {
             Object.keys(sync._events).should.have.length(0);
             changeCalled.should.equal(true);
-            done();
+            resolve();
           });
         });
       });
     });
 
-    it('Doesn\'t have a memory leak (push)', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('Doesn\'t have a memory leak (push)', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{}, {}, {}]).then(function () {
-        return remote.bulkDocs([{}, {}, {}]);
-      }).then(function () {
-        var sync = db.replicate.to(remote);
-        sync.on('change', function () {});
-        sync.on('error', function () {});
-        sync.on('complete', function () {
-          setTimeout(function () {
+      await db.bulkDocs([{}, {}, {}]);
+      await remote.bulkDocs([{}, {}, {}]);
+
+      const sync = db.replicate.to(remote);
+      sync.on('change', () => {});
+      sync.on('error', () => {});
+
+      await new Promise((resolve) => {
+        sync.on('complete', () => {
+          setTimeout(() => {
             Object.keys(sync._events).should.have.length(0);
-            done();
+            resolve();
           });
         });
       });
     });
 
-    it('Doesn\'t have a memory leak (pull)', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('Doesn\'t have a memory leak (pull)', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{}, {}, {}]).then(function () {
-        return remote.bulkDocs([{}, {}, {}]);
-      }).then(function () {
-        var sync = db.replicate.from(remote);
-        sync.on('change', function () {});
-        sync.on('error', function () {});
-        sync.on('complete', function () {
-          setTimeout(function () {
+      await db.bulkDocs([{}, {}, {}]);
+      await remote.bulkDocs([{}, {}, {}]);
+
+      const sync = db.replicate.from(remote);
+      sync.on('change', () => {});
+      sync.on('error', () => {});
+
+      await new Promise((resolve) => {
+        sync.on('complete', () => {
+          setTimeout(() => {
             Object.keys(sync._events).should.have.length(0);
-            done();
+            resolve();
           });
         });
       });
     });
 
-    it('Doesn\'t have a memory leak (bi)', function (done) {
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('Doesn\'t have a memory leak (bi)', async () => {
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{}, {}, {}]).then(function () {
-        return remote.bulkDocs([{}, {}, {}]);
-      }).then(function () {
-        var sync = db.sync(remote);
-        sync.on('change', function () {});
-        sync.on('error', function () {});
-        sync.on('complete', function () {
-          setTimeout(function () {
+      await db.bulkDocs([{}, {}, {}]);
+      await remote.bulkDocs([{}, {}, {}]);
+
+      const sync = db.sync(remote);
+      sync.on('change', () => {});
+      sync.on('error', () => {});
+
+      await new Promise((resolve) => {
+        sync.on('complete', () => {
+          setTimeout(() => {
             Object.keys(sync._events).should.have.length(0);
-            done();
+            resolve();
           });
         });
       });
     });
-    it('PouchDB.sync with strings for dbs', function (done) {
-      var doc1 = {
+
+    it('PouchDB.sync with strings for dbs', async () => {
+      const doc1 = {
           _id: 'adoc',
           foo: 'bar'
         };
-      var doc2 = {
+      const doc2 = {
           _id: 'anotherdoc',
           foo: 'baz'
         };
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      db.put(doc1).then(function () {
-        return remote.put(doc2);
-      }).then(function () {
-        return PouchDB.sync(dbs.name, dbs.remote);
-      }).then(function (result) {
-        result.pull.ok.should.equal(true);
-        result.pull.docs_read.should.equal(1);
-        result.pull.docs_written.should.equal(1);
-        result.pull.errors.should.have.length(0);
-        done();
-      }, done);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      await db.put(doc1);
+      await remote.put(doc2);
+      const result = await PouchDB.sync(dbs.name, dbs.remote);
+      result.pull.ok.should.equal(true);
+      result.pull.docs_read.should.equal(1);
+      result.pull.docs_written.should.equal(1);
+      result.pull.errors.should.have.length(0);
     });
 
     it('#3270 triggers "denied" events',
-        function (done) {
-      testUtils.isCouchDB(function (isCouchDB) {
+        async () => {
+      const isCouchDB = await new Promise((resolve) => testUtils.isCouchDB(resolve));
+      if (/*adapters[1] !== 'http' || */!isCouchDB) {
+        return;
+      }
+      if (adapters[0] !== 'local' || adapters[1] !== 'http') {
+        return;
+      }
+
+      const deniedErrors = [];
+      const ddoc = {
+        "_id": "_design/validate",
+        "validate_doc_update": function (newDoc) {
+          if (newDoc.foo) {
+            throw { unauthorized: 'go away, no picture' };
+          }
+        }.toString()
+      };
+
+      const remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+
+      await remote.put(ddoc);
+      const docs = [
+        {_id: 'foo1', foo: 'string'},
+        {_id: 'nofoo'},
+        {_id: 'foo2', foo: 'object'}
+      ];
+      await db.bulkDocs({docs});
+      const sync = db.sync(dbs.remote);
+      sync.on('denied', (error) => {
+        deniedErrors.push(error);
+      });
+      await sync;
+      deniedErrors.length.should.equal(2);
+      deniedErrors[0].doc.name.should.equal('unauthorized');
+      deniedErrors[1].doc.name.should.equal('unauthorized');
+      deniedErrors[0].direction.should.equal('push');
+    });
+
+    it('#3270 triggers "denied" events, reverse direction',
+      async () => {
+        const isCouchDB = await new Promise((resolve) => testUtils.isCouchDB(resolve));
         if (/*adapters[1] !== 'http' || */!isCouchDB) {
-          return done();
+          return;
         }
         if (adapters[0] !== 'local' || adapters[1] !== 'http') {
-          return done();
+          return;
         }
 
-        var deniedErrors = [];
-        var ddoc = {
+        const deniedErrors = [];
+        const ddoc = {
           "_id": "_design/validate",
           "validate_doc_update": function (newDoc) {
             if (newDoc.foo) {
@@ -626,193 +639,119 @@ adapters.forEach(function (adapters) {
           }.toString()
         };
 
-        var remote = new PouchDB(dbs.remote);
-        var db = new PouchDB(dbs.name);
+        const remote = new PouchDB(dbs.remote);
+        const db = new PouchDB(dbs.name);
 
-        return remote.put(ddoc).then(function () {
-          var docs = [
-            {_id: 'foo1', foo: 'string'},
-            {_id: 'nofoo'},
-            {_id: 'foo2', foo: 'object'}
-          ];
-          return db.bulkDocs({docs});
-        }).then(function () {
-          var sync = db.sync(dbs.remote);
-          sync.on('denied', function (error) {
-            deniedErrors.push(error);
-          });
-          return sync;
-        }).then(function () {
-          deniedErrors.length.should.equal(2);
-          deniedErrors[0].doc.name.should.equal('unauthorized');
-          deniedErrors[1].doc.name.should.equal('unauthorized');
-          deniedErrors[0].direction.should.equal('push');
-        })
-        .then(done, done);
-      });
-    });
-
-    it('#3270 triggers "denied" events, reverse direction',
-      function (done) {
-        testUtils.isCouchDB(function (isCouchDB) {
-          if (/*adapters[1] !== 'http' || */!isCouchDB) {
-            return done();
-          }
-          if (adapters[0] !== 'local' || adapters[1] !== 'http') {
-            return done();
-          }
-
-          var deniedErrors = [];
-          var ddoc = {
-            "_id": "_design/validate",
-            "validate_doc_update": function (newDoc) {
-              if (newDoc.foo) {
-                throw { unauthorized: 'go away, no picture' };
-              }
-            }.toString()
-          };
-
-          var remote = new PouchDB(dbs.remote);
-          var db = new PouchDB(dbs.name);
-
-          return remote.put(ddoc).then(function () {
-            var docs = [
-              {_id: 'foo1', foo: 'string'},
-              {_id: 'nofoo'},
-              {_id: 'foo2', foo: 'object'}
-            ];
-            return db.bulkDocs({docs});
-          }).then(function () {
-            var sync = remote.sync(db);
-            sync.on('denied', function (error) {
-              deniedErrors.push(error);
-            });
-            return sync;
-          }).then(function () {
-            deniedErrors.length.should.equal(2);
-            deniedErrors[0].doc.name.should.equal('unauthorized');
-            deniedErrors[1].doc.name.should.equal('unauthorized');
-            deniedErrors[0].direction.should.equal('pull');
-          })
-            .then(done, done);
+        await remote.put(ddoc);
+        const docs = [
+          {_id: 'foo1', foo: 'string'},
+          {_id: 'nofoo'},
+          {_id: 'foo2', foo: 'object'}
+        ];
+        await db.bulkDocs({docs});
+        const sync = remote.sync(db);
+        sync.on('denied', (error) => {
+          deniedErrors.push(error);
         });
+        await sync;
+        deniedErrors.length.should.equal(2);
+        deniedErrors[0].doc.name.should.equal('unauthorized');
+        deniedErrors[1].doc.name.should.equal('unauthorized');
+        deniedErrors[0].direction.should.equal('pull');
       });
 
-    it('#3270 triggers "change" events with .docs property', function (done) {
-      var syncedDocs = [];
-      var db = new PouchDB(dbs.name);
-      var docs = [
+    it('#3270 triggers "change" events with .docs property', async () => {
+      let syncedDocs = [];
+      const db = new PouchDB(dbs.name);
+      const docs = [
         {_id: '1'},
         {_id: '2'},
         {_id: '3'}
       ];
 
-      db.bulkDocs({ docs }, {}).then(function () {
-        var sync = db.sync(dbs.remote);
-        sync.on('change', function (change) {
-          syncedDocs = syncedDocs.concat(change.change.docs);
-        });
-        return sync;
-      })
-      .then(function () {
-        syncedDocs.sort(function (a, b) {
-          return a._id > b._id ? 1 : -1;
-        });
+      await db.bulkDocs({ docs }, {});
+      const sync = db.sync(dbs.remote);
+      sync.on('change', (change) => {
+        syncedDocs = syncedDocs.concat(change.change.docs);
+      });
+      await sync;
 
-        syncedDocs.length.should.equal(3);
-        syncedDocs[0]._id.should.equal('1');
-        syncedDocs[1]._id.should.equal('2');
-        syncedDocs[2]._id.should.equal('3');
-        done();
-      })
-      .catch(done);
+      syncedDocs.sort((a, b) => a._id > b._id ? 1 : -1);
+
+      syncedDocs.length.should.equal(3);
+      syncedDocs[0]._id.should.equal('1');
+      syncedDocs[1]._id.should.equal('2');
+      syncedDocs[2]._id.should.equal('3');
     });
 
-    it('4791 Single filter', function () {
+    it('4791 Single filter', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var localDocs = [{_id: '0'}, {_id: '1'}];
-      var remoteDocs = [{_id: 'a'}, {_id: 'b'}];
+      const localDocs = [{_id: '0'}, {_id: '1'}];
+      const remoteDocs = [{_id: 'a'}, {_id: 'b'}];
 
-      return remote.bulkDocs(remoteDocs).then(function () {
-        return db.bulkDocs(localDocs);
-      }).then(function () {
-        return db.sync(remote, {
-          filter: function (doc) { return doc._id !== '0' && doc._id !== 'a'; }
-        });
-      }).then(function () {
-        return db.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
-        return remote.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
+      await remote.bulkDocs(remoteDocs);
+      await db.bulkDocs(localDocs);
+      await db.sync(remote, {
+        filter: (doc) => doc._id !== '0' && doc._id !== 'a'
       });
+      const localResult = await db.allDocs();
+      localResult.total_rows.should.equal(3);
+      const remoteResult = await remote.allDocs();
+      remoteResult.total_rows.should.equal(3);
     });
 
 
-    it('4791 Single filter, live/retry', function () {
+    it('4791 Single filter, live/retry', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var localDocs = [{_id: '0'}, {_id: '1'}];
-      var remoteDocs = [{_id: 'a'}, {_id: 'b'}];
+      const localDocs = [{_id: '0'}, {_id: '1'}];
+      const remoteDocs = [{_id: 'a'}, {_id: 'b'}];
 
-      return remote.bulkDocs(remoteDocs).then(function () {
-        return db.bulkDocs(localDocs);
-      }).then(function () {
-        return new Promise(function (resolve, reject) {
-          var filter = function (doc) {
-            return doc._id !== '0' && doc._id !== 'a';
-          };
-          var changes = 0;
-          var onChange = function (c) {
-            changes += c.change.docs.length;
-            if (changes === 2) {
-              sync.cancel();
-            }
-          };
-          var sync = db.sync(remote, {filter, live: true, retry: true})
-            .on('error', reject)
-            .on('change', onChange)
-            .on('complete', resolve);
-        });
-      }).then(function () {
-        return db.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
-        return remote.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
+      await remote.bulkDocs(remoteDocs);
+      await db.bulkDocs(localDocs);
+      await new Promise((resolve, reject) => {
+        const filter = (doc) => doc._id !== '0' && doc._id !== 'a';
+        let changes = 0;
+        const onChange = (c) => {
+          changes += c.change.docs.length;
+          if (changes === 2) {
+            sync.cancel();
+          }
+        };
+        const sync = db.sync(remote, {filter, live: true, retry: true})
+          .on('error', reject)
+          .on('change', onChange)
+          .on('complete', resolve);
       });
+      const localResult = await db.allDocs();
+      localResult.total_rows.should.equal(3);
+      const remoteResult = await remote.allDocs();
+      remoteResult.total_rows.should.equal(3);
     });
 
-    it('4289 Separate to / from filters', function () {
+    it('4289 Separate to / from filters', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      var localDocs = [{_id: '0'}, {_id: '1'}];
-      var remoteDocs = [{_id: 'a'}, {_id: 'b'}];
+      const localDocs = [{_id: '0'}, {_id: '1'}];
+      const remoteDocs = [{_id: 'a'}, {_id: 'b'}];
 
-      return remote.bulkDocs(remoteDocs).then(function () {
-        return db.bulkDocs(localDocs);
-      }).then(function () {
-        return db.sync(remote, {
-          push: {filter: function (doc) { return doc._id === '0'; }},
-          pull: {filter: function (doc) { return doc._id === 'a'; }}
-        });
-      }).then(function () {
-        return db.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
-        return remote.allDocs();
-      }).then(function (docs) {
-        docs.total_rows.should.equal(3);
+      await remote.bulkDocs(remoteDocs);
+      await db.bulkDocs(localDocs);
+      await db.sync(remote, {
+        push: {filter: (doc) => doc._id === '0'},
+        pull: {filter: (doc) => doc._id === 'a'}
       });
+      const localResult = await db.allDocs();
+      localResult.total_rows.should.equal(3);
+      const remoteResult = await remote.allDocs();
+      remoteResult.total_rows.should.equal(3);
     });
 
     it('5007 sync 2 databases', async function () {
@@ -840,13 +779,13 @@ adapters.forEach(function (adapters) {
       const changes1 = remote1.changes({ live: true });
       const changes2 = remote2.changes({ live: true });
 
-      return new Promise(function (resolve, reject) {
+      return new Promise((resolve, reject) => {
         let numChanges = 0;
-        function onChange() {
+        const onChange = () => {
           if (++numChanges === 2) {
             resolve();
           }
-        }
+        };
         sync1.on('error', reject);
         sync2.on('error', reject);
         changes1.on('change', onChange);
@@ -854,68 +793,62 @@ adapters.forEach(function (adapters) {
 
         db.post({ foo: 'bar' }).catch(reject);
       })
-        .then(function () {
+        .then(() => {
           for (const cancelable of [changes1, changes2, sync1, sync2]) {
             cancelable.cancel();
           }
         })
-        .finally(function () {
+        .finally(() => {
           return remote2.destroy();
         });
     });
 
-    it('5782 sync rev-1 conflicts', function () {
-      var local = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+    it('5782 sync rev-1 conflicts', async () => {
+      const local = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      function update(a, id) {
-        return a.get(id).then(function (doc) {
-          doc.updated = Date.now();
-          return a.put(doc);
-        });
-      }
+      const update = async (a, id) => {
+        const doc = await a.get(id);
+        doc.updated = Date.now();
+        return a.put(doc);
+      };
 
-      function remove(a, id) {
-        return a.get(id).then(function (doc) {
-          return a.remove(doc);
-        });
-      }
+      const remove = async (a, id) => {
+        const doc = await a.get(id);
+        return a.remove(doc);
+      };
 
-      function conflict(docTemplate) {
-        return local.put(docTemplate).then(function () {
-          docTemplate.baz = 'fubar';
-          return remote.put(docTemplate);
-        });
-      }
+      const conflict = async (docTemplate) => {
+        await local.put(docTemplate);
+        docTemplate.baz = 'fubar';
+        return remote.put(docTemplate);
+      };
 
-      var doc1 = {
-        _id: 'random-' + Date.now(),
+      const doc1 = {
+        _id: `random-${Date.now()}`,
         foo: 'bar'
       };
 
-      var doc2 = {
-        _id: 'random2-' + Date.now(),
+      const doc2 = {
+        _id: `random2-${Date.now()}`,
         foo: 'bar'
       };
 
-      return conflict(doc2)
-      .then(function () { return local.replicate.to(remote); })
-      .then(function () { return update(local, doc2._id); })
-      .then(function () { return remove(local, doc2._id); })
-      .then(function () { return local.replicate.to(remote); })
-      .then(function () { return conflict(doc1); })
-      .then(function () { return update(remote, doc2._id); })
-      .then(function () { return local.replicate.to(remote); })
-      .then(function () { return remove(local, doc1._id); })
-      .then(function () { return local.sync (remote); })
-      .then(function () {
-        return Promise.all([
-          local.allDocs({include_docs: true}),
-          remote.allDocs({include_docs: true})
-        ]);
-      }).then(function (res) {
-        res[0].should.deep.equal(res[1]);
-      });
+      await conflict(doc2);
+      await local.replicate.to(remote);
+      await update(local, doc2._id);
+      await remove(local, doc2._id);
+      await local.replicate.to(remote);
+      await conflict(doc1);
+      await update(remote, doc2._id);
+      await local.replicate.to(remote);
+      await remove(local, doc1._id);
+      await local.sync(remote);
+      const res = await Promise.all([
+        local.allDocs({include_docs: true}),
+        remote.allDocs({include_docs: true})
+      ]);
+      res[0].should.deep.equal(res[1]);
     });
   });
 });

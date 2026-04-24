@@ -4,133 +4,115 @@ if (!process.env.LEVEL_ADAPTER &&
     !process.env.AUTO_COMPACTION &&
     !process.env.ADAPTERS) {
   // these tests don't make sense for anything other than default leveldown
-  var path = require('path');
+  const path = require('path');
   const { mkdirSync } = require('fs');
-  var rimraf = require('rimraf');
+  const rimraf = require('rimraf');
 
-  describe('defaults', function () {
+  describe('defaults', () => {
 
-    beforeEach(function () {
-      return new PouchDB('mydb').destroy().then(function () {
-        return new PouchDB('mydb', {db: require('memdown')}).destroy();
-      });
+    beforeEach(async () => {
+      await new PouchDB('mydb').destroy();
+      await new PouchDB('mydb', {db: require('memdown')}).destroy();
     });
 
-    afterEach(function (done) {
+    afterEach(() => {
       rimraf.sync('./tmp/_pouch_.');
       rimraf.sync('./tmp/path');
-      done();
     });
 
-    it('should allow prefixes', function () {
-      var prefix = './tmp/path/to/db/1/';
-      var dir = path.join(prefix, '/tmp/');
-      var dir2 = path.join('./tmp/_pouch_./', prefix);
-      var dir3 = path.join(dir2, './tmp/_pouch_mydb');
+    it('should allow prefixes', async () => {
+      const prefix = './tmp/path/to/db/1/';
+      const dir = path.join(prefix, '/tmp/');
+      const dir2 = path.join('./tmp/_pouch_./', prefix);
+      const dir3 = path.join(dir2, './tmp/_pouch_mydb');
       mkdirSync(dir, { recursive:true });
       mkdirSync(dir2, { recursive:true });
       mkdirSync(dir3, { recursive:true });
 
-      var db = new PouchDB('mydb', {prefix});
-      return db.info().then(function (info1) {
-        info1.db_name.should.equal('mydb');
-        return db.destroy();
-      });
+      const db = new PouchDB('mydb', {prefix});
+      const info1 = await db.info();
+      info1.db_name.should.equal('mydb');
+      await db.destroy();
     });
 
-    it('Defaults leaks eventEmitters', function () {
+    it('Defaults leaks eventEmitters', () => {
       PouchDB.defaults({db: require('memdown') });
       PouchDB.defaults({db: require('memdown') });
       PouchDB.defaults({db: require('memdown') });
       PouchDB.defaults({db: require('memdown') });
     });
 
-    it('should allow us to set a prefix by default', function () {
-      var prefix = './tmp/path/to/db/2/';
-      var dir = path.join(prefix, '/tmp/');
-      var dir2 = path.join('./tmp/_pouch_./', prefix);
-      var dir3 = path.join(dir2, './tmp/_pouch_mydb');
+    it('should allow us to set a prefix by default', async () => {
+      const prefix = './tmp/path/to/db/2/';
+      const dir = path.join(prefix, '/tmp/');
+      const dir2 = path.join('./tmp/_pouch_./', prefix);
+      const dir3 = path.join(dir2, './tmp/_pouch_mydb');
       mkdirSync(dir, { recursive:true });
       mkdirSync(dir2, { recursive:true });
       mkdirSync(dir3, { recursive:true });
 
-      var CustomPouch = PouchDB.defaults({
+      const CustomPouch = PouchDB.defaults({
         prefix
       });
-      var db = CustomPouch({name: 'mydb'});
-      return db.info().then(function (info1) {
-        info1.db_name.should.equal('mydb');
-        return db.destroy();
-      });
+      const db = CustomPouch({name: 'mydb'});
+      const info1 = await db.info();
+      info1.db_name.should.equal('mydb');
+      await db.destroy();
     });
 
-    it('should allow us to use memdown', function () {
-      var opts = { name: 'mydb', db: require('memdown') };
-      var db = new PouchDB(opts);
-      return db.put({_id: 'foo'}).then(function () {
-        var otherDB = new PouchDB('mydb');
-        return db.info().then(function (info1) {
-          return otherDB.info().then(function (info2) {
-            info1.doc_count.should.not.equal(info2.doc_count);
-            return otherDB.destroy();
-          }).then(function () {
-            return db.destroy();
-          });
-        });
-      });
+    it('should allow us to use memdown', async () => {
+      const opts = { name: 'mydb', db: require('memdown') };
+      const db = new PouchDB(opts);
+      await db.put({_id: 'foo'});
+      const otherDB = new PouchDB('mydb');
+      const info1 = await db.info();
+      const info2 = await otherDB.info();
+      info1.doc_count.should.not.equal(info2.doc_count);
+      await otherDB.destroy();
+      await db.destroy();
     });
 
-    it('should allow us to destroy memdown', function () {
-      var opts = {db: require('memdown') };
-      var db = new PouchDB('mydb', opts);
-      return db.put({_id: 'foo'}).then(function () {
-        var otherDB = new PouchDB('mydb', opts);
-        return db.info().then(function (info1) {
-          return otherDB.info().then(function (info2) {
-            info1.doc_count.should.equal(info2.doc_count);
-            return otherDB.destroy();
-          }).then(function () {
-            var db3 = new PouchDB('mydb', opts);
-            return db3.info().then(function (info) {
-              info.doc_count.should.equal(0);
-              return db3.destroy();
-            });
-          });
-        });
-      });
+    it('should allow us to destroy memdown', async () => {
+      const opts = {db: require('memdown') };
+      const db = new PouchDB('mydb', opts);
+      await db.put({_id: 'foo'});
+      const otherDB = new PouchDB('mydb', opts);
+      const info1 = await db.info();
+      const info2 = await otherDB.info();
+      info1.doc_count.should.equal(info2.doc_count);
+      await otherDB.destroy();
+      const db3 = new PouchDB('mydb', opts);
+      const info = await db3.info();
+      info.doc_count.should.equal(0);
+      await db3.destroy();
     });
 
-    it('should allow us to use memdown by default', function () {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
-      var db = new CustomPouch('mydb');
-      return db.put({_id: 'foo'}).then(function () {
-        var otherDB = new PouchDB('mydb');
-        return db.info().then(function (info1) {
-          return otherDB.info().then(function (info2) {
-            info1.doc_count.should.not.equal(info2.doc_count);
-            return otherDB.destroy();
-          }).then(function () {
-            return db.destroy();
-          });
-        });
-      });
+    it('should allow us to use memdown by default', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
+      const db = new CustomPouch('mydb');
+      await db.put({_id: 'foo'});
+      const otherDB = new PouchDB('mydb');
+      const info1 = await db.info();
+      const info2 = await otherDB.info();
+      info1.doc_count.should.not.equal(info2.doc_count);
+      await otherDB.destroy();
+      await db.destroy();
     });
 
 
-    it('should inform us when using memdown', function () {
-      var opts = { name: 'mydb', db: require('memdown') };
-      var db = new PouchDB(opts);
-      return db.info().then(function (info) {
-        info.backend_adapter.should.equal('MemDOWN');
-      });
+    it('should inform us when using memdown', async () => {
+      const opts = { name: 'mydb', db: require('memdown') };
+      const db = new PouchDB(opts);
+      const info = await db.info();
+      info.backend_adapter.should.equal('MemDOWN');
     });
 
-    it('constructor emits destroyed when using defaults', function () {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
+    it('constructor emits destroyed when using defaults', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
 
-      var db = new CustomPouch('mydb');
-      return new Promise(function (resolve) {
-        CustomPouch.once('destroyed', function (name) {
+      const db = new CustomPouch('mydb');
+      await new Promise((resolve) => {
+        CustomPouch.once('destroyed', (name) => {
           name.should.equal('mydb');
           resolve();
         });
@@ -138,34 +120,36 @@ if (!process.env.LEVEL_ADAPTER &&
       });
     });
 
-    it('db emits destroyed when using defaults', function () {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
+    it('db emits destroyed when using defaults', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
 
-      var db = new CustomPouch('mydb');
-      return new Promise(function (resolve) {
-        db.once('destroyed', resolve);
-        db.destroy();
-      });
+      const db = new CustomPouch('mydb');
+      const destroyedPromise = new Promise((resolve) => db.once('destroyed', resolve));
+      db.destroy();
+      await destroyedPromise;
     });
 
-    it('constructor emits creation event', function (done) {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
+    it('constructor emits creation event', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
 
-      CustomPouch.once('created', function (name) {
-        name.should.equal('mydb', 'should be same thing');
-        done();
+      const eventPromise = new Promise((resolve) => {
+        CustomPouch.once('created', (name) => {
+          name.should.equal('mydb', 'should be same thing');
+          resolve();
+        });
       });
       new PouchDB('mydb');
+      await eventPromise;
     });
 
     // somewhat odd behavior (CustomPouch constructor always mirrors PouchDB),
     // but better to test it explicitly
-    it('PouchDB emits destroyed when using defaults', function () {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
+    it('PouchDB emits destroyed when using defaults', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
 
-      var db = new CustomPouch('mydb');
-      return new Promise(function (resolve) {
-        PouchDB.once('destroyed', function (name) {
+      const db = new CustomPouch('mydb');
+      await new Promise((resolve) => {
+        PouchDB.once('destroyed', (name) => {
           name.should.equal('mydb');
           resolve();
         });
@@ -175,25 +159,27 @@ if (!process.env.LEVEL_ADAPTER &&
 
     // somewhat odd behavior (CustomPouch constructor always mirrors PouchDB),
     // but better to test it explicitly
-    it('PouchDB emits created when using defaults', function (done) {
-      var CustomPouch = PouchDB.defaults({db: require('memdown')});
+    it('PouchDB emits created when using defaults', async () => {
+      const CustomPouch = PouchDB.defaults({db: require('memdown')});
 
-      PouchDB.once('created', function (name) {
-        name.should.equal('mydb', 'should be same thing');
-        done();
+      const eventPromise = new Promise((resolve) => {
+        PouchDB.once('created', (name) => {
+          name.should.equal('mydb', 'should be same thing');
+          resolve();
+        });
       });
       new CustomPouch('mydb');
+      await eventPromise;
     });
 
-    it('should be transitive (#5922)', function () {
-      var CustomPouch = PouchDB
+    it('should be transitive (#5922)', async () => {
+      const CustomPouch = PouchDB
         .defaults({db: require('memdown')})
         .defaults({});
 
-      var db = new CustomPouch('mydb');
-      return db.info().then(function (info) {
-        info.backend_adapter.should.equal('MemDOWN');
-      });
+      const db = new CustomPouch('mydb');
+      const info = await db.info();
+      info.backend_adapter.should.equal('MemDOWN');
     });
   });
 }
