@@ -1,9 +1,8 @@
-{% assign pagePath = page.inputPath | replace: "./", "" %}
 <a
   data-toggle="tooltip"
   data-placement="top"
   title="Edit this on Github"
   class="icon-edit"
-  href="{{ site.github.repository_url }}/edit/master/docs/{{ pagePath }}"
+  href="{{ site.github.repository_url }}/edit/master/docs/{{ page.inputPath | formatInputPath }}"
   target="_blank"
 ></a>

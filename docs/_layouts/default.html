@@ -69,12 +69,14 @@
 
         <div class="container">
 
-          <h1 class="margin-bottom-none">{{ title }}</h1>
-          {% if edit != false %}
-            <span class="h1 margin-bottom-none">
+          <h1 class="margin-bottom-none">{{ title }}
+
+            {% if edit != false %}
+            <span>
               {% include edit_button.html %}
             </span>
-          {% endif %}
+            {% endif %}
+          </h1>
           {% if sub_title %}
             <h4>{{ sub_title}}</h4>
           {% endif %}
