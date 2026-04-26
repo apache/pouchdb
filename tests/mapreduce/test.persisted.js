@@ -1,8 +1,8 @@
 'use strict';
 
 describe('test.persisted.js', function () {
-  var dbType = testUtils.adapterType();
-  var dbName = testUtils.adapterUrl(dbType, 'testdb');
+  const dbType = testUtils.adapterType();
+  const dbName = testUtils.adapterUrl(dbType, 'testdb');
 
   function setTimeoutPromise(time) {
     return new Promise(function (resolve) {
@@ -11,11 +11,11 @@ describe('test.persisted.js', function () {
   }
 
   function createView(db, viewObj) {
-    var storableViewObj = {
-      map : viewObj.map.toString()
+    const storableViewObj = {
+      map : `${viewObj.map}`
     };
     if (viewObj.reduce) {
-      storableViewObj.reduce = viewObj.reduce.toString();
+      storableViewObj.reduce = `${viewObj.reduce}`;
     }
     return new Promise(function (resolve, reject) {
       db.put({
@@ -38,8 +38,8 @@ describe('test.persisted.js', function () {
   });
 
   it('Test destroyed event on auxiliary db', function () {
-    var db = new PouchDB(dbName);
-    var rev;
+    const db = new PouchDB(dbName);
+    let rev;
     return db.put({
       _id: '_design/name',
       views: {
@@ -82,7 +82,7 @@ describe('test.persisted.js', function () {
     }).then(function () {
       return db.viewCleanup();
     }).then(function () {
-      var views = ['name', 'title'];
+      const views = ['name', 'title'];
       return Promise.all(views.map(function (view) {
         return db.query(view).then(function () {
           throw new Error('expected an error');
@@ -116,14 +116,14 @@ describe('test.persisted.js', function () {
   });
 
   it('Returns ok for viewCleanup on empty db', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return db.viewCleanup().then(function (res) {
       res.ok.should.equal(true);
     });
   });
 
   it('Returns ok for viewCleanup on empty db, callback style', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return new Promise(function (resolve, reject) {
       db.viewCleanup(function (err, res) {
         if (err) {
@@ -137,8 +137,8 @@ describe('test.persisted.js', function () {
   });
 
   it('Returns ok for viewCleanup after modifying view', function () {
-    var db = new PouchDB(dbName);
-    var ddoc = {
+    const db = new PouchDB(dbName);
+    const ddoc = {
       _id: '_design/myview',
       views: {
         myview: {
@@ -148,7 +148,7 @@ describe('test.persisted.js', function () {
         }
       }
     };
-    var doc = {
+    const doc = {
       _id: 'foo',
       firstName: 'Foobar',
       lastName: 'Bazman'
@@ -175,8 +175,8 @@ describe('test.persisted.js', function () {
   });
 
   it('Return ok for viewCleanup after modding view, old format', function () {
-    var db = new PouchDB(dbName);
-    var ddoc = {
+    const db = new PouchDB(dbName);
+    const ddoc = {
       _id: '_design/myddoc',
       views: {
         myview: {
@@ -186,7 +186,7 @@ describe('test.persisted.js', function () {
         }
       }
     };
-    var doc = {
+    const doc = {
       _id: 'foo',
       firstName: 'Foobar',
       lastName: 'Bazman'
@@ -213,8 +213,8 @@ describe('test.persisted.js', function () {
   });
 
   it("Query non existing view throws error", function () {
-    var db = new PouchDB(dbName);
-    var doc = {
+    const db = new PouchDB(dbName);
+    const doc = {
       _id: '_design/barbar',
       views: {
         scores: {
@@ -228,8 +228,8 @@ describe('test.persisted.js', function () {
   });
 
   it("Query non-string view throws error", function () {
-    var db = new PouchDB(dbName);
-    var doc = {
+    const db = new PouchDB(dbName);
+    const doc = {
       _id: '_design/barbar',
       views: {
         scores: {
@@ -244,21 +244,21 @@ describe('test.persisted.js', function () {
 
   it('many simultaneous persisted views', function () {
     this.timeout(120000);
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
 
-    var views = [];
-    var doc = {_id: 'foo'};
-    for (var i = 0; i < 20; i++) {
+    const views = [];
+    const doc = {_id: 'foo'};
+    for (let i = 0; i < 20; i++) {
       views.push('foo_' + i);
       doc['foo_' + i] = 'bar_' + i;
     }
 
     return db.put(doc).then(function () {
       return Promise.all(views.map(function (_, i) {
-        var fun = "function (doc) { emit(doc.foo_" + i + ");}";
+        const fun = "function (doc) { emit(doc.foo_" + i + ");}";
 
-        var ddocId = 'theViewDoc_' + i;
-        var ddoc = {
+        const ddocId = 'theViewDoc_' + i;
+        const ddoc = {
           _id: '_design/' + ddocId,
           views: {
             theView : {map: fun}
@@ -287,7 +287,7 @@ describe('test.persisted.js', function () {
   });
 
   it('should error with a callback', function (done) {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     db.query('fake/thing', function (err) {
       should.exist(err);
       done();
@@ -295,7 +295,7 @@ describe('test.persisted.js', function () {
   });
 
   it('should query correctly when stale', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return createView(db, {
       map : function (doc) {
         emit(doc.name);
@@ -358,14 +358,14 @@ describe('test.persisted.js', function () {
   });
 
   it('should query correctly with stale update_after', function () {
-    var pouch = new PouchDB(dbName);
+    const pouch = new PouchDB(dbName);
 
     return createView(pouch, {map: function (doc) {
       emit(doc.foo);
     }}).then(function (queryFun) {
-      var docs = [];
+      const docs = [];
 
-      for (var i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i++) {
         docs.push({foo: 'bar'});
       }
 
@@ -383,8 +383,8 @@ describe('test.persisted.js', function () {
   });
 
   it('should delete duplicate indexes', function () {
-    var docs = [];
-    for (var i = 0; i < 10; i++) {
+    const docs = [];
+    for (let i = 0; i < 10; i++) {
       docs.push(
         {
           _id : '_design/view' + i,
@@ -396,10 +396,10 @@ describe('test.persisted.js', function () {
         }
       );
     }
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return db.bulkDocs({docs}).then(function (responses) {
-      var tasks = [];
-      for (var i = 0; i < docs.length; i++) {
+      const tasks = [];
+      for (let i = 0; i < docs.length; i++) {
         docs[i]._rev = responses[i].rev;
         tasks.push(db.query('view' + i + '/view'));
       }
@@ -418,11 +418,11 @@ describe('test.persisted.js', function () {
       // can't test this in Node due to the vm
       (typeof process === 'undefined' || process.browser)) {
     it('issue 4967 map() called twice', function () {
-      var db = new PouchDB(dbName);
-      var globalObj = (typeof process !== 'undefined' && !process.browser) ?
+      const db = new PouchDB(dbName);
+      const globalObj = (typeof process !== 'undefined' && !process.browser) ?
         global : window;
       globalObj.__mapreduce_called = {};
-      var docs = Array.apply(null, Array(5)).map(function (_, i) {
+      const docs = Array.apply(null, Array(5)).map(function (_, i) {
         return {
           _id: 'doc_' + i,
           data: Math.random().toString(36).slice(2)
@@ -459,9 +459,9 @@ describe('test.persisted.js', function () {
   }
 
   it('test docs with reserved IDs', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
 
-    var docs = [
+    const docs = [
       {_id: 'constructor'},
       {_id: 'isPrototypeOf'},
       {_id: 'hasOwnProperty'},
@@ -477,7 +477,7 @@ describe('test.persisted.js', function () {
     return db.bulkDocs(docs).then(function () {
       return db.query('view/view', {include_docs: true});
     }).then(function (res) {
-      var rows = res.rows.map(function (row) {
+      const rows = res.rows.map(function (row) {
         return {
           id: row.id,
           key: row.key,
@@ -511,7 +511,7 @@ describe('test.persisted.js', function () {
   });
 
   it('should handle user errors in design doc names', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return db.put({
       _id : '_design/theViewDoc'
     }).then(function () {
@@ -540,7 +540,7 @@ describe('test.persisted.js', function () {
     function getKey(row) {
       return row.key;
     }
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return db.put({
       _id : '_design/foo',
       views : {
@@ -611,8 +611,8 @@ describe('test.persisted.js', function () {
   });
 
   it('should allow view names without slashes', function () {
-    var ddocRev;
-    var db = new PouchDB(dbName);
+    let ddocRev;
+    const db = new PouchDB(dbName);
     return db.put({
       _id : '_design/foo',
       views : {
@@ -631,7 +631,7 @@ describe('test.persisted.js', function () {
   });
 
   it('test 304s in Safari (issue 69)', function () {
-    var db = new PouchDB(dbName);
+    const db = new PouchDB(dbName);
     return createView(db, {
       map : function (doc) {
         emit(doc.name);
@@ -653,16 +653,16 @@ describe('test.persisted.js', function () {
     });
   });
 
-  var isNode = typeof window === 'undefined';
+  const isNode = typeof window === 'undefined';
   if (dbType === 'local' && isNode) {
     it('#239 test memdown db', function () {
-      var destroyedDBs = [];
+      const destroyedDBs = [];
       PouchDB.on('destroyed', function (db) {
         destroyedDBs.push(db);
       });
 
       // make sure prefixed DBs are tied to regular DBs
-      var db = new PouchDB(dbName, {db: require('memdown')});
+      const db = new PouchDB(dbName, {db: require('memdown')});
       return testUtils.fin(createView(db, {
         map: function (doc) {
           emit(doc.name);
@@ -673,7 +673,7 @@ describe('test.persisted.js', function () {
         }).then(function (res) {
           res.rows.should.have.length(1);
           res.rows[0].key.should.equal('foo');
-          var ddocId = '_design/' + queryFun.split('/')[0];
+          const ddocId = '_design/' + queryFun.split('/')[0];
           return db.get(ddocId);
         }).then(function (ddoc) {
           return db.remove(ddoc);
@@ -682,13 +682,13 @@ describe('test.persisted.js', function () {
         });
       }), function () {
         return db.destroy().then(function () {
-          var chain = Promise.resolve();
+          let chain = Promise.resolve();
           // for each of the supposedly destroyed DBs,
           // check that there isn't a normal DB hanging around
           destroyedDBs.forEach(function (dbName) {
             chain = chain.then(function () {
-              var db = new PouchDB(dbName);
-              var promise = db.info().then(function (info) {
+              const db = new PouchDB(dbName);
+              const promise = db.info().then(function (info) {
                 info.update_seq.should.equal(0);
               });
               return testUtils.fin(promise, function () {
@@ -704,14 +704,14 @@ describe('test.persisted.js', function () {
     });
 
     it('#239 test prefixed db', function () {
-      var destroyedDBs = [];
+      const destroyedDBs = [];
       PouchDB.on('destroyed', function (db) {
         destroyedDBs.push(db);
       });
 
       // make sure prefixed DBs are tied to regular DBs
       require('fs').mkdirSync('./myprefix_./tmp/', { recursive:true }); // TODO: bit hacky
-      var db = new PouchDB(dbName, {prefix: './myprefix_'});
+      const db = new PouchDB(dbName, {prefix: './myprefix_'});
       return testUtils.fin(createView(db, {
         map: function (doc) {
           emit(doc.name);
@@ -722,7 +722,7 @@ describe('test.persisted.js', function () {
         }).then(function (res) {
           res.rows.should.have.length(1);
           res.rows[0].key.should.equal('foo');
-          var ddocId = '_design/' + queryFun.split('/')[0];
+          const ddocId = '_design/' + queryFun.split('/')[0];
           return db.get(ddocId);
         }).then(function (ddoc) {
           return db.remove(ddoc);
@@ -731,13 +731,13 @@ describe('test.persisted.js', function () {
         });
       }), function () {
         return db.destroy().then(function () {
-          var chain = Promise.resolve();
+          let chain = Promise.resolve();
           // for each of the supposedly destroyed DBs,
           // check that there isn't a normal DB hanging around
           destroyedDBs.forEach(function (dbName) {
             chain = chain.then(function () {
-              var db = new PouchDB(dbName);
-              var promise = db.info().then(function (info) {
+              const db = new PouchDB(dbName);
+              const promise = db.info().then(function (info) {
                 info.update_seq.should.equal(0);
               });
               return testUtils.fin(promise, function () {
