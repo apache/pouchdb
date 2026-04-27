@@ -9,15 +9,11 @@
 
   "env": {
     "browser": true,
+    "es2017": true,
     "node": true
   },
 
   "globals": {
-    "Map": "readonly",
-    "Set": "readonly",
-    "Promise": "readonly",
-    "Uint8Array": "readonly",
-    "ArrayBuffer": "readonly",
     "emit": "readonly",
     "PouchDB": "readonly"
   },
