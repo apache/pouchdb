@@ -1,8 +1,8 @@
 "use strict";
 
-describe("test.issue7810.js", function () {
-  var adapter = testUtils.adapterType();
-  var dbs = {};
+describe("test.issue7810.js", () => {
+  const adapter = testUtils.adapterType();
+  const dbs = {};
 
   const docData = {
     _id: "foobar",
@@ -12,16 +12,13 @@ describe("test.issue7810.js", function () {
     indexedPairTwo: 'bar'
   };
 
-  function findInDbs(query) {
-    return dbs.withIndex.find(query).then((withIndexResults) =>
-      dbs.withoutIndex.find(query).then((withoutIndexResults) => ({
-        withIndexResults,
-        withoutIndexResults,
-      }))
-    );
-  }
+  const findInDbs = async (query) => {
+    const withIndexResults = await dbs.withIndex.find(query);
+    const withoutIndexResults = await dbs.withoutIndex.find(query);
+    return { withIndexResults, withoutIndexResults };
+  };
 
-  function createIndicesAndPutData() {
+  const createIndicesAndPutData = () => {
     return Promise.all([
       dbs.withIndex.createIndex({
         index: {
@@ -39,9 +36,9 @@ describe("test.issue7810.js", function () {
       dbs.withIndex.put(docData),
       dbs.withoutIndex.put(docData),
     ]);
-  }
+  };
 
-  function assertWithAndWithoutLengthOf(results, docLen) {
+  const assertWithAndWithoutLengthOf = (results, docLen) => {
     const { withIndexResults, withoutIndexResults } = results;
     const withIndexDocs = withIndexResults.docs.length;
     const withoutIndexDocs = withoutIndexResults.docs.length;
@@ -53,148 +50,121 @@ describe("test.issue7810.js", function () {
     const suffix = docLen === 1 ? '' : 's';
     withIndexDocs.should.equal(docLen, `indexed should return ${docLen} doc${suffix}`);
     withoutIndexDocs.should.equal(docLen, `non-indexed should return ${docLen} doc${suffix}`);
-  }
+  };
 
-  beforeEach(function () {
+  beforeEach(async () => {
     dbs.withIndexName = testUtils.adapterUrl(adapter, "with_index");
     dbs.withoutIndexName = testUtils.adapterUrl(adapter, "without_index");
     dbs.withIndex = new PouchDB(dbs.withIndexName);
     dbs.withoutIndex = new PouchDB(dbs.withoutIndexName);
 
-    return createIndicesAndPutData();
+    await createIndicesAndPutData();
   });
 
-  afterEach(function (done) {
+  afterEach((done) => {
     testUtils.cleanup([dbs.withIndexName, dbs.withoutIndexName], done);
   });
 
-  it("Testing issue #7810 with selector {} - should return 1 doc", function () {
-    var query = {
+  it("Testing issue #7810 with selector {} - should return 1 doc", async () => {
+    const query = {
       selector: {},
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 1);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 
-  it("Testing issue #7810 with selector { _id: {} } - should return 0 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector { _id: {} } - should return 0 docs", async () => {
+    const query = {
       selector: {
         _id: {},
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 0);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 0);
   });
 
-  it("Testing issue #7810 with selector { indexedField: {} } - should return 0 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector { indexedField: {} } - should return 0 docs", async () => {
+    const query = {
       selector: {
         indexedField: {},
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 0);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 0);
   });
 
-  it("Testing issue #7810 with selector { _id: 'foobar'} - should return 1 doc", function () {
-    var query = {
+  it("Testing issue #7810 with selector { _id: 'foobar'} - should return 1 doc", async () => {
+    const query = {
       selector: {
         _id: "foobar",
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 1);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 
-  it("Testing issue #7810 with selector { indexedField: 'foobaz' } - should return 1 doc", function () {
-    var query = {
+  it("Testing issue #7810 with selector { indexedField: 'foobaz' } - should return 1 doc", async () => {
+    const query = {
       selector: {
         indexedField: "foobaz",
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 1);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 
-  it("Testing issue #7810 with selector { numericField: 1337} - should return 1 doc", function () {
-    var query = {
+  it("Testing issue #7810 with selector { numericField: 1337} - should return 1 doc", async () => {
+    const query = {
       selector: {
         numericField: 1337,
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 1);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 
-  it("Testing issue #7810 with selector { numericField: 404 } - should return 0 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector { numericField: 404 } - should return 0 docs", async () => {
+    const query = {
       selector: {
         numericField: 404,
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 0);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 0);
   });
 
 
-  it("Testing issue #7810 with selector { indexedPairOne: 'foo' } - should return 1 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector { indexedPairOne: 'foo' } - should return 1 docs", async () => {
+    const query = {
       selector: {
         indexedPairOne: 'foo',
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 1);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 
-  it("Testing issue #7810 with selector { indexedPairOne: 'baz' } - should return 0 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector { indexedPairOne: 'baz' } - should return 0 docs", async () => {
+    const query = {
       selector: {
         indexedPairOne: 'baz'
       },
       limit: 1,
     };
-    return findInDbs(query).then(
-      (results) => {
-        assertWithAndWithoutLengthOf(results, 0);
-      }
-    );
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 0);
   });
 
-  it("Testing issue #7810 with selector {} - should return 1 out of 2 docs", function () {
-    var query = {
+  it("Testing issue #7810 with selector {} - should return 1 out of 2 docs", async () => {
+    const query = {
       selector: {},
       limit: 1,
     };
@@ -205,15 +175,11 @@ describe("test.issue7810.js", function () {
       indexedPairOne: 'bob',
       indexedPairTwo: 'david'
     };
-    return Promise.all([
+    await Promise.all([
       dbs.withIndex.put(otherDoc),
       dbs.withoutIndex.put(otherDoc)
-    ]).then(function () {
-      return findInDbs(query).then(
-        (results) => {
-          assertWithAndWithoutLengthOf(results, 1);
-        }
-      );
-    });
+    ]);
+    const results = await findInDbs(query);
+    assertWithAndWithoutLengthOf(results, 1);
   });
 });
