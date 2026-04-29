@@ -362,19 +362,6 @@ adapters.forEach((adapters) => {
 
           rep.on('complete', finish).on('error', cleanup);
           rep.on('change', async () => {
-            if (++posted < numDocsToWrite) {
-              remote.post({}).catch(cleanup);
-            } else {
-              try {
-                const info = await db.info();
-                if (info.doc_count === numDocsToWrite) {
-                  cleanup();
-                }
-              } catch (err) {
-                cleanup(err);
-              }
-            }
-
             try {
               const numListeners = rep.listeners(event).length;
               if (typeof originalNumListeners !== 'number') {
@@ -388,6 +375,19 @@ adapters.forEach((adapters) => {
               }
             } catch (err) {
               cleanup(err);
+            }
+
+            if (++posted < numDocsToWrite) {
+              remote.post({}).catch(cleanup);
+            } else {
+              try {
+                const info = await db.info();
+                if (info.doc_count === numDocsToWrite) {
+                  cleanup();
+                }
+              } catch (err) {
+                cleanup(err);
+              }
             }
           });
         });
@@ -528,6 +528,17 @@ adapters.forEach((adapters) => {
         }).on('paused', () => {
           paused++;
         }).on('change', async () => {
+          try {
+            const numListeners = getTotalListeners();
+            if (typeof originalNumListeners !== 'number') {
+              originalNumListeners = numListeners;
+            } else {
+              Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
+            }
+          } catch (err) {
+            cleanup(err);
+          }
+
           if (++posted < numDocsToWrite) {
             remote.post({}).catch(cleanup);
           } else {
@@ -539,17 +550,6 @@ adapters.forEach((adapters) => {
             } catch (err) {
               cleanup(err);
             }
-          }
-
-          try {
-            const numListeners = getTotalListeners();
-            if (typeof originalNumListeners !== 'number') {
-              originalNumListeners = numListeners;
-            } else {
-              Math.abs(numListeners -  originalNumListeners).should.be.at.most(1);
-            }
-          } catch (err) {
-            cleanup(err);
           }
         });
       });
