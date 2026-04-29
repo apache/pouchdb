@@ -28,7 +28,6 @@ jobs:
         with:
           repository: apache/pouchdb-site
           ref: asf-site
-          ssh-key: ${{ secrets.POUCHDB_WEBSITE_BUILD }}
           path: checked-out-pouchdb-site
           fetch-depth: 0
       - name: Commit and push if changed
@@ -36,6 +35,10 @@ jobs:
           POUCHDB_WEBSITE_BUILD: ${{ secrets.POUCHDB_WEBSITE_BUILD }}
         run: |
           cd checked-out-pouchdb-site
+
+          echo "Git remotes:"
+          git remote -v
+
           git config url."https://asf-ci-deploy:$POUCHDB_WEBSITE_BUILD@github.com/".insteadOf "https://github.com/"
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git config user.name ${{ github.actor }}
@@ -47,13 +50,11 @@ jobs:
 
           cp -R ../docs/_site/. .
 
-          git remote -v
-
           if [[ -n $(git status --porcelain) ]]; then
             echo "Committing changes…"
             git add -A
             git commit -m "Deploy site from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
-            git push origin asf-site --force
+            GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push origin asf-site --force
           else
             echo "No changes to commit"
           fi
