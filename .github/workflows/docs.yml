@@ -22,7 +22,7 @@ jobs:
   test-docs:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
+      - name: Checkout PouchDB repo
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -30,10 +30,6 @@ jobs:
         with:
           node-version: 24
       - run: BUILD=1 npm run build-site
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.POUCHDB_WEBSITE_BUILD }}
       - name: Checkout pouchdb-site repo
         uses: actions/checkout@v4
         with:
@@ -43,10 +39,13 @@ jobs:
           path: checked-out-pouchdb-site
           fetch-depth: 0
       - name: Commit and push if changed
+        env:
+          POUCHDB_WEBSITE_BUILD: ${{ secrets.POUCHDB_WEBSITE_BUILD }}
         run: |
           cd checked-out-pouchdb-site
-          git config user.name "CI"
-          git config user.email "ci@users.noreply.github.com"
+          git config url."https://asf-ci-deploy:$POUCHDB_WEBSITE_BUILD@github.com/".insteadOf "https://github.com/"
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          git config user.name ${{ github.actor }}
 
           # Juuust in case
           git checkout asf-site
