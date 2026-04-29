@@ -30,11 +30,24 @@ jobs:
           ref: asf-site
           path: checked-out-pouchdb-site
           fetch-depth: 0
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.POUCHDB_WEBSITE_BUILD }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Configure SSH for GitHub
+        run: |
+          echo "Host github.com
+            IdentityFile ~/.ssh/id_rsa
+            IdentitiesOnly yes" >> ~/.ssh/config
       - name: Commit and push if changed
         env:
           POUCHDB_WEBSITE_BUILD: ${{ secrets.POUCHDB_WEBSITE_BUILD }}
         run: |
           cd checked-out-pouchdb-site
+
+          git remote set-url origin git@github.com:apache/pouchdb-site.git
 
           echo "Git remotes:"
           git remote -v
