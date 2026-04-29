@@ -334,7 +334,7 @@ adapters.forEach((adapter) => {
 
     it('#2935 new_edits=false with single unauthorized', async () => {
 
-      const isCouchDB = await new Promise(resolve => testUtils.isCouchDB(resolve));
+      const isCouchDB = await testUtils.isCouchDB();
       if (adapter !== 'http' || !isCouchDB) {
         return;
       }
