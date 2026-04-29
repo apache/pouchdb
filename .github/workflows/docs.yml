@@ -2,13 +2,6 @@ name: PouchDB Docs
 
 on:
   push:
-    paths:
-      - '.github/actions/**'
-      - '.github/workflows/docs.yml'
-      - 'package.json'
-      - 'bin/**'
-      - 'docs/**'
-  pull_request:
     branches: [master]
     paths:
       - '.github/actions/**'
@@ -54,11 +47,13 @@ jobs:
 
           cp -R ../docs/_site/. .
 
+          git remote -v
+
           if [[ -n $(git status --porcelain) ]]; then
             echo "Committing changes…"
             git add -A
             git commit -m "Deploy site from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
-            git push git@github.com:apache/pouchdb-site.git asf-site --force
+            git push origin asf-site --force
           else
             echo "No changes to commit"
           fi
