@@ -52,12 +52,12 @@ jobs:
           echo "Git remotes:"
           git remote -v
 
-          git config url."https://asf-ci-deploy:$POUCHDB_WEBSITE_BUILD@github.com/".insteadOf "https://github.com/"
+          # git config url."https://asf-ci-deploy:$POUCHDB_WEBSITE_BUILD@github.com/".insteadOf "https://github.com/"
           git config user.email ${{ github.actor }}@users.noreply.github.com
           git config user.name ${{ github.actor }}
 
           # Juuust in case
-          git checkout asf-site
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git checkout asf-site
 
           git rm -rf . || true
 
