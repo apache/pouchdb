@@ -334,54 +334,55 @@ adapters.forEach((adapter) => {
 
     it('#2935 new_edits=false with single unauthorized', async () => {
 
-      const isCouchDB = await testUtils.isCouchDB();
-      if (adapter !== 'http' || !isCouchDB) {
-        return;
-      }
+      testUtils.isCouchDB(async (isCouchDB) => {
+        if (adapter !== 'http' || !isCouchDB) {
+          return;
+        }
 
-      const ddoc = {
-        "_id": "_design/validate",
-        "validate_doc_update": function (newDoc) {
-          if (newDoc.foo === undefined) {
-            throw {unauthorized: 'Document must have a foo.'};
-          }
-        }.toString()
-      };
+        const ddoc = {
+          "_id": "_design/validate",
+          "validate_doc_update": function (newDoc) {
+            if (newDoc.foo === undefined) {
+              throw {unauthorized: 'Document must have a foo.'};
+            }
+          }.toString()
+        };
 
-      const db = new PouchDB(dbs.name);
+        const db = new PouchDB(dbs.name);
 
-      await db.put(ddoc);
-      const res = await db.bulkDocs({
-        docs: [
-          {
-            '_id': 'doc0',
-            '_rev': '1-x',
-            'foo': 'bar',
-            '_revisions': {
-              'start': 1,
-              'ids': ['x']
+        await db.put(ddoc);
+        const res = await db.bulkDocs({
+          docs: [
+            {
+              '_id': 'doc0',
+              '_rev': '1-x',
+              'foo': 'bar',
+              '_revisions': {
+                'start': 1,
+                'ids': ['x']
+              }
+            }, {
+              '_id': 'doc1',
+              '_rev': '1-x',
+              '_revisions': {
+                'start': 1,
+                'ids': ['x']
+              }
+            }, {
+              '_id': 'doc2',
+              '_rev': '1-x',
+              'foo': 'bar',
+              '_revisions': {
+                'start': 1,
+                'ids': ['x']
+              }
             }
-          }, {
-            '_id': 'doc1',
-            '_rev': '1-x',
-            '_revisions': {
-              'start': 1,
-              'ids': ['x']
-            }
-          }, {
-            '_id': 'doc2',
-            '_rev': '1-x',
-            'foo': 'bar',
-            '_revisions': {
-              'start': 1,
-              'ids': ['x']
-            }
-          }
-        ]
-      }, {new_edits: false});
-      res.should.have.length(1);
-      should.exist(res[0].error);
-      res[0].id.should.equal('doc1');
+          ]
+        }, {new_edits: false});
+        res.should.have.length(1);
+        should.exist(res[0].error);
+        res[0].id.should.equal('doc1');
+      });
     });
 
     it('Deleting _local docs with bulkDocs' , async () => {

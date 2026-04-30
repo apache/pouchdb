@@ -167,13 +167,11 @@ const parseHostWithCreds = (host) => {
 
 testUtils.isCouchDB = async (cb) => {
   const {url, options} = parseHostWithCreds(testUtils.couchHost());
-  const response = await PouchDB.fetch(url, options);
-  const res = await response.json();
-  const result = 'couchdb' in res || 'express-pouchdb' in res;
-  if (cb) {
-    cb(result);
-  }
-  return result;
+  PouchDB.fetch(url, options).then(function (response) {
+    return response.json();
+  }).then(function (res) {
+    cb('couchdb' in res || 'express-pouchdb' in res);
+  });
 };
 
 testUtils.getServerType = async () => {
