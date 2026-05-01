@@ -32,7 +32,11 @@ testUtils.adapterType = function () {
 
 testUtils.readBlob = function (blob, callback) {
   if (testUtils.isNode()) {
-    callback(blob.toString('binary'));
+    if (blob.text) {
+      blob.text().then(text => callback(text));
+    } else {
+      callback(blob.toString('binary'));
+    }
   } else {
     var reader = new FileReader();
     reader.onloadend = function () {
@@ -59,7 +63,11 @@ testUtils.readBlobPromise = function (blob) {
 
 testUtils.base64Blob = function (blob, callback) {
   if (testUtils.isNode()) {
-    callback(blob.toString('base64'));
+    if (blob.text) {
+      blob.text().then(text => callback(text));
+    } else {
+      callback(blob.toString('base64'));
+    }
   } else {
     testUtils.readBlob(blob, function (binary) {
       callback(testUtils.btoa(binary));
