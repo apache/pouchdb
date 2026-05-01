@@ -1,0 +1,7 @@
+{
+  "extends": "../.eslintrc.json",
+
+  "globals": {
+    "__pouch__": "readonly"
+  }
+}
