@@ -4,60 +4,56 @@ if (!process.env.LEVEL_ADAPTER &&
     !process.env.AUTO_COMPACTION &&
     !process.env.ADAPTERS) {
   // these tests don't make sense for anything other than default leveldown
-  var fs = require('fs');
-  var ncp = require('ncp').ncp;
+  const fs = require('fs');
+  const { ncp } = require('ncp');
 
   ncp.limit = 16;
 
-  describe('migration one', function () {
-    beforeEach(function (done) {
-      var input =
+  describe('migration one', () => {
+    beforeEach((done) => {
+      const input =
         fs.createReadStream('./tests/integration/leveldb/oldStyle.uuid');
-      input.on('end', function () {
+      input.on('end', () => {
         ncp('./tests/integration/leveldb/oldStyle',
             './tmp/_pouch_oldStyle', done);
       });
       input.pipe(fs.createWriteStream('./tmp/_pouch_oldStyle.uuid'));
     });
-    it('should work', function () {
-      var db = new PouchDB('oldStyle');
-      return db.get('doc').then(function (doc) {
-        doc.something.should.equal('awesome');
-        return db.destroy();
-      });
+    it('should work', async () => {
+      const db = new PouchDB('oldStyle');
+      const doc = await db.get('doc');
+      doc.something.should.equal('awesome');
+      await db.destroy();
     });
   });
-  describe('migration two', function () {
-    beforeEach(function (done) {
+  describe('migration two', () => {
+    beforeEach((done) => {
       ncp('./tests/integration/leveldb/middleStyle',
           './tmp/_pouch_middleStyle', done);
     });
-    it('should work', function () {
-      var db = new PouchDB('middleStyle');
-      return db.id().then(function (id) {
-        id.should.equal('8E049E64-784A-3209-8DD6-97C29D7A5868');
-        return db.get('_local/foo');
-      }).then(function (resp) {
-        resp.something.should.equal('else');
-        return db.allDocs();
-      }).then(function (resp) {
-        resp.total_rows.should.equal(1);
-        resp.rows[0].id.should.equal('_design/foo');
-        return db.destroy();
-      });
+    it('should work', async () => {
+      const db = new PouchDB('middleStyle');
+      const id = await db.id();
+      id.should.equal('8E049E64-784A-3209-8DD6-97C29D7A5868');
+      const resp = await db.get('_local/foo');
+      resp.something.should.equal('else');
+      const allDocsResp = await db.allDocs();
+      allDocsResp.total_rows.should.equal(1);
+      allDocsResp.rows[0].id.should.equal('_design/foo');
+      await db.destroy();
     });
   });
 
   // sanity check to ensure we don't actually need to migrate
   // attachments for #2818
-  describe('#2818 no migration needed for attachments', function () {
-    beforeEach(function (done) {
+  describe('#2818 no migration needed for attachments', () => {
+    beforeEach((done) => {
       ncp('./tests/integration/leveldb/lateStyle',
           './tmp/_pouch_lateStyle', done);
     });
-    it('should work', function () {
-      var db = new PouchDB('lateStyle', { auto_compaction: false });
-      return db.put({
+    it('should work', async () => {
+      const db = new PouchDB('lateStyle', { auto_compaction: false });
+      await db.put({
         _id: 'doc_b',
         _attachments: {
           'att.txt': {
@@ -65,20 +61,15 @@ if (!process.env.LEVEL_ADAPTER &&
             content_type: 'text/plain'
             }
         }
-      }).then(function () {
-        return db.get('doc_b');
-      }).then(function (doc) {
-        return db.remove(doc);
-      }).then(function () {
-        return db.compact();
-      }).then(function () {
-        return db.get('doc_a', {attachments: true});
-      }).then(function (doc) {
-        doc._attachments['att.txt'].data.should.equal('Zm9vYmFy');
-        doc._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
-        doc._attachments['att3.txt'].data.should.equal('Zm9v');
-        return db.destroy();
       });
+      let doc = await db.get('doc_b');
+      await db.remove(doc);
+      await db.compact();
+      doc = await db.get('doc_a', {attachments: true});
+      doc._attachments['att.txt'].data.should.equal('Zm9vYmFy');
+      doc._attachments['att2.txt'].data.should.equal('Zm9vYmFy');
+      doc._attachments['att3.txt'].data.should.equal('Zm9v');
+      await db.destroy();
     });
   });
 
@@ -93,13 +84,13 @@ if (!process.env.LEVEL_ADAPTER &&
   // This test is very similar to the test.bulk_docs.js test:
   // 'Testing successive new_edits to the same doc, different content'
 
-  describe('#3136 no migration needed for overwritten revs', function () {
-    beforeEach(function (done) {
+  describe('#3136 no migration needed for overwritten revs', () => {
+    beforeEach((done) => {
       ncp('./tests/integration/leveldb/laterStyle',
         './tmp/_pouch_laterStyle', done);
     });
-    it('should work', function () {
-      var db = new PouchDB('laterStyle');
+    it('should work', async () => {
+      const db = new PouchDB('laterStyle');
 
       // basically this a db where I did a very pathological thing:
       //var docsA = [{
@@ -132,29 +123,28 @@ if (!process.env.LEVEL_ADAPTER &&
       //db.bulkDocs(docsB, {new_edits: false});
 
 
-      return db.changes({
+      const result = await db.changes({
         include_docs: true,
         return_docs: true
-      }).then(function (result) {
         // the important thing is that 'zam' is ignored. see
         // the other test in test.bulk_docs.js for details
-        var expected = {
-          "results": [{
-            "id": "fee",
-            "changes": [{"rev": "1-x"}],
-            "doc": {"_id": "fee", "_rev": "1-x"},
-            "seq": 1
-          }, {
-            "id": "foo",
-            "changes": [{"rev": "1-x"}],
-            "doc": {"bar": "baz", "_id": "foo", "_rev": "1-x"},
-            "seq": 2
-          }],
-          "last_seq": 2
-        };
-        result.should.deep.equal(expected);
-        return db.destroy();
       });
+      const expected = {
+        "results": [{
+          "id": "fee",
+          "changes": [{"rev": "1-x"}],
+          "doc": {"_id": "fee", "_rev": "1-x"},
+          "seq": 1
+        }, {
+          "id": "foo",
+          "changes": [{"rev": "1-x"}],
+          "doc": {"bar": "baz", "_id": "foo", "_rev": "1-x"},
+          "seq": 2
+        }],
+        "last_seq": 2
+      };
+      result.should.deep.equal(expected);
+      await db.destroy();
     });
   });
 }
