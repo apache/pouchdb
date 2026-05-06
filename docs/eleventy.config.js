@@ -18,7 +18,9 @@ module.exports = eleventyConfig => {
   eleventyConfig.addGlobalData('permalink', '/{{ page.filePathStem }}.html');
 
   eleventyConfig.addCollection('guides', collectionApi => {
-    return collectionApi.getFilteredByTag('guides').sort((a, b) => a.data.index - b.data.index);
+    return collectionApi
+        .getFilteredByTag('guides')
+        .sort((a, b) => a.data.index - b.data.index);
   });
 
   eleventyConfig.addCollection('pages', collectionApi => {
@@ -41,6 +43,10 @@ module.exports = eleventyConfig => {
     return collectionApi
         .getFilteredByTag('posts')
         .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
+  });
+
+  eleventyConfig.addFilter("formatInputPath", function(value) {
+    return value.replace("./", "").replace("_guides", "guides").replace("_posts", "post");
   });
 
   eleventyConfig.addFilter('first_paragraph', function(content) {
