@@ -9,8 +9,11 @@ permalink: /serviceWorker.js
 var newCacheName = 'pouchdb-assets-cache-v{{ site.time }}';
 
 var criticalAssets = [
-  '{{ site.baseurl }}/offline.html',
-  '{{ site.baseurl }}/static/css/pouchdb.min.css',
+  '/offline.html',
+  '/static/css/pouchdb.min.css',
+  '/static/fonts/LatoLatin-Medium.woff2',
+  '/static/fonts//open-sans-v44-latin_latin-ext-regular.woff2',
+  '/static/fonts//open-sans-v44-latin_latin-ext-700.woff2'
 ];
 
 {%- assign pages = collections.pages | where_exp: "page", "page.url != '/manifest.appcache'" -%}
