@@ -8,15 +8,15 @@
 {% endif %}
 
 {% assign post_author = author %}
-{% assign post_gravatar = '' %}
+{% assign avatar = '' %}
 
 {% for a in authors %}
   {% if a.name == author %}
     {% if a.twitter %}
       {% capture post_author %}<a href="https://twitter.com/{{a.twitter}}">{{ author }}</a>{% endcapture %}
     {% endif %}
-    {% if a.gravatar %}
-      {% capture post_gravatar %}https://gravatar.com/avatar/{{ a.gravatar }}{% endcapture %}
+    {% if a.avatar %}
+      {% capture avatar %}<img class="pull-left media-object img-circle img-responsive" src='/static/img/authors/{{ a.avatar }}' alt='{{ author }}'>{% endcapture %}
     {% endif %}
   {% endif %}
 {% endfor %}
@@ -27,9 +27,7 @@
 
 <div class="post">
   <div class="media">
-    <a class="pull-left" href="#">
-    <img class="media-object img-circle img-responsive" src='{{ post_gravatar }}' alt='{{ author }}'>
-    </a>
+    {{ avatar }}
     <div class="media-body">
     <p>
       <strong>By:</strong> {{ post_author }}<br>

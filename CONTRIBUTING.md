@@ -117,7 +117,7 @@ Writing a blog post for PouchDB is exactly the same process as other contributio
 ### Steps
 
 1. Open up an issue proposing the blog post if you need help getting ideas or structuring it.
-2. Add yourself as an author to https://github.com/pouchdb/pouchdb/blob/master/docs/_data/authors.yml. (Make sure you have a [Gravatar](http://en.gravatar.com/) too.)
+2. Add yourself as an author to https://github.com/pouchdb/pouchdb/blob/master/docs/_data/authors.yml, and optionally add an image of yourself in `/docs/static/img/authors`, check the existing files there for guidance on size and format.
 3. Add a new blog post with the date that you expect it will be published (we can always change it later).
 4. Write something!
 5. Run `npm run build-site` and you will always have a fresh version of the site at localhost:4000. You may need to Cmd-Shift-R or Ctrl-Shift-R (hard refresh) to see the latest version, since we use AppCache.
