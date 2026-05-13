@@ -31,10 +31,10 @@ var blogPosts = [{% for page in collections.posts %}
 // Only cache the first blog page
 var nonCriticalAssets =
   [
-    '{{ site.baseurl }}/static/favicon.ico',
-    '{{ site.baseurl }}/static/js/code.min.js',
-    'https://code.jquery.com/jquery.min.js',
-    'https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js',
+    '/static/favicon.ico',
+    '/static/js/code.min.js',
+    '/static/js/jquery.min.js',
+    '/static/js/bootstrap.min.js',
     'https://cdn.jsdelivr.net/npm/pouchdb/dist/pouchdb.min.js',
   ]
   .concat(pages)
