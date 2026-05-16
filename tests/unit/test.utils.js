@@ -7,6 +7,7 @@ var normalizeDdocFunctionName = PouchDB.utils.normalizeDdocFunctionName;
 var parseDdocFunctionName = PouchDB.utils.parseDdocFunctionName;
 var createError = PouchDB.utils.createError;
 var errors = PouchDB.Errors;
+var clone = PouchDB.utils.clone;
 
 describe('test.utils.js', function () {
   describe('the design doc function name normalizer', function () {
@@ -42,6 +43,13 @@ describe('test.utils.js', function () {
         'correct error message returned');
       newError.stack.should.be.a('string');
       newError.reason.should.equal('love needs no message');
+    });
+  });
+  describe('clone without __proto__', function () {
+    it ('clones', function () {
+      const input = '{ "__proto__": { "a": 1 } }';
+      const output = clone(JSON.parse(input));
+      Object.getPrototypeOf(output).should.equal(Object.prototype);
     });
   });
 });
