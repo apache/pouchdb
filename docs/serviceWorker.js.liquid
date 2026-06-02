@@ -9,11 +9,11 @@ permalink: /serviceWorker.js
 var newCacheName = 'pouchdb-assets-cache-v{{ site.time }}';
 
 var criticalAssets = [
-  '/offline.html',
-  '/static/css/pouchdb.min.css',
-  '/static/fonts/LatoLatin-Medium.woff2',
-  '/static/fonts//open-sans-v44-latin_latin-ext-regular.woff2',
-  '/static/fonts//open-sans-v44-latin_latin-ext-700.woff2'
+  '{{ site.baseurl }}/offline.html',
+  '{{ site.baseurl }}/static/css/pouchdb.min.css',
+  '{{ site.baseurl }}/static/fonts/LatoLatin-Medium.woff2',
+  '{{ site.baseurl }}/static/fonts//open-sans-v44-latin_latin-ext-regular.woff2',
+  '{{ site.baseurl }}/static/fonts//open-sans-v44-latin_latin-ext-700.woff2'
 ];
 
 {%- assign pages = collections.pages | where_exp: "page", "page.url != '/manifest.appcache'" -%}
@@ -31,11 +31,11 @@ var blogPosts = [{% for page in collections.posts %}
 // Only cache the first blog page
 var nonCriticalAssets =
   [
-    '/static/favicon.ico',
-    '/static/js/code.min.js',
-    '/static/js/jquery.min.js',
-    '/static/js/bootstrap.min.js',
-    '/static/js/pouchdb.min.js',
+    '{{ site.baseurl }}/static/favicon.ico',
+    '{{ site.baseurl }}/static/js/code.min.js',
+    '{{ site.baseurl }}/static/js/jquery.min.js',
+    '{{ site.baseurl }}/static/js/bootstrap.min.js',
+    '{{ site.baseurl }}/static/js/pouchdb.min.js',
   ]
   .concat(pages)
   .filter(function (file) {

@@ -16,7 +16,7 @@
       {% capture post_author %}<a href="https://twitter.com/{{a.twitter}}">{{ author }}</a>{% endcapture %}
     {% endif %}
     {% if a.avatar %}
-      {% capture avatar %}<img class="pull-left media-object img-circle img-responsive" src='/static/img/authors/{{ a.avatar }}' alt='{{ author }}'>{% endcapture %}
+      {% capture avatar %}<img class="pull-left media-object img-circle img-responsive" src='{{ site.baseurl }}/static/img/authors/{{ a.avatar }}' alt='{{ author }}'>{% endcapture %}
     {% endif %}
   {% endif %}
 {% endfor %}
