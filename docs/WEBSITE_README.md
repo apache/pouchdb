@@ -1,4 +1,4 @@
-# www.pouchdb.com
+# pouchdb.com
 
 This is the PouchDB documentation site, built with [11ty](http://11ty.dev/), a node.js static site generator.
 

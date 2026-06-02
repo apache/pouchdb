@@ -40,8 +40,8 @@ We're always looking for new contributors! If you'd like to try your hand at wri
 
 If you have a pull request that you'd like to submit, please read the [contributing guide](https://github.com/pouchdb/pouchdb/blob/master/CONTRIBUTING.md) for info on style, commit message format, and other (slightly!) nitpicky things like that. PouchDB is heavily tested, so you'll also want to check out the [testing guide](https://github.com/pouchdb/pouchdb/blob/master/TESTING.md).
 
-## The www.pouchdb.com Website
+## The pouchdb.com Website
 
-The documentation website at [www.pouchdb.com](www.pouchdb.com) is also part of this repo, in the `/docs` folder. It has its own `/docs/WEBSITE_README.md`
+The documentation website at [pouchdb.com](pouchdb.com) is also part of this repo, in the `/docs` folder. It has its own `/docs/WEBSITE_README.md`
 
 Website deployment happens automatically once the changes land in `master`.
