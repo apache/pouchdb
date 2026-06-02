@@ -19,7 +19,7 @@ permalink: /feed.xml
         {% else %}
           <description>{{ post.content | first_paragraph | xml_escape }}</description>
         {% endif %}
-        <pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
+        <pubDate>{{ post.date | dateToRfc882 }}</pubDate>
         <link>{{ site.url }}{{ post.url }}</link>
         <guid isPermaLink="true">{{ site.url }}{{ post.url }}</guid>
       </item>

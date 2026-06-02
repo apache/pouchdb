@@ -96,6 +96,33 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('markdown',  content => md.render(content));
   eleventyConfig.addPairedShortcode('markdown',  content => md.render(content));
 
+  function pubDateRFC822(value, timeZone = undefined) {
+    const date = new Date(value);
+    const options = {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+
+      timeZone: timeZone,
+      timeZoneName: 'longOffset',
+    };
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+    const [wkd, mmm, dd, yyyy, time, z] = formattedDate.replace(/([,\s]+)/g, ' ').split(' ');
+    // This is valid regex, even if ESLint complains. It’s also not ignorable for some reason.
+    const tz = z.replace(/GMT(?<sign>\+|\-)(?<hour>\d\d):(?<minute>\d\d)/, '$<sign>$<hour>$<minute>');
+
+    return `${wkd}, ${dd} ${mmm} ${yyyy} ${time} ${tz}`;
+  }
+
+  eleventyConfig.addLiquidFilter("dateToRfc882", pubDateRFC822);
+
   return {
     dir: {
       input: './docs',
