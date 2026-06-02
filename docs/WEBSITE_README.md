@@ -34,6 +34,19 @@ By default, SW will only cache the pages you’ve seen plus `offline.html`, whic
 
 To test the "Content updated, reload now?" toast that indicates that a new version of the site is available, run the dev server, make a change to the site (e.g. change some text somewhere), then navigate once or reload the page with a normal (not hard) reload. The update toast should show. When you click it, the page and the serviceworker cache will be updated.
 
+## PouchDB Version Updates
+
+If you’re releasing a new PouchDB version, the site also needs some updates:
+
+1. Replace `docs/static/js/pouchdb.min.js` with your newly built version of the same file (this is the PouchDB that is hosted by the website itself and available in the browser dev console).
+2. Update the `version` key in `docs/_data/site.js` to the new PouchDB version.
+
+Then deploy the webite.
+
+## Website Deployment
+
+Currently, the website is deployed manually by members of the team. In the near future, any website changes merged into `master` will be deployed automatically.
+
 ## Technology Choices
 
 The PouchDB website is over a decade old and some parts of it are somewhat out of date by now, but they haven’t been updated for good reasons. The most significant legacy bit is Bootstrap 3.11 in the LESS version, which depends on JQuery for interactivity. There is currently zero benefit to, for example, migrating to SASS/SCSS here or trying to untangle JQuery from Bootstrap in order to use vanilla JS. A design update is on the horizon, and we’ll take that as an opportunity to remove Bootstrap, LESS and JQuery alltogether and replace everything with vanilla web standard JS and CSS, and maybe a slim UI library for base styling. Then we can also get rid of `/bin/build-site.js` and just use 11ty for everything. Until then, we’re still rocking Bootstrap and JQuery.
