@@ -1,5 +1,4 @@
-[PouchDB](https://pouchdb.com/) – The Database that Syncs!
-=========
+# [PouchDB](https://pouchdb.com/) – The Database that Syncs!
 
 [![Build Status](https://github.com/pouchdb/pouchdb/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pouchdb/pouchdb/actions/workflows/ci.yml?query=branch%3Amaster) [![npm version](https://img.shields.io/npm/v/pouchdb.svg)](https://www.npmjs.com/package/pouchdb) [![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/pouchdb/badge?style=rounded)](https://www.jsdelivr.com/package/npm/pouchdb)
 
@@ -7,25 +6,17 @@ PouchDB is an open-source JavaScript database inspired by [Apache CouchDB](http:
 
 PouchDB was created to help web developers build applications that work as well offline as they do online.
 
-Using PouchDB
--------------
+## Using PouchDB
 
 To get started using PouchDB, check out the [web site](https://pouchdb.com) and [API documentation](https://pouchdb.com/api.html).
 
-Deploying the Documentation Site www.pouchdb.com
-------------------------------------------------
-
-Doc website deployment is handled automatically once the changes land in `master`.
-
-Getting Help
-------------
+## Getting Help
 
 The PouchDB community is active [in `#pouchdb` on the CouchDB Slack](https://join.slack.com/t/couchdb/shared_invite/zt-3aqucllea-C92fkzW5oO_VhllRCqFbcw), in [the Google Groups mailing list](https://groups.google.com/forum/#!forum/pouchdb), and [on StackOverflow](http://stackoverflow.com/questions/tagged/pouchdb). Or you can [mastodon @pouchdb](https://fosstodon.org/@pouchdb)!
 
 If you think you've found a bug in PouchDB, please write a reproducible test case and file [a Github issue](https://github.com/pouchdb/pouchdb/issues).
 
-Prerelease builds
-----
+## Prerelease builds
 
 If you like to live on the bleeding edge, you can build PouchDB from source using these steps:
 
@@ -35,8 +26,7 @@ If you like to live on the bleeding edge, you can build PouchDB from source usin
 
 After running these steps, the browser build can be found in `packages/node_modules/pouchdb/dist/pouchdb.js`.
 
-Changelog
-----
+## Changelog
 
 PouchDB follows [semantic versioning](http://semver.org/). To see a changelog with all PouchDB releases, check out the [Github releases page](https://github.com/pouchdb/pouchdb/releases).
 
@@ -44,9 +34,14 @@ For a concise list of breaking changes, there's the [wiki list of breaking chang
 
 Keep in mind that PouchDB is auto-migrating, so a database created in 1.0.0 will still work if you open it in 4.0.0+. Any release containing a migration is clearly marked in the release notes.
 
-Contributing
-------------
+## Contributing
 
 We're always looking for new contributors! If you'd like to try your hand at writing code, writing documentation, designing the website, writing a blog post, or answering [questions on StackOverflow](http://stackoverflow.com/search?tab=newest&q=pouchdb), then we'd love to have your input.
 
 If you have a pull request that you'd like to submit, please read the [contributing guide](https://github.com/pouchdb/pouchdb/blob/master/CONTRIBUTING.md) for info on style, commit message format, and other (slightly!) nitpicky things like that. PouchDB is heavily tested, so you'll also want to check out the [testing guide](https://github.com/pouchdb/pouchdb/blob/master/TESTING.md).
+
+## The www.pouchdb.com Website
+
+The documentation website at [www.pouchdb.com](www.pouchdb.com) is also part of this repo, in the `/docs` folder. It has its own `/docs/WEBSITE_README.md`
+
+Website deployment happens automatically once the changes land in `master`.
