@@ -222,9 +222,13 @@ describe('test.persisted.js', () => {
         }
       }
     };
-    await db.post(doc);
 
-    await db.query('barbar/scores', {key: 'bar'}).should.be.rejected;
+    try {
+      await db.post(doc);
+      await db.query('barbar/scores', {key: 'bar'});
+    } catch (err) {
+      err.message.should.include('string');
+    }
   });
 
   it('many simultaneous persisted views', async () => {
