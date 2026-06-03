@@ -226,6 +226,7 @@ describe('test.persisted.js', () => {
     try {
       await db.post(doc);
       await db.query('barbar/scores', {key: 'bar'});
+      throw new Error('should fail');
     } catch (err) {
       err.message.should.include('string');
     }
@@ -437,7 +438,7 @@ describe('test.persisted.js', () => {
     });
   }
 
-  it('test docs with reserved IDs', function () {
+  it('test docs with reserved IDs', async () => {
     const db = new PouchDB(dbName);
 
     const docs = [
@@ -453,66 +454,71 @@ describe('test.persisted.js', () => {
         }
       }
     ];
-    return db.bulkDocs(docs).then(function () {
-      return db.query('view/view', {include_docs: true});
-    }).then(function (res) {
-      const rows = res.rows.map(function (row) {
-        return {
-          id: row.id,
-          key: row.key,
-          docId: row.doc._id
-        };
-      });
-      assert.deepEqual(rows, [
-        { "id": "constructor",
-          "key": "constructor",
-          "docId": "constructor"
-        },
-        {
-          "id": "hasOwnProperty",
-          "key": "hasOwnProperty",
-          "docId": "hasOwnProperty"
-        },
-        {
-          "id": "isPrototypeOf",
-          "key": "isPrototypeOf",
-          "docId": "isPrototypeOf"
-        }
-      ]);
-      return db.viewCleanup();
-    }).then(function () {
-      return db.get('_design/view');
-    }).then(function (doc) {
-      return db.remove(doc);
-    }).then(function () {
-      return db.viewCleanup();
-    });
+    await db.bulkDocs(docs);
+
+    const res = await db.query('view/view', {include_docs: true});
+
+    const rows = res.rows.map(row =>  ({
+      id: row.id,
+      key: row.key,
+      docId: row.doc._id
+    }));
+
+    assert.deepEqual(rows, [
+      { "id": "constructor",
+        "key": "constructor",
+        "docId": "constructor"
+      },
+      {
+        "id": "hasOwnProperty",
+        "key": "hasOwnProperty",
+        "docId": "hasOwnProperty"
+      },
+      {
+        "id": "isPrototypeOf",
+        "key": "isPrototypeOf",
+        "docId": "isPrototypeOf"
+      }
+    ]);
+
+    await db.viewCleanup();
+
+    const doc = await db.get('_design/view');
+    await db.remove(doc);
+    await db.viewCleanup();
   });
 
-  it('should handle user errors in design doc names', function () {
+  it('should handle user errors in design doc names', async () => {
     const db = new PouchDB(dbName);
-    return db.put({
+
+    await db.put({
       _id : '_design/theViewDoc'
-    }).then(function () {
-      return db.query('foo/bar');
-    }).then(function (res) {
-      should.not.exist(res);
-    }).catch(function (err) {
-      err.status.should.equal(404);
-      return db.put(
-        {_id : '_design/void', views : {1 : null}}
-      ).then(function () {
-        return db.query('void/1');
-      }).then(function (res) {
-        should.not.exist(res);
-      }).catch(function (err) {
-        err.status.should.be.a('number');
-        // this might throw due to erroneous ddoc, but that's ok
-        return db.viewCleanup().catch(function (err) {
-          err.status.should.equal(500);
-        });
-      });
     });
+
+    try {
+      await db.query('foo/bar');
+      throw new Error('should fail');
+    } catch (err) {
+      err.status.should.equal(404);
+    }
+
+    await db.put(
+      {_id : '_design/void', views : {1 : null}}
+    );
+
+    try {
+      await db.query('void/1');
+      throw new Error("should fail");
+    } catch (err) {
+      err.status.should.be.a('number');
+    }
+
+    // this might throw due to erroneous ddoc, but that's ok
+    try {
+      await db.viewCleanup();
+    } catch (err) {
+      err.status.should.equal(500);
+    }
   });
 
   it('should allow the user to create many design docs', function () {
