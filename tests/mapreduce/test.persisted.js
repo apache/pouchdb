@@ -1,6 +1,6 @@
 'use strict';
 
-describe('test.persisted.js', function () {
+describe('test.persisted.js', () => {
   const dbType = testUtils.adapterType();
   const dbName = testUtils.adapterUrl(dbType, 'testdb');
 
@@ -10,37 +10,29 @@ describe('test.persisted.js', function () {
     });
   }
 
-  function createView(db, viewObj) {
+  const createView = async (db, viewObj) => {
     const storableViewObj = {
       map : `${viewObj.map}`
     };
     if (viewObj.reduce) {
       storableViewObj.reduce = `${viewObj.reduce}`;
     }
-    return new Promise(function (resolve, reject) {
-      db.put({
-        _id: '_design/theViewDoc',
-        views: {
-          'theView' : storableViewObj
-        }
-      }, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('theViewDoc/theView');
-        }
-      });
+    await db.put({
+      _id: '_design/theViewDoc',
+      views: {
+        'theView' : storableViewObj
+      }
     });
-  }
+    return 'theViewDoc/theView';
+  };
 
-  afterEach(function () {
-    return new PouchDB(dbName).destroy();
+  afterEach(async () => {
+    await new PouchDB(dbName).destroy();
   });
 
-  it('Test destroyed event on auxiliary db', function () {
+  it('Test destroyed event on auxiliary db', async () => {
     const db = new PouchDB(dbName);
-    let rev;
-    return db.put({
+    const putNameView = await db.put({
       _id: '_design/name',
       views: {
         name: {
@@ -49,94 +41,82 @@ describe('test.persisted.js', function () {
           }.toString()
         }
       }
-    }).then(function (res) {
-      rev = res.rev;
-      return db.bulkDocs([
-        {_id: 'foo', name: 'foo', title: 'yo'},
-        {_id: 'baz', name: 'bar', title: 'hey'},
-        {_id: 'bar', name: 'baz', title: 'wuzzup'}
-      ]);
-    }).then(function () {
-      return db.query('name');
-    }).then(function () {
-      return db.remove('_design/name', rev);
-    }).then(function () {
-      return db.viewCleanup();
-    }).then(function () {
-      return db.put({
-        _id: '_design/title',
-        views: {
-          title: {
-            map: function (doc) {
-              emit(doc.title);
-            }.toString()
-          }
-        }
-      });
-    }).then(function (res) {
-      rev = res.rev;
-    }).then(function () {
-      return db.query('title');
-    }).then(function () {
-      return db.remove('_design/title', rev);
-    }).then(function () {
-      return db.viewCleanup();
-    }).then(function () {
-      const views = ['name', 'title'];
-      return Promise.all(views.map(function (view) {
-        return db.query(view).then(function () {
-          throw new Error('expected an error');
-        }, function (err) {
-          should.exist(err);
-        });
-      }));
-    }).then(function () {
-      return db.put({
-        _id: '_design/name',
-        views: {
-          name: {
-            map: function (doc) {
-              emit(doc.name);
-            }.toString()
-          }
-        }
-      }).then(function (res) {
-        rev = res.rev;
-        return db.query('name');
-      }).then(function (res) {
-        res.rows.map(function (row) {
-          return [row.id, row.key];
-        }).should.deep.equal([
-            ['baz', 'bar'],
-            ['bar', 'baz'],
-            ['foo', 'foo']
-          ]);
-      });
     });
+    const nameViewRev = putNameView.rev;
+
+    await db.bulkDocs([
+      {_id: 'foo', name: 'foo', title: 'yo'},
+      {_id: 'baz', name: 'bar', title: 'hey'},
+      {_id: 'bar', name: 'baz', title: 'wuzzup'}
+    ]);
+
+    await db.query('name');
+    await db.remove('_design/name', nameViewRev);
+    await db.viewCleanup();
+
+    const putTitleView = await db.put({
+      _id: '_design/title',
+      views: {
+        title: {
+          map: function (doc) {
+            emit(doc.title);
+          }.toString()
+        }
+      }
+    });
+    const titleViewRev = putTitleView.rev;
+
+    await db.query('title');
+    await db.remove('_design/title', titleViewRev);
+    await db.viewCleanup();
+
+    const views = ['name', 'title'];
+
+    await Promise.all(views.map((view) => {
+      return db.query(view).should.be.rejected;
+    }));
+
+    await db.put({
+      _id: '_design/name',
+      views: {
+        name: {
+          map: function (doc) {
+            emit(doc.name);
+          }.toString()
+        }
+      }
+    });
+
+    const queryRes = await db.query('name');
+
+    queryRes.rows.map(row => [row.id, row.key]).should.deep.equal([
+      ['baz', 'bar'],
+      ['bar', 'baz'],
+      ['foo', 'foo']
+    ]);
   });
 
-  it('Returns ok for viewCleanup on empty db', function () {
+
+  it('Returns ok for viewCleanup on empty db', async () => {
     const db = new PouchDB(dbName);
-    return db.viewCleanup().then(function (res) {
-      res.ok.should.equal(true);
-    });
+    const res = await db.viewCleanup();
+
+    res.ok.should.equal(true);
   });
 
-  it('Returns ok for viewCleanup on empty db, callback style', function () {
+  it('Returns ok for viewCleanup on empty db, callback style', async () => {
     const db = new PouchDB(dbName);
-    return new Promise(function (resolve, reject) {
-      db.viewCleanup(function (err, res) {
-        if (err) {
-          return reject(err);
-        }
+    const res = await new Promise((resolve, reject) => {
+      db.viewCleanup((err, res) => {
+        if (err)  {return reject(err);}
         resolve(res);
       });
-    }).then(function (res) {
-      res.ok.should.equal(true);
     });
+
+    res.ok.should.equal(true);
   });
 
-  it('Returns ok for viewCleanup after modifying view', function () {
+  it('Returns ok for viewCleanup after modifying view', async () => {
     const db = new PouchDB(dbName);
     const ddoc = {
       _id: '_design/myview',
@@ -153,28 +133,31 @@ describe('test.persisted.js', function () {
       firstName: 'Foobar',
       lastName: 'Bazman'
     };
-    return db.bulkDocs({docs: [ddoc, doc]}).then(function (info) {
-      ddoc._rev = info[0].rev;
-      return db.query('myview');
-    }).then(function (res) {
-      res.rows.should.deep.equal([
-        {id: 'foo', key: 'Foobar', value: null}
-      ]);
-      ddoc.views.myview.map = function (doc) {
-        emit(doc.lastName);
-      }.toString();
-      return db.put(ddoc);
-    }).then(function () {
-      return db.query('myview');
-    }).then(function (res) {
-      res.rows.should.deep.equal([
+
+    const info = await db.bulkDocs({docs: [ddoc, doc]});
+    ddoc._rev = info[0].rev;
+
+    const queryRes = await db.query('myview');
+
+    queryRes.rows.should.deep.equal([
+      {id: 'foo', key: 'Foobar', value: null}
+    ]);
+
+    ddoc.views.myview.map = function (doc) {
+      emit(doc.lastName);
+    }.toString();
+
+    await db.put(ddoc);
+    const queryResAfterMod = await db.query('myview');
+
+    queryResAfterMod.rows.should.deep.equal([
         {id: 'foo', key: 'Bazman', value: null}
       ]);
-      return db.viewCleanup();
-    });
+
+    await db.viewCleanup();
   });
 
-  it('Return ok for viewCleanup after modding view, old format', function () {
+  it('Return ok for viewCleanup after modding view, old format', async () => {
     const db = new PouchDB(dbName);
     const ddoc = {
       _id: '_design/myddoc',
@@ -191,28 +174,30 @@ describe('test.persisted.js', function () {
       firstName: 'Foobar',
       lastName: 'Bazman'
     };
-    return db.bulkDocs({docs: [ddoc, doc]}).then(function (info) {
-      ddoc._rev = info[0].rev;
-      return db.query('myddoc/myview');
-    }).then(function (res) {
-      res.rows.should.deep.equal([
-        {id: 'foo', key: 'Foobar', value: null}
-      ]);
-      ddoc.views.myview.map = function (doc) {
-        emit(doc.lastName);
-      }.toString();
-      return db.put(ddoc);
-    }).then(function () {
-      return db.query('myddoc/myview');
-    }).then(function (res) {
-      res.rows.should.deep.equal([
-        {id: 'foo', key: 'Bazman', value: null}
-      ]);
-      return db.viewCleanup();
-    });
+    const info = await db.bulkDocs({docs: [ddoc, doc]});
+    ddoc._rev = info[0].rev;
+
+    const queryRes = await db.query('myddoc/myview');
+
+    queryRes.rows.should.deep.equal([
+      {id: 'foo', key: 'Foobar', value: null}
+    ]);
+
+    ddoc.views.myview.map = function (doc) {
+      emit(doc.lastName);
+    }.toString();
+
+    await db.put(ddoc);
+    const queryResAfterMod = await db.query('myddoc/myview');
+
+    queryResAfterMod.rows.should.deep.equal([
+      {id: 'foo', key: 'Bazman', value: null}
+    ]);
+
+    return db.viewCleanup();
   });
 
-  it("Query non existing view throws error", function () {
+  it("Query non existing view throws error", async () => {
     const db = new PouchDB(dbName);
     const doc = {
       _id: '_design/barbar',
@@ -222,12 +207,12 @@ describe('test.persisted.js', function () {
         }
       }
     };
-    return db.post(doc).then(function () {
-      return db.query('barbar/dontExist', {key: 'bar'}).should.be.rejected;
-    });
+    await db.post(doc);
+
+    await db.query('barbar/dontExist', {key: 'bar'}).should.be.rejected;
   });
 
-  it("Query non-string view throws error", function () {
+  it("Query non-string view throws error", async () => {
     const db = new PouchDB(dbName);
     const doc = {
       _id: '_design/barbar',
@@ -237,13 +222,12 @@ describe('test.persisted.js', function () {
         }
       }
     };
-    return db.post(doc).then(function () {
-      return db.query('barbar/scores', {key: 'bar'});
-    }).should.be.rejected;
+    await db.post(doc);
+
+    await db.query('barbar/scores', {key: 'bar'}).should.be.rejected;
   });
 
-  it('many simultaneous persisted views', function () {
-    this.timeout(120000);
+  it('many simultaneous persisted views', async () => {
     const db = new PouchDB(dbName);
 
     const views = [];
@@ -252,40 +236,35 @@ describe('test.persisted.js', function () {
       views.push('foo_' + i);
       doc['foo_' + i] = 'bar_' + i;
     }
+    await db.put(doc);
 
-    return db.put(doc).then(function () {
-      return Promise.all(views.map(function (_, i) {
-        const fun = "function (doc) { emit(doc.foo_" + i + ");}";
+    await Promise.all(views.map(async (_, i) => {
+      const fun = "function (doc) { emit(doc.foo_" + i + ");}";
 
-        const ddocId = 'theViewDoc_' + i;
-        const ddoc = {
-          _id: '_design/' + ddocId,
-          views: {
-            theView : {map: fun}
-          }
-        };
+      const ddocId = 'theViewDoc_' + i;
+      const ddoc = {
+        _id: '_design/' + ddocId,
+        views: {
+          theView : {map: fun}
+        }
+      };
 
-        return db.put(ddoc).then(function (res) {
-          ddoc._rev = res.rev;
-          return db.query(ddocId + '/theView');
-        }).then(function (res) {
-          res.rows.should.have.length(1);
-          res.rows[0].key.should.equal('bar_' + i);
-          res.rows[0].id.should.equal('foo');
-          return db.remove(ddoc);
-        }).then(function () {
-          return db.viewCleanup();
-        }).then(function () {
-          return db.query(ddocId + '/theView').then(function () {
-            throw new Error('view should have been deleted');
-          }, function (err) {
-            should.exist(err);
-          });
-        });
-      }));
-    });
-  });
+      const putRes = await db.put(ddoc);
+      ddoc._rev = putRes.rev;
+      const queryRes = await db.query(ddocId + '/theView');
 
+      queryRes.rows.should.have.length(1);
+      queryRes.rows[0].key.should.equal('bar_' + i);
+      queryRes.rows[0].id.should.equal('foo');
+
+      await db.remove(ddoc);
+      await db.viewCleanup();
+
+      await db.query(ddocId + '/theView').should.be.rejected;
+    }));
+  }).timeout(120000);
+
+  //ToDo: rm done but keep callback
   it('should error with a callback', function (done) {
     const db = new PouchDB(dbName);
     db.query('fake/thing', function (err) {
@@ -294,95 +273,96 @@ describe('test.persisted.js', function () {
     });
   });
 
-  it('should query correctly when stale', function () {
+  it('should query correctly when stale', async () => {
     const db = new PouchDB(dbName);
-    return createView(db, {
+    const queryFun = await createView(db, {
       map : function (doc) {
         emit(doc.name);
       }
-    }).then(function (queryFun) {
-      return db.bulkDocs({docs : [
-        {name : 'bar', _id : '1'},
-        {name : 'foo', _id : '2'}
-      ]}).then(function () {
-        return db.query(queryFun, {stale : 'ok'});
-      }).then(function (res) {
-        res.total_rows.should.be.within(0, 2);
-        res.offset.should.equal(0);
-        res.rows.length.should.be.within(0, 2);
-        return db.query(queryFun, {stale : 'update_after'});
-      }).then(function (res) {
-        res.total_rows.should.be.within(0, 2);
-        res.rows.length.should.be.within(0, 2);
-        return setTimeoutPromise(50);
-      }).then(function () {
-        return db.query(queryFun, {stale : 'ok'});
-      }).then(function (res) {
-        res.total_rows.should.equal(2);
-        res.rows.length.should.equal(2);
-        return db.get('2');
-      }).then(function (doc2) {
-        return db.remove(doc2);
-      }).then(function () {
-        return db.query(queryFun, {stale : 'ok', include_docs : true});
-      }).then(function (res) {
-        res.total_rows.should.be.within(1, 2);
-        res.rows.length.should.be.within(1, 2);
-        if (res.rows.length === 2) {
-          res.rows[1].key.should.equal('foo');
-          should.not.exist(res.rows[1].doc,
-                            'should not throw if doc removed');
-        }
-        return db.query(queryFun);
-      }).then(function (res) {
-        res.total_rows.should.equal(1, 'equals1-1');
-        res.rows.length.should.equal(1, 'equals1-2');
-        return db.get('1');
-      }).then(function (doc1) {
-        doc1.name = 'baz';
-        return db.post(doc1);
-      }).then(function () {
-        return db.query(queryFun, {stale : 'update_after'});
-      }).then(function (res) {
-        res.rows.length.should.equal(1);
-        ['baz', 'bar'].indexOf(res.rows[0].key).should.be
-          .above(-1, 'key might be stale, thats ok');
-        return setTimeoutPromise(1000);
-      }).then(function () {
-        return db.query(queryFun, {stale : 'ok'});
-      }).then(function (res) {
-        res.rows.length.should.equal(1);
-        res.rows[0].key.should.equal('baz');
-      });
     });
+
+    await db.bulkDocs({docs : [
+      {name : 'bar', _id : '1'},
+      {name : 'foo', _id : '2'}
+    ]});
+
+    const resStaleOk = await db.query(queryFun, {stale : 'ok'});
+
+    resStaleOk.total_rows.should.be.within(0, 2);
+    resStaleOk.offset.should.equal(0);
+    resStaleOk.rows.length.should.be.within(0, 2);
+
+    const resStaleUpdateAfter = await db.query(queryFun, {stale : 'update_after'});
+
+    resStaleUpdateAfter.total_rows.should.be.within(0, 2);
+    resStaleUpdateAfter.rows.length.should.be.within(0, 2);
+
+    await setTimeoutPromise(50);
+    const resUpdated = await db.query(queryFun, {stale : 'ok'});
+
+    resUpdated.total_rows.should.equal(2);
+    resUpdated.rows.length.should.equal(2);
+
+    const doc2 = await db.get('2');
+    await db.remove(doc2);
+    const resStaleOkRemovedDoc = await db.query(queryFun, {stale : 'ok', include_docs : true});
+
+    resStaleOkRemovedDoc.total_rows.should.be.within(1, 2);
+    resStaleOkRemovedDoc.rows.length.should.be.within(1, 2);
+    if (resStaleOkRemovedDoc.rows.length === 2) {
+      resStaleOkRemovedDoc.rows[1].key.should.equal('foo');
+      should.not.exist(resStaleOkRemovedDoc.rows[1].doc,
+                        'should not throw if doc removed');
+    }
+
+    const resNotStale = await db.query(queryFun);
+
+    resNotStale.total_rows.should.equal(1, 'equals1-1');
+    resNotStale.rows.length.should.equal(1, 'equals1-2');
+
+    const doc1 = await db.get('1');
+    doc1.name = 'baz';
+    await db.post(doc1);
+
+    const resUpdateAfterUpdatedDoc1 = await db.query(queryFun, {stale : 'update_after'});
+
+    resUpdateAfterUpdatedDoc1.rows.length.should.equal(1);
+    ['baz', 'bar'].indexOf(resUpdateAfterUpdatedDoc1.rows[0].key).should.be
+      .above(-1, 'key might be stale, thats ok');
+    await setTimeoutPromise(1000);
+
+    const resUpdatedDoc1 = await db.query(queryFun, {stale : 'ok'});
+
+    resUpdatedDoc1.rows.length.should.equal(1);
+    resUpdatedDoc1.rows[0].key.should.equal('baz');
   });
 
-  it('should query correctly with stale update_after', function () {
-    const pouch = new PouchDB(dbName);
+  it('should query correctly with stale update_after', async () => {
+    const db = new PouchDB(dbName);
 
-    return createView(pouch, {map: function (doc) {
+    const queryFun = await createView(db, {map: function (doc) {
       emit(doc.foo);
-    }}).then(function (queryFun) {
-      const docs = [];
+    }});
 
-      for (let i = 0; i < 10; i++) {
-        docs.push({foo: 'bar'});
-      }
+    const docs = [];
+    for (let i = 0; i < 10; i++) {
+      docs.push({foo: 'bar'});
+    }
+    await db.bulkDocs(docs);
 
-      return pouch.bulkDocs(docs).then(function () {
-        return pouch.query(queryFun, {stale: 'update_after'});
-      }).then(function (res) {
-        res.rows.should.have.length(0, 'query() returned immediately');
-        return setTimeoutPromise(1000);
-      }).then(function () {
-        return pouch.query(queryFun, {stale: 'ok'});
-      }).then(function (res) {
-        res.rows.should.have.length(10, 'index was built in background');
-      });
-    });
+    const resUpdateAfter = await db.query(queryFun, {stale: 'update_after'});
+
+    resUpdateAfter.rows.should.have.length(0, 'query() returned immediately');
+
+    await setTimeoutPromise(1000);
+    const resUpdated = await db.query(queryFun, {stale: 'ok'});
+
+    resUpdated.rows.should.have.length(10, 'index was built in background');
   });
 
-  it('should delete duplicate indexes', function () {
+  it('should delete duplicate indexes', async () => {
+    const db = new PouchDB(dbName);
+
     const docs = [];
     for (let i = 0; i < 10; i++) {
       docs.push(
@@ -396,38 +376,32 @@ describe('test.persisted.js', function () {
         }
       );
     }
-    const db = new PouchDB(dbName);
-    return db.bulkDocs({docs}).then(function (responses) {
-      const tasks = [];
-      for (let i = 0; i < docs.length; i++) {
-        docs[i]._rev = responses[i].rev;
-        tasks.push(db.query('view' + i + '/view'));
-      }
-      return Promise.all(tasks);
-    }).then(function () {
-      docs.forEach(function (doc) {
-        doc._deleted = true;
-      });
-      return db.bulkDocs({docs});
-    }).then(function () {
-      return db.viewCleanup();
-    });
+    const responses = await db.bulkDocs({docs});
+
+    await Promise.all(docs.map((doc, i) => {
+      docs[i]._rev = responses[i].rev;
+      return db.query('view' + i + '/view');
+    }));
+
+    docs.forEach(doc  => doc._deleted = true);
+    await db.bulkDocs({docs});
+    await db.viewCleanup();
   });
 
   if (dbType === 'local' &&
       // can't test this in Node due to the vm
       (typeof process === 'undefined' || process.browser)) {
-    it('issue 4967 map() called twice', function () {
+    it('issue 4967 map() called twice', async () => {
       const db = new PouchDB(dbName);
+
       const globalObj = (typeof process !== 'undefined' && !process.browser) ?
         global : window;
       globalObj.__mapreduce_called = {};
-      const docs = Array.apply(null, Array(5)).map(function (_, i) {
-        return {
+
+      const docs = Array.from({length: 5}, (_, i) => ({
           _id: 'doc_' + i,
           data: Math.random().toString(36).slice(2)
-        };
-      }).concat({
+        })).concat({
         _id: '_design/test',
         views: {
           test: {
@@ -440,21 +414,22 @@ describe('test.persisted.js', function () {
           }
         }
       });
-      return db.bulkDocs(docs).then(function () {
-        return Promise.all([
-          db.query('test', {}),
-          db.query('test', {})
-        ]);
-      }).then(function () {
-        globalObj.__mapreduce_called.should.deep.equal({
-          doc_0 : 1,
-          doc_1 : 1,
-          doc_2 : 1,
-          doc_3 : 1,
-          doc_4 : 1
-        });
-        delete globalObj.__mapreduce_called;
+      await db.bulkDocs(docs);
+
+      await Promise.all([
+        db.query('test', {}),
+        db.query('test', {})
+      ]);
+
+      globalObj.__mapreduce_called.should.deep.equal({
+        doc_0 : 1,
+        doc_1 : 1,
+        doc_2 : 1,
+        doc_3 : 1,
+        doc_4 : 1
       });
+
+      delete globalObj.__mapreduce_called;
     });
   }
 
