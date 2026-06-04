@@ -1,5 +1,5 @@
 ---
-layout: 2ColLeft
+layout: 2ColLeft.html
 title: Adapters
 sidebar: nav.html
 ---
@@ -60,16 +60,14 @@ We recommend avoiding Cordova SQLite unless you are hitting the 50MB storage lim
 require native or preloaded access to the database files, or there's some other reason to go native.
 The built-in IndexedDB adapter is nearly always more performant and stable.
 
-{% include alert/end.html%}
-
 ### Browser adapter plugins
 
 PouchDB also offers separate browser plugins that use backends other than IndexedDB. These plugins fully pass the PouchDB test suite and are rigorously tested in our CI process.
 
 **Downloads:**
 
-* [pouchdb.memory.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.js) (Minified: [pouchdb.memory.min.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.min.js))
-* [pouchdb.localstorage.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.js) (Minified: [pouchdb.localstorage.min.js](https://github.com/pouchdb/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.min.js))
+* [pouchdb.memory.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.js) (Minified: [pouchdb.memory.min.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.memory.min.js))
+* [pouchdb.localstorage.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.js) (Minified: [pouchdb.localstorage.min.js](https://github.com/apache/pouchdb/releases/download/{{ site.version }}/pouchdb.localstorage.min.js))
 
 {% include alert/start.html variant="warning"%}
 {% markdown %}
@@ -122,9 +120,15 @@ The LocalStorage plugin should be considered highly experimental, and the underl
 
 #### In-memory
 
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `memory` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163). 
+{% endmarkdown %}
+{% include alert/end.html%}
+
 Just as in the browser, you can also create a pure in-memory PouchDB:
 
-```
+```bash
 $ npm install pouchdb-adapter-memory
 ```
 
@@ -139,22 +143,22 @@ This implementation is based on [MemDOWN](https://github.com/level/memdown), and
 
 #### Node SQLite adapter
 
-You can also use PouchDB over [SQLite3](https://github.com/mapbox/node-sqlite3) in Node, using the WebSQL adapter and
-[node-websql](https://github.com/nolanlawson/node-websql):
+You can also use PouchDB in Node.js' [native SQLite module](https://nodejs.org/api/sqlite.html), when using Node.js' `>22.5.0` version. 
 
 ```js
 const PouchDB = require('pouchdb');
-PouchDB.plugin(require('pouchdb-adapter-node-websql'));
+PouchDB.plugin(require('pouchdb-adapter-node-sqlite'));
 
-const db = new PouchDB('mydatabase.db', {adapter: 'websql'});
+const db = new PouchDB('mydatabase.db', {adapter: 'nodesqlite'});
 ```
 
-In this case, PouchDB is directly using SQLite queries to build the database, exactly as the WebSQL adapter would.
-
-See ["Prebuilt databases with PouchDB"]({{ site.baseurl }}/2016/04/28/prebuilt-databases-with-pouchdb.html)
-for a guide to how you might use this adapter to create prebuilt SQLite database files for adapters such as Cordova or Electron.
-
 #### Other LevelDOWN adapters
+
+{% include alert/start.html variant="warning"%}
+{% markdown %}
+**Warning: deprecation notice.** The `leveldb` adapter will be deprecated in PouchDB version 10.0.0 and removed in version 11.0.0. You can read [the migration guide here](https://pouchdb.com/2026/04/10/migration-to-nodesqlite.html) and more about the topic in [this link](https://github.com/apache/pouchdb/issues/9163).
+{% endmarkdown %}
+{% include alert/end.html%}
 
 Technically you are free to use
 [any LevelDOWN-based implementation](https://github.com/rvagg/node-levelup/wiki/Modules#storage-back-ends) in either Node or the browser.
@@ -177,10 +181,10 @@ Currently PouchDB has full support for:
 
 * CouchDB 1.x
 * [Smileupps](https://www.smileupps.com/) (same as 1.x)
-* CouchDB 2.x ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
-* CouchDB 3.x ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
+* CouchDB 2.x ([tested in CI](https://github.com/apache/pouchdb/actions))
+* CouchDB 3.x ([tested in CI](https://github.com/apache/pouchdb/actions))
 * [Cloudant](https://cloudant.com/) (roughly the same as 2.x)
-* [PouchDB Server](https://github.com/pouchdb/pouchdb-server) ([tested in CI](https://github.com/pouchdb/pouchdb/actions))
+* [PouchDB Server](https://github.com/pouchdb/pouchdb-server) ([tested in CI](https://github.com/apache/pouchdb/actions))
 * [PouchDB Server --in-memory mode](https://github.com/pouchdb/pouchdb-server)
 
 [Drupal 8](http://wearepropeople.com/blog/a-content-staging-solution-for-drupal-8-and-more) has also announced support for PouchDB, and there is [rcouch](https://github.com/rcouch/rcouch) as well, but these are both untested by PouchDB.

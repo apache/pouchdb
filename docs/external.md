@@ -1,5 +1,5 @@
 ---
-layout: 2ColLeft
+layout: 2ColLeft.html
 title: Plugins and External Projects
 sidebar: nav.html
 ---
@@ -20,7 +20,7 @@ Plugin for CouchDB's authentication system.
 
 Allows decentralized authentication and access control per document, using asymmetric encryption.
 
-#### [PouchDB Collate](https://github.com/pouchdb/pouchdb/tree/master/packages/node_modules/pouchdb-collate)
+#### [PouchDB Collate](https://github.com/apache/pouchdb/tree/master/packages/node_modules/pouchdb-collate)
 
 Collation functions for PouchDB map/reduce. Used by PouchDB map/reduce to maintain consistent [CouchDB collation ordering](https://wiki.apache.org/couchdb/View_collation).
 
@@ -58,7 +58,7 @@ Fully replicate two PouchDB/CouchDB databases, preserving absolutely all revisio
 
 #### [PouchDB GQL](https://github.com/pouchdb/GQL)
 
-Google Query Language (GQL) queries with PouchDB. ([Documentation]({{ site.baseurl }}/gql.html))
+Google Query Language (GQL) queries with PouchDB.
 
 #### [PouchDB Hoodie API](https://github.com/hoodiehq/pouchdb-hoodie-api)
 
@@ -293,7 +293,7 @@ Android adapter with a native Java interface to PouchDB.
 
 Shims and utils for working with binary Blobs in the browser.
 
-#### [Pouchy] (https://www.npmjs.com/package/pouchy)
+#### [Pouchy](https://www.npmjs.com/package/pouchy)
 
 PouchDB sugar API. ([Github](https://github.com/cdaringe/pouchy))
 

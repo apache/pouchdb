@@ -1,110 +1,67 @@
 #!/usr/bin/env node
 
+/*
+ideally, we would eventually deprecate this entire file and rely exclusively
+on 11ty for building and dev serving (https://www.11ty.dev/docs/watch-serve/).
+
+However, since all the styles are in LESS, and 11ty doesn’t build that, and
+the LESS plugin for 11ty doesn’t seem to work with our setup, we’ll need to keep
+build-site.js around for a little longer.
+*/
+
 'use strict';
 
-const { promisify } = require('node:util');
-const exec = promisify(require('node:child_process').exec);
+import { execa } from 'execa';
+import fs from 'fs';
+import http_server from 'http-server';
+import globWatcher from 'glob-watcher';
 
-var fs = require('fs');
-const Path = require('node:path');
+process.chdir('./');
 
-var replace = require('replace');
-var mkdirp = require('mkdirp');
-var cssmin = require('cssmin');
-const terser = require('terser');
-
-const POUCHDB_CSS = resolvePath('docs/static/css/pouchdb.css');
-const POUCHDB_LESS = resolvePath('docs/src/less/pouchdb/pouchdb.less');
-
-process.chdir('docs');
-
-function checkJekyll() {
-  return exec('bundle check').catch(function () {
-    throw new Error('Jekyll is not installed.  You need to do: npm run install-jekyll');
-  });
+async function buildCSS() {
+  await execa({stdio: 'inherit'})`npm run build:less`;
+  console.log('=> Rebuilt CSS');
 }
 
-function buildCSS() {
-  mkdirp.sync(resolvePath('docs/static/css'));
-  const cmd = [ resolvePath('node_modules/less/bin/lessc'), POUCHDB_LESS ].join(' ');
-  return exec(cmd).then(function (child) {
-    var minifiedCss = cssmin(child.stdout);
-    fs.writeFileSync(POUCHDB_CSS, minifiedCss);
-    console.log('Updated: ', POUCHDB_CSS);
-  });
+async function buildEleventy() {
+  // --incremental sadly doesn't work in this setup, but the build is so fast
+  // it doesn’t really matter. However, on a full rebuild, 11ty logs every
+  // single built file, hence --quiet
+  await execa({stdio: 'inherit'})`eleventy --quiet`;
+  console.log('=> Rebuilt eleventy');
 }
 
-function buildJekyll(path) {
-  // Don't rebuild on website artifacts being written
-  if (path && /^_site/.test(path.relative)) {
-    return;
+async function buildEverything() {
+  try {
+    await buildCSS();
+    await buildEleventy();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
   }
-  return exec('bundle exec jekyll build').then(function () {
-    console.log('=> Rebuilt jekyll');
-    return highlightEs6();
-  }).then(function () {
-    console.log('=> Highlighted ES6');
-
-    const srcPath = resolvePath('docs/src/code.js');
-    const targetPath = resolvePath('docs/_site/static/js/code.min.js');
-    const src = fs.readFileSync(srcPath, { encoding:'utf8' });
-    const mangle = { toplevel: true };
-    const output = { ascii_only: true };
-    const { code, error } = terser.minify(src, { mangle, output });
-    if (error) {
-      if (process.env.BUILD) {
-        throw error;
-      } else {
-        console.log(
-          `Javascript minification failed on line ${error.line} col ${error.col}:`,
-          error.message,
-        );
-      }
-    } else {
-      fs.writeFileSync(targetPath, code);
-      console.log('Minified javascript.');
-    }
-  });
-}
-
-function highlightEs6() {
-  const path = resolvePath('docs/_site');
-
-  // TODO: this is a fragile and hacky way to get
-  // 'async' and 'await' to highlight correctly
-  // in blog posts & documentation.
-  replace({
-    regex: '<span class="nx">(await|async|of)</span>',
-    replacement: '<span class="kd">$1</span>',
-    paths: [path],
-    recursive: true
-  });
-}
-
-function onError(err) {
-  console.error(err);
-  process.exit(1);
-}
-
-function buildEverything() {
-  return Promise.resolve()
-    .then(checkJekyll)
-    .then(buildCSS)
-    .then(buildJekyll)
-    .catch(onError);
-}
-
-function resolvePath(projectLocalPath) {
-  return Path.resolve(__dirname, '..', projectLocalPath);
 }
 
 if (!process.env.BUILD) {
-  const http_server = require('http-server');
-  const watchGlob = require('glob-watcher');
+  const watchGlob = (path, fn) => globWatcher(path, () => fn().catch(console.log));
 
-  watchGlob('**', buildJekyll);
-  watchGlob('static/src/*/*.less', buildCSS);
-  http_server.createServer({root: '_site', cache: '-1'}).listen(4000);
+  // Simpler ways of blacklisting certain paths here would be very welcome.
+  fs.readdirSync('./docs')
+    .forEach(path => {
+      if (path === '_site') {
+        return;
+      }
+
+      if (fs.statSync(`./docs/${path}`).isDirectory()) {
+        watchGlob(`./docs/${path}/**`, buildEleventy);
+      } else {
+        watchGlob(`./docs/${path}`, buildEleventy);
+      }
+    });
+
+
+  watchGlob('./docs/src/less/**', buildCSS);
+
+  http_server.createServer({root: './docs/_site', cache: '-1'}).listen(4000);
   console.log('Server address: http://localhost:4000');
 }
 

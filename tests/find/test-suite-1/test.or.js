@@ -1,8 +1,8 @@
 'use strict';
 
-describe('test.or.js', function () {
-    beforeEach(function () {
-        return context.db.bulkDocs([
+describe('test.or.js', () => {
+    beforeEach(async () => {
+        await context.db.bulkDocs([
             { name: 'Mario', _id: 'mario', rank: 5, series: 'Mario', debut: 1981, awesome: true },
             { name: 'Jigglypuff', _id: 'puff', rank: 8, series: 'Pokemon', debut: 1996,
                 awesome: false },
@@ -22,53 +22,51 @@ describe('test.or.js', function () {
         ]);
     });
 
-    it('#6366 should do a basic $or', function () {
-        var db = context.db;
-        return db.find({
+    it('#6366 should do a basic $or', async () => {
+        const db = context.db;
+        const res = await db.find({
             selector: {
                 "$or": [
                     { "name": "Link" },
                     { "name": "Mario" }
                 ]
             }
-        }).then(function (res) {
-            var docs = res.docs.map(function (doc) {
-                return {
-                    _id: doc._id
-                };
-            });
-            docs.should.deep.equal([
-                {'_id': 'link'},
-                {'_id': 'mario'},
-            ]);
         });
+        const docs = res.docs.map((doc) => {
+            return {
+                _id: doc._id
+            };
+        });
+        docs.should.deep.equal([
+            {'_id': 'link'},
+            {'_id': 'mario'},
+        ]);
     });
 
-    it('#6366 should do a basic $or, with explicit $eq', function () {
-        var db = context.db;
-        return db.find({
+    it('#6366 should do a basic $or, with explicit $eq', async () => {
+        const db = context.db;
+        const res = await db.find({
             selector: {
                 "$or": [
                     { "name": {$eq: "Link"} },
                     { "name": {$eq: "Mario"} }
                 ]
             }
-        }).then(function (res) {
-            var docs = res.docs.map(function (doc) {
-                return {
-                    _id: doc._id
-                };
-            });
-            docs.should.deep.equal([
-                {'_id': 'link'},
-                {'_id': 'mario'},
-            ]);
         });
+        const docs = res.docs.map((doc) => {
+            return {
+                _id: doc._id
+            };
+        });
+        docs.should.deep.equal([
+            {'_id': 'link'},
+            {'_id': 'mario'},
+        ]);
     });
 
-    it('#7458 should do $or with nested $and', function () {
-        var db = context.db;
-        return db.find({
+    it('#7458 should do $or with nested $and', async () => {
+        const db = context.db;
+        const res = await db.find({
             selector: {
                 "$or": [
                     { "name": {$eq: "Link"} },
@@ -80,22 +78,21 @@ describe('test.or.js', function () {
                     }
                 ]
             }
-        }).then(function (res) {
-            var docs = res.docs.map(function (doc) {
-                return {
-                    _id: doc._id
-                };
-            });
-            docs.should.deep.equal([
-                {'_id': 'link'},
-                {'_id': 'mario'},
-            ]);
         });
+        const docs = res.docs.map((doc) => {
+            return {
+                _id: doc._id
+            };
+        });
+        docs.should.deep.equal([
+            {'_id': 'link'},
+            {'_id': 'mario'},
+        ]);
     });
 
-    it('#7458 should do $or with nested $and, with explicit $eq', function () {
-        var db = context.db;
-        return db.find({
+    it('#7458 should do $or with nested $and, with explicit $eq', async () => {
+        const db = context.db;
+        const res = await db.find({
             selector: {
                 "$or": [
                     { "name": {$eq: "Link"} },
@@ -107,28 +104,27 @@ describe('test.or.js', function () {
                     }
                 ]
             }
-        }).then(function (res) {
-            var docs = res.docs.map(function (doc) {
-                return {
-                    _id: doc._id
-                };
-            });
-            docs.should.deep.equal([
-                {'_id': 'link'},
-                {'_id': 'mario'},
-            ]);
         });
+        const docs = res.docs.map((doc) => {
+            return {
+                _id: doc._id
+            };
+        });
+        docs.should.deep.equal([
+            {'_id': 'link'},
+            {'_id': 'mario'},
+        ]);
     });
-    describe("nested $or inside $and", function () {
-        it('equal length $ors', function () {
-            var db = context.db;
-            var index = {
+    describe("nested $or inside $and", () => {
+        it('equal length $ors', async () => {
+            const db = context.db;
+            const index = {
                 "index": {
                     "fields": ["field.a"]
                 }
             };
 
-            var selector = {
+            const selector = {
                 $and: [
                     {
                         $or: [
@@ -144,45 +140,40 @@ describe('test.or.js', function () {
                     }
                 ]
             };
-            return db.createIndex(index).then(function () {
-                return db.bulkDocs([
-                    {_id: '1', a: 1, b: 2},
-                    {_id: '2', a: 1, b: 4},
-                    {_id: '3', a: 3, b: 2},
-                    {_id: '4', a: 3, b: 4},
-                ]);
-            }).then(function () {
-                return db.find({
+            await db.createIndex(index);
+            await db.bulkDocs([
+                {_id: '1', a: 1, b: 2},
+                {_id: '2', a: 1, b: 4},
+                {_id: '3', a: 3, b: 2},
+                {_id: '4', a: 3, b: 4},
+            ]);
+            const resp = await db.find({
+                selector,
+                fields: ["_id"]
+            });
+            resp.docs.should.deep.equal([{_id: '2'}, {_id: '3'}]);
+            if (db.adapter === "local") {
+                const explainResp = await db.explain({
                     selector,
                     fields: ["_id"]
-                }).then(function (resp) {
-                    resp.docs.should.deep.equal([{_id: '2'}, {_id: '3'}]);
                 });
-            }).then(function () {
-                if (db.adapter === "local") {
-                    return db.explain({
-                        selector,
-                        fields: ["_id"]
-                    }).then(function (resp) {
-                        resp.selector.should.deep.equal({
-                        "$or": [
-                                {"a": {"$eq": 1}, "b": {"$eq": 4}},
-                                {"a": {"$eq": 3}, "b": {"$eq": 2}}
-                            ]
-                        });
-                    });
-                }
-            });
+                explainResp.selector.should.deep.equal({
+                "$or": [
+                        {"a": {"$eq": 1}, "b": {"$eq": 4}},
+                        {"a": {"$eq": 3}, "b": {"$eq": 2}}
+                    ]
+                });
+            }
         });
-        it('first $or length less than second', function () {
-            var db = context.db;
-            var index = {
+        it('first $or length less than second', async () => {
+            const db = context.db;
+            const index = {
                 "index": {
                     "fields": ["field.a"]
                 }
             };
 
-            var selector = {
+            const selector = {
                 $and: [
                     {
                         $or: [
@@ -197,46 +188,41 @@ describe('test.or.js', function () {
                     },
                 ]
             };
-            return db.createIndex(index).then(function () {
-                return db.bulkDocs([
-                    {_id: '1', a: 1, b: 2, c: 2},
-                    {_id: '2', a: 2, b: 2, c: 2},
-                    {_id: '3', a: 2, b: 1, c: 2},
-                    {_id: '4', a: 2, b: 2, c: 2},
-                ]);
-            }).then(function () {
-                return db.find({
+            await db.createIndex(index);
+            await db.bulkDocs([
+                {_id: '1', a: 1, b: 2, c: 2},
+                {_id: '2', a: 2, b: 2, c: 2},
+                {_id: '3', a: 2, b: 1, c: 2},
+                {_id: '4', a: 2, b: 2, c: 2},
+            ]);
+            const resp = await db.find({
+                selector,
+                fields: ["_id"]
+            });
+            resp.docs.should.deep.equal([{_id: '1'}, {_id: '3'}]);
+            if (db.adapter === "local") {
+                const explainResp = await db.explain({
                     selector,
                     fields: ["_id"]
-                }).then(function (resp) {
-                    resp.docs.should.deep.equal([{_id: '1'}, {_id: '3'}]);
                 });
-            }).then(function () {
-                if (db.adapter === "local") {
-                    return db.explain({
-                        selector,
-                        fields: ["_id"]
-                    }).then(function (resp) {
-                        console.log(resp.selector);
-                        resp.selector.should.deep.equal({
-                            "$or": [
-                                {"a": {"$eq": 1}, "c": {"$eq": 2}},
-                                {"b": {"$eq": 1}, "c": {"$eq": 2}}
-                            ]
-                        });
-                    });
-                }
-            });
+                console.log(explainResp.selector);
+                explainResp.selector.should.deep.equal({
+                    "$or": [
+                        {"a": {"$eq": 1}, "c": {"$eq": 2}},
+                        {"b": {"$eq": 1}, "c": {"$eq": 2}}
+                    ]
+                });
+            }
         });
-        it('second $or length less than first', function () {
-            var db = context.db;
-            var index = {
+        it('second $or length less than first', async () => {
+            const db = context.db;
+            const index = {
                 "index": {
                     "fields": ["field.a"]
                 }
             };
 
-            var selector = {
+            const selector = {
                 $and: [
                     {
                         $or: [
@@ -251,45 +237,40 @@ describe('test.or.js', function () {
                     },
                 ]
             };
-            return db.createIndex(index).then(function () {
-                return db.bulkDocs([
-                    {_id: '1', a: 1, b: 2, c: 2},
-                    {_id: '2', a: 2, b: 2, c: 2},
-                    {_id: '3', a: 2, b: 1, c: 2},
-                    {_id: '4', a: 2, b: 2, c: 2},
-                ]);
-            }).then(function () {
-                return db.find({
+            await db.createIndex(index);
+            await db.bulkDocs([
+                {_id: '1', a: 1, b: 2, c: 2},
+                {_id: '2', a: 2, b: 2, c: 2},
+                {_id: '3', a: 2, b: 1, c: 2},
+                {_id: '4', a: 2, b: 2, c: 2},
+            ]);
+            const resp = await db.find({
+                selector,
+                fields: ["_id"]
+            });
+            resp.docs.should.deep.equal([{_id: '1'}, {_id: '3'}]);
+            if (db.adapter === "local") {
+                const explainResp = await db.explain({
                     selector,
                     fields: ["_id"]
-                }).then(function (resp) {
-                    resp.docs.should.deep.equal([{_id: '1'}, {_id: '3'}]);
                 });
-            }).then(function () {
-                if (db.adapter === "local") {
-                    return db.explain({
-                        selector,
-                        fields: ["_id"]
-                    }).then(function (resp) {
-                        resp.selector.should.deep.equal({
-                            "$or": [
-                                {"a": {"$eq": 1}, "c": {"$eq": 2}},
-                                {"b": {"$eq": 1}, "c": {"$eq": 2}}
-                            ]
-                        });
-                    });
-                }
-            });
+                explainResp.selector.should.deep.equal({
+                    "$or": [
+                        {"a": {"$eq": 1}, "c": {"$eq": 2}},
+                        {"b": {"$eq": 1}, "c": {"$eq": 2}}
+                    ]
+                });
+            }
         });
-        it('should do complex queries', function () {
-            var db = context.db;
-            var index = {
+        it('should do complex queries', async () => {
+            const db = context.db;
+            const index = {
                 "index": {
                     "fields": ["field.a"]
                 }
             };
 
-            var selector = {
+            const selector = {
                 $or: [
                     {
                         $and: [
@@ -321,79 +302,74 @@ describe('test.or.js', function () {
                     }
                 ]
             };
-            return db.createIndex(index).then(function () {
-                return db.bulkDocs([
-                    {_id: '1', include:true, due: {repeating: true, date: "friday"}, tags: ["home"], assigned: "other2"},
-                    {_id: '2', include:true, due: {repeating: true, date: "friday", important: true}, tags: ["home"], assigned: "other1"},
-                    {_id: '3', include:true, due: {repeating: false, date: "soon", important: false}, tags: ["home"], assigned: "me"},
-                    {_id: '4', include:true, due: {repeating: false, date: "tuesday"}, tags: ["home"], assigned: "me"},
-                    {_id: '5', include:true, due: {repeating: true, date: "friday", important: true}, tags: ["work"], assigned: "me"},
-                    {_id: '6', include:true, due: {repeating: false, date: "tomorrow"}, tags: ["health"], assigned: "me"},
-                    {_id: '7', include:false, due: {repeating: false, date: "tomorrow"}, tags: ["health"], assigned: "me"},
-                ]);
-            }).then(function () {
-                return db.find({
+            await db.createIndex(index);
+            await db.bulkDocs([
+                {_id: '1', include:true, due: {repeating: true, date: "friday"}, tags: ["home"], assigned: "other2"},
+                {_id: '2', include:true, due: {repeating: true, date: "friday", important: true}, tags: ["home"], assigned: "other1"},
+                {_id: '3', include:true, due: {repeating: false, date: "soon", important: false}, tags: ["home"], assigned: "me"},
+                {_id: '4', include:true, due: {repeating: false, date: "tuesday"}, tags: ["home"], assigned: "me"},
+                {_id: '5', include:true, due: {repeating: true, date: "friday", important: true}, tags: ["work"], assigned: "me"},
+                {_id: '6', include:true, due: {repeating: false, date: "tomorrow"}, tags: ["health"], assigned: "me"},
+                {_id: '7', include:false, due: {repeating: false, date: "tomorrow"}, tags: ["health"], assigned: "me"},
+            ]);
+            const resp = await db.find({
+                selector,
+                fields: ["_id"]
+            });
+            resp.docs.should.deep.equal([{_id: '2'}, {_id: '3'}, {_id: '6'}]);
+            if (db.adapter === "local") {
+                const explainResp = await db.explain({
                     selector,
                     fields: ["_id"]
-                }).then(function (resp) {
-                    resp.docs.should.deep.equal([{_id: '2'}, {_id: '3'}, {_id: '6'}]);
                 });
-            }).then(function () {
-                if (db.adapter === "local") {
-                    return db.explain({
-                        selector,
-                        fields: ["_id"]
-                    }).then(function (resp) {
-                        console.log(JSON.stringify(resp.selector, null, "\t"));
+                console.log(JSON.stringify(explainResp.selector, null, "\t"));
 
-                        resp.selector.should.deep.equal({
+                explainResp.selector.should.deep.equal({
+                    $or: [
+                        {
                             $or: [
                                 {
-                                    $or: [
-                                        {
-                                            due: {important: true},
-                                            tags: {$all: ["home"]},
-                                        },
-                                        {
-                                            due: {
-                                                date: "soon",
-                                                important: false
-                                            }
-                                        },
-                                    ],
-                                    assigned: {$eq: "me"},
+                                    due: {important: true},
+                                    tags: {$all: ["home"]},
                                 },
                                 {
-                                    $or: [
-                                        {
-                                            due: {important: true},
-                                            tags: {$all: ["home"]},
-                                        },
-                                        {
-                                            due: {
-                                                date: "soon",
-                                                important: false
-                                            }
-                                        },
-                                    ],
-                                    assigned: {$eq: "other1"},
-                                },
-                                {
-                                    due: {date: "tomorrow"},
-                                    assigned: {$eq: "me"},
-                                },
-                                {
-                                    due: {date: "tomorrow"},
-                                    assigned: {$eq: "other1"},
+                                    due: {
+                                        date: "soon",
+                                        important: false
+                                    }
                                 },
                             ],
-                            include: {
-                                $eq: true,
-                            },
-                        });
-                    });
-                }
-            });
+                            assigned: {$eq: "me"},
+                        },
+                        {
+                            $or: [
+                                {
+                                    due: {important: true},
+                                    tags: {$all: ["home"]},
+                                },
+                                {
+                                    due: {
+                                        date: "soon",
+                                        important: false
+                                    }
+                                },
+                            ],
+                            assigned: {$eq: "other1"},
+                        },
+                        {
+                            due: {date: "tomorrow"},
+                            assigned: {$eq: "me"},
+                        },
+                        {
+                            due: {date: "tomorrow"},
+                            assigned: {$eq: "other1"},
+                        },
+                    ],
+                    include: {
+                        $eq: true,
+                    },
+                });
+            }
         });
     });
 });

@@ -1,4 +1,4 @@
-function codeWrap(){
+function codeWrap() {
   "use strict";
 
   var DEFAULT_TYPE = 'promise';
@@ -7,18 +7,18 @@ function codeWrap(){
 
   var codeIds =
     $codes
-      .map(function(div){
-          return div.attributes["data-code-id"].value
+      .map(function (div) {
+          return div.attributes["data-code-id"].value;
       })
-      .filter(function(item, index, inputArray){
+      .filter(function (item, index, inputArray) {
           // Each code block has multiple versions so let's only grab one.
-          return inputArray.indexOf(item) == index;
+          return inputArray.indexOf(item) === index;
       });
 
   wrap();
   setAll();
 
-  $('[data-code-tablist] [href]').on('click', function(e){
+  $('[data-code-tablist] [href]').on('click', function (e) {
     var href = $(this).attr('href');
 
     setAll(href.replace('#', ''));
@@ -28,7 +28,7 @@ function codeWrap(){
     e.preventDefault();
   });
 
-  function wrap(){
+  function wrap() {
     var codeTpl = '' +
       '<ul class="nav nav-tabs nav-code" data-code-tablist="{{codeId}}">' +
         '<li>' +
@@ -41,17 +41,17 @@ function codeWrap(){
             '<a href="#callback">Callbacks</a>' +
         '</li>' +
       '</ul>' +
-      '<div class="tab-content">{{tapPanes}}</div>';
+      '<div class="tab-content">{{tabPanes}}</div>';
     codeIds
-      .forEach(function(id){
+      .forEach(function (id) {
         var $code = $("[data-code-id='" + id + "']");
 
-        var paneHtml = $code.get().map(function(div){
+        var paneHtml = $code.get().map(function (div) {
           return div.outerHTML;
         }).join('');
 
         var codeHtml = codeTpl
-                          .replace(/{{tapPanes}}/g, paneHtml)
+                          .replace(/{{tabPanes}}/g, paneHtml)
                           .replace(/{{codeId}}/g, id);
         $code
           .first()
@@ -62,16 +62,16 @@ function codeWrap(){
     $('[data-code-hide]').addClass('hide');
   }
 
-  function setAll(type){
+  function setAll(type) {
 
     // We default to callback so no need to do anything the first time.
     var firstTime = !localStorage.getItem('codeStyle');
-    if(firstTime){
+    if (firstTime) {
       localStorage.setItem('codeStyle', DEFAULT_TYPE);
     }
 
     type = type || localStorage.getItem('codeStyle');
-    if(typeof type === "undefined" || type === null) {
+    if (typeof type === "undefined" || type === null) {
       return;
     }
 
@@ -86,22 +86,22 @@ function codeWrap(){
 
 
   var setHeights = [];
-  function setEqualHeights(){
-    if(setHeights.length > 0){
+  function setEqualHeights() {
+    if (setHeights.length > 0) {
       return;
     }
     codeIds
-      .forEach(function(id){
+      .forEach(function (id) {
         var $code = $("[data-code-id='" + id + "']");
 
         var paneHeight = 0;
 
-        $code.get().forEach(function(div){
+        $code.get().forEach(function (div) {
           var originalDisplay = div.style.display;
           div.style.display = 'block';
           var clientHeight = div.clientHeight;
           div.style.display = originalDisplay;
-          if(clientHeight > paneHeight){
+          if (clientHeight > paneHeight) {
             paneHeight = clientHeight;
           }
         });
@@ -111,3 +111,48 @@ function codeWrap(){
   }
 }
 codeWrap();
+
+function addCodeCopyButtons() {
+  if (!navigator.clipboard.writeText) {return;}
+
+  function copyCodeFor(codeElement) {
+    return () => {
+      const clone = codeElement.cloneNode(true);
+      clone.querySelectorAll('.btnCopyCode').forEach(btn => btn.remove());
+      navigator.clipboard.writeText(clone.textContent);
+
+      const success = addButton('✅', codeElement);
+      success.disabled = true;
+      success.style.transition = 'opacity 1.5s ease';
+      setTimeout(() => {
+        success.style.opacity = 0;
+        setTimeout(() => codeElement.removeChild(success), 1500);
+      }, 500);
+    };
+  }
+
+  function addButton(txt, parent) {
+    const btn = document.createElement('button');
+    btn.style.position = 'absolute';
+    btn.style.top   = '6px';
+    btn.style.right = '6px';
+    btn.style.borderRadius = '5px';
+    btn.style.padding = '4px 10px 3px';
+    btn.textContent = txt;
+    btn.classList.add('btnCopyCode');
+
+    parent.appendChild(btn);
+
+    return btn;
+  }
+
+  document
+    .querySelectorAll('pre[class^=language]')
+    .forEach(codeElement => {
+      codeElement.style.position = 'relative';
+
+      const btn = addButton('📎', codeElement);
+      btn.onclick = copyCodeFor(codeElement);
+    });
+}
+addCodeCopyButtons();

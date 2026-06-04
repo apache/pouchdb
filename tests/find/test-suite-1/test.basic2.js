@@ -1,10 +1,10 @@
 'use strict';
 
-describe('test.basic2.js', function () {
-  var sortById = testUtils.sortById;
+describe('test.basic2.js', () => {
+  const sortById = testUtils.sortById;
 
-  beforeEach(function () {
-    return context.db.bulkDocs([
+  beforeEach(async () => {
+    await context.db.bulkDocs([
       { name: 'Mario', _id: 'mario', rank: 5, series: 'Mario', debut: 1981 },
       { name: 'Jigglypuff', _id: 'puff', rank: 8, series: 'Pokemon', debut: 1996 },
       { name: 'Link', rank: 10, _id: 'link', series: 'Zelda', debut: 1986 },
@@ -20,173 +20,155 @@ describe('test.basic2.js', function () {
     ]);
   });
 
-  it('should not include ddocs in _id results', function () {
-    var db = context.db;
-    var index = {
+  it('should not include ddocs in _id results', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function () {
-      return db.find({
-        selector: {_id: {$gt: '\u0000'}},
-        fields: ['_id'],
-        sort: ['_id']
-      }).then(function (response) {
-        response.docs.should.deep.equal([
-          {"_id": "dk"},
-          {"_id": "falcon"},
-          {"_id": "fox"},
-          {"_id": "kirby"},
-          {"_id": "link"},
-          {"_id": "luigi"},
-          {"_id": "mario"},
-          {"_id": "ness"},
-          {"_id": "pikachu"},
-          {"_id": "puff"},
-          {"_id": "samus"},
-          {"_id": "yoshi"}
-        ]);
-      });
+    await db.createIndex(index);
+    await db.getIndexes();
+    const response = await db.find({
+      selector: {_id: {$gt: '\u0000'}},
+      fields: ['_id'],
+      sort: ['_id']
     });
+    response.docs.should.deep.equal([
+      {"_id": "dk"},
+      {"_id": "falcon"},
+      {"_id": "fox"},
+      {"_id": "kirby"},
+      {"_id": "link"},
+      {"_id": "luigi"},
+      {"_id": "mario"},
+      {"_id": "ness"},
+      {"_id": "pikachu"},
+      {"_id": "puff"},
+      {"_id": "samus"},
+      {"_id": "yoshi"}
+    ]);
   });
 
-  it('should find debut > 1990', function () {
-    var db = context.db;
-    return db.createIndex({
+  it('should find debut > 1990', async () => {
+    const db = context.db;
+    await db.createIndex({
       "index": {
         "fields": ["name"]
       }
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['debut']}
-      });
-    }).then(function () {
-      return db.find({
-        selector: {debut: {$gt: 1990}},
-        fields: ['_id'],
-        sort: ['debut']
-      });
-    }).then(function (response) {
-      response.docs.should.deep.equal([
-        {"_id":"kirby"},
-        {"_id":"fox"},
-        {"_id":"ness"},
-        {"_id":"pikachu"},
-        {"_id":"puff"}
-      ]);
     });
+    await db.createIndex({
+      index: {fields: ['debut']}
+    });
+    const response = await db.find({
+      selector: {debut: {$gt: 1990}},
+      fields: ['_id'],
+      sort: ['debut']
+    });
+    response.docs.should.deep.equal([
+      {"_id":"kirby"},
+      {"_id":"fox"},
+      {"_id":"ness"},
+      {"_id":"pikachu"},
+      {"_id":"puff"}
+    ]);
   });
 
-  it('should find debut > 1990 2', function () {
-    var db = context.db;
-    return db.createIndex({
+  it('should find debut > 1990 2', async () => {
+    const db = context.db;
+    await db.createIndex({
       "index": {
         "fields": ["name"]
       }
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['debut']}
-      });
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['series', 'debut']}
-      });
-    }).then(function () {
-      return db.find({
-        selector: {debut: {$gt: 1990}},
-        fields: ['_id'],
-        sort: ['debut']
-      });
-    }).then(function (response) {
-      response.docs.should.deep.equal([
-        {"_id":"kirby"},
-        {"_id":"fox"},
-        {"_id":"ness"},
-        {"_id":"pikachu"},
-        {"_id":"puff"}
-      ]);
     });
-  });
-
-  it('should find debut > 1990 3', function () {
-    var db = context.db;
-    return db.createIndex({
-      "index": {
-        "fields": ["name"]
-      }
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['debut']}
-      });
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['series', 'debut']}
-      });
-    }).then(function () {
-      return db.find({
-        selector: {debut: {$gt: 1990}},
-        fields: ['_id']
-      });
-    }).then(function (response) {
-      response.docs.sort(sortById);
-      response.docs.should.deep.equal([
-        {"_id":"fox"},
-        {"_id":"kirby"},
-        {"_id":"ness"},
-        {"_id":"pikachu"},
-        {"_id":"puff"}
-      ]);
+    await db.createIndex({
+      index: {fields: ['debut']}
     });
-  });
-
-  it('should find series == mario', function () {
-    var db = context.db;
-    return db.createIndex({
-      "index": {
-        "fields": ["name"]
-      }
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['debut']}
-      });
-    }).then(function () {
-      return db.createIndex({
-        index: {fields: ['series', 'debut']}
-      });
-    }).then(function () {
-      return db.find({
-        selector: {series: {$eq: 'Mario'}},
-        fields: ['_id', 'debut'],
-        sort: [{series: 'desc'}, {debut: 'desc'}]
-      });
-    }).then(function (response) {
-      response.docs.should.deep.equal([
-        {"_id":"yoshi","debut":1990},
-        {"_id":"luigi","debut":1983},
-        {"_id":"mario","debut":1981},
-        {"_id":"dk","debut":1981}
-      ]);
-    });
-  });
-
-  it('throws an error for an invalid selector/sort', function () {
-    var db = context.db;
-    return db.createIndex({
+    await db.createIndex({
       index: {fields: ['series', 'debut']}
-    }).then(function () {
-      return db.find({
+    });
+    const response = await db.find({
+      selector: {debut: {$gt: 1990}},
+      fields: ['_id'],
+      sort: ['debut']
+    });
+    response.docs.should.deep.equal([
+      {"_id":"kirby"},
+      {"_id":"fox"},
+      {"_id":"ness"},
+      {"_id":"pikachu"},
+      {"_id":"puff"}
+    ]);
+  });
+
+  it('should find debut > 1990 3', async () => {
+    const db = context.db;
+    await db.createIndex({
+      "index": {
+        "fields": ["name"]
+      }
+    });
+    await db.createIndex({
+      index: {fields: ['debut']}
+    });
+    await db.createIndex({
+      index: {fields: ['series', 'debut']}
+    });
+    const response = await db.find({
+      selector: {debut: {$gt: 1990}},
+      fields: ['_id']
+    });
+    response.docs.sort(sortById);
+    response.docs.should.deep.equal([
+      {"_id":"fox"},
+      {"_id":"kirby"},
+      {"_id":"ness"},
+      {"_id":"pikachu"},
+      {"_id":"puff"}
+    ]);
+  });
+
+  it('should find series == mario', async () => {
+    const db = context.db;
+    await db.createIndex({
+      "index": {
+        "fields": ["name"]
+      }
+    });
+    await db.createIndex({
+      index: {fields: ['debut']}
+    });
+    await db.createIndex({
+      index: {fields: ['series', 'debut']}
+    });
+    const response = await db.find({
+      selector: {series: {$eq: 'Mario'}},
+      fields: ['_id', 'debut'],
+      sort: [{series: 'desc'}, {debut: 'desc'}]
+    });
+    response.docs.should.deep.equal([
+      {"_id":"yoshi","debut":1990},
+      {"_id":"luigi","debut":1983},
+      {"_id":"mario","debut":1981},
+      {"_id":"dk","debut":1981}
+    ]);
+  });
+
+  it('throws an error for an invalid selector/sort', async () => {
+    const db = context.db;
+    await db.createIndex({
+      index: {fields: ['series', 'debut']}
+    });
+    try {
+      await db.find({
         selector: {series: 'Mario', debut: 1981},
         sort: ['name']
       });
-    }).then(function () {
       throw new Error('expected an error');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 });

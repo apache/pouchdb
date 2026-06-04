@@ -6,7 +6,7 @@ if (typeof process === 'undefined' || process.browser) {
 
 beforeEach(function () {
   this.timeout(60000);
-  var dbName = testUtils.adapterUrl(testUtils.adapterType(), 'testdb');
+  const dbName = testUtils.adapterUrl(testUtils.adapterType(), 'testdb');
   context.db = new PouchDB(dbName);
 });
 

@@ -1,119 +1,107 @@
 'use strict';
 
-describe('test.ne.js', function () {
-  it('#7 does ne queries 1', function () {
-    var db = context.db;
-    var index = {
+describe('test.ne.js', () => {
+  it('#7 does ne queries 1', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       }
     };
 
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        { _id: '1', foo: 'eyo', bar: 'zxy'},
-        { _id: '2', foo: 'ebb', bar: 'zxy'},
-        { _id: '3', foo: 'eba', bar: 'zxz'},
-        { _id: '4', foo: 'abo', bar: 'zxz'}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {foo: {$gt: "a"}, bar: {$ne: 'zxy'}},
-        fields: ["_id"],
-        sort: [{foo: "asc"}]
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([{ _id: '4'}, { _id: '3'}]);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      { _id: '1', foo: 'eyo', bar: 'zxy'},
+      { _id: '2', foo: 'ebb', bar: 'zxy'},
+      { _id: '3', foo: 'eba', bar: 'zxz'},
+      { _id: '4', foo: 'abo', bar: 'zxz'}
+    ]);
+    const resp = await db.find({
+      selector: {foo: {$gt: "a"}, bar: {$ne: 'zxy'}},
+      fields: ["_id"],
+      sort: [{foo: "asc"}]
     });
+    resp.docs.should.deep.equal([{ _id: '4'}, { _id: '3'}]);
   });
 
-  it('#7 does ne queries 2', function () {
-    var db = context.db;
-    var index = {
+  it('#7 does ne queries 2', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo", "bar"]
       }
     };
 
-    return db.createIndex(index).then(function () {
-      return db.bulkDocs([
-        {_id: '1', foo: 'eyo', bar: 'zxy'},
-        {_id: '2', foo: 'ebb', bar: 'zxy'},
-        {_id: '3', foo: 'eba', bar: 'zxz'},
-        {_id: '4', foo: 'abo', bar: 'zxz'}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {foo: {$gt: "a"}, bar: {$ne: 'zxy'}},
-        fields: ["_id"],
-        sort: [{foo: "asc"}]
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([{_id: '4'}, {_id: '3'}]);
+    await db.createIndex(index);
+    await db.bulkDocs([
+      {_id: '1', foo: 'eyo', bar: 'zxy'},
+      {_id: '2', foo: 'ebb', bar: 'zxy'},
+      {_id: '3', foo: 'eba', bar: 'zxz'},
+      {_id: '4', foo: 'abo', bar: 'zxz'}
+    ]);
+    const resp = await db.find({
+      selector: {foo: {$gt: "a"}, bar: {$ne: 'zxy'}},
+      fields: ["_id"],
+      sort: [{foo: "asc"}]
     });
+    resp.docs.should.deep.equal([{_id: '4'}, {_id: '3'}]);
   });
 
-  it('$ne/$eq inconsistency', function () {
-    var db = context.db;
+  it('$ne/$eq inconsistency', async () => {
+    const db = context.db;
 
-    function normalize(res) {
-      return res.docs.map(function getId(x) {
+    const normalize = (res) => {
+      return res.docs.map((x) => {
         return x._id;
       }).sort();
-    }
+    };
 
-    return db.createIndex({
+    await db.createIndex({
       index: {
         fields: ['foo']
       }
-    }).then(function () {
-      return db.bulkDocs([
-        {_id: '1', foo: 1},
-        {_id: '2', foo: 2},
-        {_id: '3', foo: 3},
-        {_id: '4', foo: 4}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {$and: [{foo: {$eq: 1}}, {foo: {$ne: 1}}]}
-      });
-    }).then(function (res) {
-      normalize(res).should.deep.equal([]);
     });
+    await db.bulkDocs([
+      {_id: '1', foo: 1},
+      {_id: '2', foo: 2},
+      {_id: '3', foo: 3},
+      {_id: '4', foo: 4}
+    ]);
+    const res = await db.find({
+      selector: {$and: [{foo: {$eq: 1}}, {foo: {$ne: 1}}]}
+    });
+    normalize(res).should.deep.equal([]);
   });
 
-  it('$ne/$eq consistency', function () {
-    var db = context.db;
+  it('$ne/$eq consistency', async () => {
+    const db = context.db;
 
-    function normalize(res) {
-      return res.docs.map(function getId(x) {
+    const normalize = (res) => {
+      return res.docs.map((x) => {
         return x._id;
       }).sort();
-    }
+    };
 
-    return db.createIndex({
+    await db.createIndex({
       index: {
         fields: ['foo']
       }
-    }).then(function () {
-      return db.bulkDocs([
-        {_id: '1', foo: 1},
-        {_id: '2', foo: 2},
-        {_id: '3', foo: 3},
-        {_id: '4', foo: 4}
-      ]);
-    }).then(function () {
-      return db.find({
-        selector: {$and: [{foo: {$eq: 1}}, {foo: {$ne: 3}}]}
-      });
-    }).then(function (res) {
-      normalize(res).should.deep.equal(['1']);
     });
+    await db.bulkDocs([
+      {_id: '1', foo: 1},
+      {_id: '2', foo: 2},
+      {_id: '3', foo: 3},
+      {_id: '4', foo: 4}
+    ]);
+    const res = await db.find({
+      selector: {$and: [{foo: {$eq: 1}}, {foo: {$ne: 3}}]}
+    });
+    normalize(res).should.deep.equal(['1']);
   });
 
-  it('does ne queries with gt', function () {
-    var db = context.db;
-    return db.bulkDocs([
+  it('does ne queries with gt', async () => {
+    const db = context.db;
+    await db.bulkDocs([
       { name: 'mario', _id: 'mario', rank: 5, series: 'mario', debut: 1981 },
       { name: 'jigglypuff', _id: 'puff', rank: 8, series: 'pokemon', debut: 1996 },
       { name: 'link', rank: 10, _id: 'link', series: 'zelda', debut: 1986 },
@@ -126,28 +114,26 @@ describe('test.ne.js', function () {
       { name: 'samus', rank: 12, _id: 'samus', series: 'metroid', debut: 1986 },
       { name: 'yoshi', _id: 'yoshi', rank: 6, series: 'mario', debut: 1990 },
       { name: 'kirby', _id: 'kirby', series: 'kirby', rank: 2, debut: 1992 }
-    ]).then(function () {
-      return db.find({
-        selector: {
-          $and: [
-            {_id: {$ne: "samus"}},
-            {_id: {$ne: "yoshia"}},
-            {_id: {$gt: "fox"}}
-          ]
-        },
-        fields: ["_id"],
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([
-        {_id: 'kirby'},
-        {_id: 'link'},
-        {_id: 'luigi'},
-        {_id: 'mario'},
-        {_id: 'ness'},
-        {_id: 'pikachu'},
-        {_id: 'puff'},
-        {_id: 'yoshi'}
-      ]);
+    ]);
+    const resp = await db.find({
+      selector: {
+        $and: [
+          {_id: {$ne: "samus"}},
+          {_id: {$ne: "yoshia"}},
+          {_id: {$gt: "fox"}}
+        ]
+      },
+      fields: ["_id"],
     });
+    resp.docs.should.deep.equal([
+      {_id: 'kirby'},
+      {_id: 'link'},
+      {_id: 'luigi'},
+      {_id: 'mario'},
+      {_id: 'ness'},
+      {_id: 'pikachu'},
+      {_id: 'puff'},
+      {_id: 'yoshi'}
+    ]);
   });
 });

@@ -83,6 +83,13 @@ pouchdb-build-node() {
 }
 
 if [[ $CI = true ]] && [[ $CLIENT != node ]]; then
+  # Change Ubuntu mirror priorities. 
+  # azure.archive.ubuntu.com is very slow, especially if the US is awake.
+  # From https://github.com/servo/servo/pull/39190
+  sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
+  sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
+  sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
+  sudo cat /etc/apt/apt-mirrors.txt
   npx playwright install --with-deps "$CLIENT"
 fi
 

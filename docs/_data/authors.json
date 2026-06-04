@@ -1,0 +1,64 @@
+[
+  {
+    "name": "Nick Colley",
+    "twitter": "nickcolley",
+    "github": "nickcolley",
+    "www": "http://nickcolley.co.uk",
+    "avatar": "nick_colley.jpeg"
+  },
+  {
+    "name": "Nolan Lawson",
+    "twitter": "nolanlawson",
+    "github": "nolanlawson",
+    "www": "http://nolanlawson.com",
+    "avatar": "nolan_lawson.png"
+  },
+  {
+    "name": "Dale Harvey",
+    "twitter": "daleharvey",
+    "github": "daleharvey",
+    "www": "http://arandomurl.com",
+    "avatar": "dale_harvey.jpeg"
+  },
+  {
+    "name": "Calvin Metcalf",
+    "twitter": "CWMma",
+    "github": "calvinmetcalf",
+    "www": "http://calvinmetcalf.com/",
+    "avatar": "calvin_metcalf.jpeg"
+  },
+  {
+    "name": "Giovanni Ornaghi",
+    "twitter": "sphaso",
+    "github": "sphaso",
+    "www": "https://it.linkedin.com/in/giovanniornaghi",
+    "avatar": "giovanni_ornaghi.jpeg"
+  },
+  {
+    "name": "Garren Smith",
+    "twitter": "garrensmith",
+    "github": "garrensmith",
+    "www": "http://www.redcometlabs.com",
+    "avatar": "garren_smith.png"
+  },
+  {
+    "name": "Will Holley",
+    "twitter": "wilhol",
+    "github": "willholley",
+    "www": "https://github.com/willholley/"
+  },
+  {
+    "name": "Gareth Bowen",
+    "twitter": "garethjtbowen",
+    "github": "garethbowen",
+    "www": "https://bowenwebdesign.co.nz",
+    "avatar": "gareth_bowen.png"
+  },
+  {
+    "name": "Alba Herrerías",
+    "twitter": "alba_dev",
+    "github": "AlbaHerrerias",
+    "www": "https://www.albaherrerias.dev",
+    "avatar": "alba_herreiras.png"
+  }
+]

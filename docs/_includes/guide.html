@@ -1,0 +1,26 @@
+---
+layout: 2ColLeft.html
+---
+
+{{ content }}
+
+{% assign guides = collections.guides | sort: 'data.index' %}
+{% for guide in guides %}
+    {% if title == guide.data.title %}
+        {% assign prev = guide.data.index | minus: 2 %}
+        {% assign next = guide.data.index %}
+
+        <ul class="pager">
+            {% unless prev == -1 %}
+                <li class="previous">
+                    <a href="{{ guides[prev].url }}">&larr; {{ guides[prev].data.title }}</a>
+                </li>
+            {% endunless %}
+            {% if guides[next] %}
+                <li class="next">
+                    <a href="{{ guides[next].url }}">{{ guides[next].data.title }} &rarr;</a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+{% endfor %}

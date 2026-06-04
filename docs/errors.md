@@ -1,20 +1,24 @@
 ---
-layout: 2ColLeft
+layout: 2ColLeft.html
 title: Common Errors
 sidebar: nav.html
 ---
 
-{% include anchor.html class="h3" title="No 'Access-Control-Allow-Origin' header" hash="no_access_control_allow_origin_header" %}
+{% include anchor.html class="h3" title="No `Access-Control-Allow-Origin` header" hash="no_access_control_allow_origin_header" %}
 
 If you see the error:
 
-> XMLHttpRequest cannot load [...]
-> No 'Access-Control-Allow-Origin' header is present on the requested resource.
-> Origin [...] is therefore not allowed access.
+```bash
+XMLHttpRequest cannot load [...]
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+Origin [...] is therefore not allowed access.
+```
 
 or this one:
 
-> Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://[couchDBIP]:[couchDBPort]/[dbname]/?_nonce=[request hash]. This can be fixed by moving the resource to the same domain or enabling CORS
+```bash
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://[couchDBIP]:[couchDBPort]/[dbname]/?_nonce=[request hash]. This can be fixed by moving the resource to the same domain or enabling CORS
+```
 
 it's because you need to enable [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) on CouchDB/Cloudant/whatever you're using. Otherwise, your scripts can only access the server database if they're served from the same origin &#8212; the protocol (ex: _http://_, _https://_), domain, and port number must match.
 
@@ -58,7 +62,7 @@ new PouchDB('mydb', {size: 50}); // request 50 MB with a popup
 new PouchDB('mydb'); // implicitly request 5 MB, no popup until you exceed 5MB
 ```
 
-This does not affect any backend other than Web SQL. Chrome, Android, and Opera do not show the popup. On PhoneGap/Cordova apps, you can also use the [SQLite plugin][sqlite] to get around this problem. Here's [more information about storage quotas](http://www.html5rocks.com/en/tutorials/offline/quota-research) and [details on the Safari/iOS bug](https://github.com/pouchdb/pouchdb/issues/2347).
+This does not affect any backend other than Web SQL. Chrome, Android, and Opera do not show the popup. On PhoneGap/Cordova apps, you can also use the [SQLite plugin][sqlite] to get around this problem. Here's [more information about storage quotas](http://www.html5rocks.com/en/tutorials/offline/quota-research) and [details on the Safari/iOS bug](https://github.com/apache/pouchdb/issues/2347).
 
 {% include anchor.html class="h3" title="PouchDB throws 404 (Object Not Found) for '_local' document" hash="404__local_document" %}
 
@@ -77,8 +81,10 @@ There is a limit of one database per app in some versions of the Android WebView
 
 If you see this warning:
 
-    (node) warning: possible EventEmitter memory leak detected. 11 listeners added.
-    Use emitter.setMaxListeners() to increase limit.
+```bash
+(node) warning: possible EventEmitter memory leak detected. 11 listeners added.
+Use emitter.setMaxListeners() to increase limit.
+```
 
 This is because PouchDB uses Node-style [EventEmitters](https://nodejs.org/api/events.html) for its events. An EventEmitter is any object that has an `.on()` or `once()` method, such as `db.changes().on('change', ...`.
 
@@ -96,15 +102,15 @@ In the above example, `db` refers to a database object you created using `new Po
 
 {% include anchor.html class="h3" title="Database size limitation of ~5MB on iOS with Cordova/Phone Gap" hash="size_limitation_5mb" %}
 
-If you're storing large amounts of data, such as PNG attachments, the [SQLite plugin][sqlite] is again your friend. (See [issue #1260](https://github.com/pouchdb/pouchdb/issues/1260) for details.)
+If you're storing large amounts of data, such as PNG attachments, the [SQLite plugin][sqlite] is again your friend. (See [issue #1260](https://github.com/apache/pouchdb/issues/1260) for details.)
 
 {% include anchor.html class="h3" title="CouchDB returns a 404 for GETs from a CouchApp" hash="404_get_couchapp" %}
 
-Certain URL rewrites are broken by PouchDB's cache-busting; try adding `{cache : false}` to the PouchDB constructor. (See [issue #1233](https://github.com/pouchdb/pouchdb/issues/1233) for details.)
+Certain URL rewrites are broken by PouchDB's cache-busting; try adding `{cache : false}` to the PouchDB constructor. (See [issue #1233](https://github.com/apache/pouchdb/issues/1233) for details.)
 
 {% include anchor.html class="h3" title="Uncaught TypeError: object is not a function" hash="typeerror_object_is_not_a_function" %}
 
-Did you include the [es6-promise shim library](https://github.com/jakearchibald/es6-promise)?  Not every browser implements ES6 Promises correctly. (See [issue #1747](https://github.com/pouchdb/pouchdb/issues/1747) for details.)
+Did you include the [es6-promise shim library](https://github.com/jakearchibald/es6-promise)?  Not every browser implements ES6 Promises correctly. (See [issue #1747](https://github.com/apache/pouchdb/issues/1747) for details.)
 
 {% include anchor.html class="h3" title="SyntaxError: Parse error (Cordova on Android)" hash="cordova_android_parse_error" %}
 
@@ -134,13 +140,17 @@ In Firefox, PouchDB instead throws a [`No valid adapter found`](#no_valid_adapte
 
 If you ever see:
 
-    Uncaught DataCloneError:
-      Failed to execute 'put' on 'IDBObjectStore':
-      An object could not be cloned.
+```bash
+Uncaught DataCloneError:
+  Failed to execute 'put' on 'IDBObjectStore':
+  An object could not be cloned.
+```
 
 Or:
 
-    DataCloneError: The object could not be cloned.
+```bash
+DataCloneError: The object could not be cloned.
+```
 
 Then the problem is that the document you are trying to store is not a pure JSON object. For example, an object with its own class (`new Foo()`) or with special methods like getters and setters cannot be stored in PouchDB/CouchDB.
 
@@ -152,7 +162,7 @@ JSON.parse(JSON.stringify(myDocument));
 
 If the object you get out is the same as the object you put in, then you are storing the right kind of object.
 
-Note that this also means that you cannot store `Date`s in your document. You must convert them to strings or numbers first. `Date`s will be stored as-is in IndexedDB, but in the other adapters and in CouchDB, they will be automatically converted to ISO string format, e.g. `'2015-01-01T12:00:00.000Z'`. This can caused unwanted results. See [#2351](https://github.com/pouchdb/pouchdb/issues/2351) and [#2158](https://github.com/pouchdb/pouchdb/issues/2158) for details.
+Note that this also means that you cannot store `Date`s in your document. You must convert them to strings or numbers first. `Date`s will be stored as-is in IndexedDB, but in the other adapters and in CouchDB, they will be automatically converted to ISO string format, e.g. `'2015-01-01T12:00:00.000Z'`. This can caused unwanted results. See [#2351](https://github.com/apache/pouchdb/issues/2351) and [#2158](https://github.com/apache/pouchdb/issues/2158) for details.
 
 {% include anchor.html class="h3" title="DOM Exception 18 in Android pre-Kitkat WebView" hash="android_pre_kitkat" %}
 
@@ -227,10 +237,7 @@ Generally, reducing these options that replicating the database down will take m
 {% include alert/start.html variant="info" %}
 
 This issue has been found on OpenVZ systems, but other Hypervisors might also be affected. See
-<a
-  href="http://blog.aplikacja.info/2010/01/105-no-buffer-space-available-on-openvz-vps/"
-  target="_blank"
->http://blog.aplikacja.info/2010/01/105-no-buffer-space-available-on-openvz-vps/</a>
+[http://blog.aplikacja.info/105_no_buffer_space_available_on_openvz_vps.html](http://blog.aplikacja.info/105_no_buffer_space_available_on_openvz_vps.html)
 on how to diagnose this issue.
 
 {% include alert/end.html %}
@@ -246,7 +253,7 @@ PouchDB may have various dependencies that may not play nicely with WebPack. Her
 
 If you run into the following error (or similar):
 
-```sh
+```bash
 ERROR in ./~/pouchdb/~/levelup/package.json
 Module parse failed: /path/to/node_modules/pouchdb/node_modules/levelup/package.json Line 2: Unexpected token :
 You may need an appropriate loader to handle this file type.
@@ -262,7 +269,7 @@ WebPack needs to be configured to recognize how to load json files. Simply, inst
 ```js
 module: {
     loaders: [
-        // https://github.com/pouchdb/pouchdb/issues/3319
+        // https://github.com/apache/pouchdb/issues/3319
         {
             test: /\.json$/,
             loader: "json-loader"
@@ -284,7 +291,7 @@ Minimal code to reproduce this can be found [here](https://gist.github.com/Treor
 
 Sometimes `npm install pouchdb` fails on windows, when no prebuilt binary is available. The error looks similar to this:
 
-```sh
+```bash
 C:\XXX\node_modules\project_name>if not defined npm_config_node_gyp (node "C:\XXX\node_modules\npm\bin\node-gyp-bin\....\node_modules\node-gyp\bin\node-gyp.js" rebuild ) else (node "" rebuild )
 gyp ERR! configure error
 gyp ERR! stack Error: Can't find Python executable "python", you can set the PYTHON env variable.
@@ -293,7 +300,7 @@ gyp ERR! stack at PythonFinder.failNoPython (C:\XXX\nodejs\node_modules\npm\node
 
 or something like this
 
-```sh
+```bash
 gyp ERR! configure error
 npm ERR! code ELIFECYCLE
 npm ERR! errno 1

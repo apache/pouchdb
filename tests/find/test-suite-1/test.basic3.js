@@ -1,10 +1,10 @@
 'use strict';
 
-describe('test.basic3.js', function () {
-  var sortById = testUtils.sortById;
+describe('test.basic3.js', () => {
+  const sortById = testUtils.sortById;
 
-  beforeEach(function () {
-    return context.db.bulkDocs([
+  beforeEach(async () => {
+    await context.db.bulkDocs([
       { name: 'Mario', _id: 'mario', rank: 5, series: 'Mario', debut: 1981, awesome: true },
       { name: 'Jigglypuff', _id: 'puff', rank: 8, series: 'Pokemon', debut: 1996,
         awesome: false },
@@ -24,219 +24,183 @@ describe('test.basic3.js', function () {
     ]);
   });
 
-  it('should be able to search for numbers', function () {
-    var db = context.db;
-    var index = {
+  it('should be able to search for numbers', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["rank"]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.find({
-        selector: {rank: 12},
-        fields: ['_id']
-      }).then(function (response) {
-        response.docs.should.deep.equal([
-          {"_id": "samus"}
-        ]);
-      });
+    await db.createIndex(index);
+    const response = await db.find({
+      selector: {rank: 12},
+      fields: ['_id']
     });
+    response.docs.should.deep.equal([
+      {"_id": "samus"}
+    ]);
   });
 
-  it('should use $exists for an in-memory filter', function () {
-    var db = context.db;
-    var index = {
+  it('should use $exists for an in-memory filter', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["rank"]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.find({
-        selector: {rank: 12, name: {$exists: true}},
-        fields: ['_id']
-      }).then(function (response) {
-        response.docs.should.deep.equal([
-          {"_id": "samus"}
-        ]);
-      });
+    await db.createIndex(index);
+    const response = await db.find({
+      selector: {rank: 12, name: {$exists: true}},
+      fields: ['_id']
     });
+    response.docs.should.deep.equal([
+      {"_id": "samus"}
+    ]);
   });
 
-  it('should be able to search for 0', function () {
-    var db = context.db;
-    var index = {
+  it('should be able to search for 0', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["rank"]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.find({
-        selector: {rank: 0},
-        fields: ['_id']
-      }).then(function (response) {
-        response.docs.should.deep.equal([
-          {"_id": "master_hand"}
-        ]);
-      });
+    await db.createIndex(index);
+    const response = await db.find({
+      selector: {rank: 0},
+      fields: ['_id']
     });
+    response.docs.should.deep.equal([
+      {"_id": "master_hand"}
+    ]);
   });
 
-  it('should be able to search for boolean true', function () {
-    var db = context.db;
-    var index = {
+  it('should be able to search for boolean true', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["awesome"]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.find({
-        selector: {awesome: true},
-        fields: ['_id']
-      }).then(function (response) {
-        response.docs.sort(sortById);
-        response.docs.should.deep.equal([{"_id":"falcon"},{"_id":"fox"},{"_id":"kirby"},
-          {"_id":"link"},{"_id":"mario"},{"_id":"ness"},{"_id":"pikachu"},
-          {"_id":"samus"},{"_id":"yoshi"}]);
-      });
+    await db.createIndex(index);
+    const response = await db.find({
+      selector: {awesome: true},
+      fields: ['_id']
     });
+    response.docs.sort(sortById);
+    response.docs.should.deep.equal([{"_id":"falcon"},{"_id":"fox"},{"_id":"kirby"},
+      {"_id":"link"},{"_id":"mario"},{"_id":"ness"},{"_id":"pikachu"},
+      {"_id":"samus"},{"_id":"yoshi"}]);
   });
 
-  it('should be able to search for boolean true', function () {
-    var db = context.db;
-    var index = {
+  it('should be able to search for boolean true', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["awesome"]
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.find({
-        selector: {awesome: false},
-        fields: ['_id']
-      }).then(function (response) {
-        response.docs.sort(sortById);
-        response.docs.should.deep.equal([{"_id":"dk"},{"_id":"luigi"},
-          {"_id":"master_hand"},{"_id":"puff"}]);
-      });
+    await db.createIndex(index);
+    const response = await db.find({
+      selector: {awesome: false},
+      fields: ['_id']
     });
+    response.docs.sort(sortById);
+    response.docs.should.deep.equal([{"_id":"dk"},{"_id":"luigi"},
+      {"_id":"master_hand"},{"_id":"puff"}]);
   });
 
-  it('#73 should be able to create a custom index name', function () {
-    var db = context.db;
-    var index = {
+  it('#73 should be able to create a custom index name', async () => {
+    const db = context.db;
+    const index = {
       index: {
         fields: ["awesome"],
         name: 'myindex',
         ddoc: 'mydesigndoc'
       }
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (res) {
-      var indexes = res.indexes.map(function (index) {
-        return {
-          name: index.name,
-          ddoc: index.ddoc,
-          type: index.type
-        };
-      });
-      indexes.should.deep.equal([
-        {
-          name: '_all_docs',
-          type: 'special',
-          ddoc: null
-        },
-        {
-          name: 'myindex',
-          ddoc: '_design/mydesigndoc',
-          type: 'json'
-        }
-      ]);
-      return db.get('_design/mydesigndoc');
-    });
+    await db.createIndex(index);
+    const res = await db.getIndexes();
+    const indexes = res.indexes.map(({ name, ddoc, type }) => ({ name, ddoc, type }));
+    indexes.should.deep.equal([
+      {
+        name: '_all_docs',
+        type: 'special',
+        ddoc: null
+      },
+      {
+        name: 'myindex',
+        ddoc: '_design/mydesigndoc',
+        type: 'json'
+      }
+    ]);
+    await db.get('_design/mydesigndoc');
   });
 
-  it('#73 should be able to create a custom index, alt style', function () {
-    var db = context.db;
-    var index = {
+  it('#73 should be able to create a custom index, alt style', async () => {
+    const db = context.db;
+    const index = {
       index: {
         fields: ["awesome"],
       },
       name: 'myindex',
       ddoc: 'mydesigndoc'
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (res) {
-      var indexes = res.indexes.map(function (index) {
-        return {
-          name: index.name,
-          ddoc: index.ddoc,
-          type: index.type
-        };
-      });
-      indexes.should.deep.equal([
-        {
-          name: '_all_docs',
-          type: 'special',
-          ddoc: null
-        },
-        {
-          name: 'myindex',
-          ddoc: '_design/mydesigndoc',
-          type: 'json'
-        }
-      ]);
-      return db.get('_design/mydesigndoc');
-    });
+    await db.createIndex(index);
+    const res = await db.getIndexes();
+    const indexes = res.indexes.map(({ name, ddoc, type }) => ({ name, ddoc, type }));
+    indexes.should.deep.equal([
+      {
+        name: '_all_docs',
+        type: 'special',
+        ddoc: null
+      },
+      {
+        name: 'myindex',
+        ddoc: '_design/mydesigndoc',
+        type: 'json'
+      }
+    ]);
+    await db.get('_design/mydesigndoc');
   });
 
-  it('#73 should be able to create a custom index, alt style 2', function () {
-    var db = context.db;
-    var index = {
+  it('#73 should be able to create a custom index, alt style 2', async () => {
+    const db = context.db;
+    const index = {
       name: 'myindex',
       ddoc: 'mydesigndoc',
       fields: ["awesome"]
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (res) {
-      var indexes = res.indexes.map(function (index) {
-        return {
-          name: index.name,
-          ddoc: index.ddoc,
-          type: index.type
-        };
-      });
-      indexes.should.deep.equal([
-        {
-          name: '_all_docs',
-          type: 'special',
-          ddoc: null
-        },
-        {
-          name: 'myindex',
-          ddoc: '_design/mydesigndoc',
-          type: 'json'
-        }
-      ]);
-      return db.get('_design/mydesigndoc');
-    });
+    await db.createIndex(index);
+    const res = await db.getIndexes();
+    const indexes = res.indexes.map(({ name, ddoc, type }) => ({ name, ddoc, type }));
+    indexes.should.deep.equal([
+      {
+        name: '_all_docs',
+        type: 'special',
+        ddoc: null
+      },
+      {
+        name: 'myindex',
+        ddoc: '_design/mydesigndoc',
+        type: 'json'
+      }
+    ]);
+    await db.get('_design/mydesigndoc');
   });
 
-  it('#6277 selector as an empty object', function () {
-    var db = context.db;
-    return db.createIndex({
+  it('#6277 selector as an empty object', async () => {
+    const db = context.db;
+    await db.createIndex({
       index: {
         fields: ['rank', 'awesome']
       },
-    }).then(function () {
-      return db.find({
-        selector: { rank: 8, awesome: null }
-      });
-    }).then(function () {
-      return db.find({
-        selector: { rank: 8, awesome: {} }
-      });
+    });
+    await db.find({
+      selector: { rank: 8, awesome: null }
+    });
+    await db.find({
+      selector: { rank: 8, awesome: {} }
     });
   });
 });

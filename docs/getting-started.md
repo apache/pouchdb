@@ -1,5 +1,5 @@
 ---
-layout: 2ColLeft
+layout: 2ColLeft.html
 title: Getting Started Guide
 sidebar: nav.html
 ---

@@ -1,81 +1,76 @@
 'use strict';
 
-describe('test.basic.js', function () {
-  it('should create an index', function () {
-    var db = context.db;
-    var index = {
+describe('test.basic.js', () => {
+  it('should create an index', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('created');
-      return db.createIndex(index);
-    }).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('exists');
-    });
+    const createResp = await db.createIndex(index);
+    createResp.id.should.match(/^_design\//);
+    createResp.name.should.equal('foo-index');
+    createResp.result.should.equal('created');
+    const existsResp = await db.createIndex(index);
+    existsResp.id.should.match(/^_design\//);
+    existsResp.name.should.equal('foo-index');
+    existsResp.result.should.equal('exists');
   });
 
-  it('should not update an existing index', function () {
-    var db = context.db;
-    var index = {
+  it('should not update an existing index', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('created');
-      return db.createIndex(index);
-    }).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('exists');
-      return response.id;
-    }).then(function (ddocId) {
-      return db.get(ddocId);
-    }).then(function (doc) {
-      doc._rev.slice(0, 1).should.equal('1');
-    });
+    const createResp = await db.createIndex(index);
+    createResp.id.should.match(/^_design\//);
+    createResp.name.should.equal('foo-index');
+    createResp.result.should.equal('created');
+    const existsResp = await db.createIndex(index);
+    existsResp.id.should.match(/^_design\//);
+    existsResp.name.should.equal('foo-index');
+    existsResp.result.should.equal('exists');
+    const doc = await db.get(existsResp.id);
+    doc._rev.slice(0, 1).should.equal('1');
   });
 
-  it('throws an error for an invalid index creation', function () {
-    var db = context.db;
-    return db.createIndex('yo yo yo').then(function () {
+  it('throws an error for an invalid index creation', async () => {
+    const db = context.db;
+    try {
+      await db.createIndex('yo yo yo');
       throw new Error('expected an error');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it('throws an error for an invalid index deletion', function () {
-    var db = context.db;
-    return db.deleteIndex('yo yo yo').then(function () {
+  it('throws an error for an invalid index deletion', async () => {
+    const db = context.db;
+    try {
+      await db.deleteIndex('yo yo yo');
       throw new Error('expected an error');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it('should not recognize duplicate indexes', function () {
-    var db = context.db;
-    var index = {
+  it('should not recognize duplicate indexes', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    var index2 = {
+    const index2 = {
       "index": {
         "fields": ["foo"]
       },
@@ -83,175 +78,161 @@ describe('test.basic.js', function () {
       "type": "json"
     };
 
-    return db.createIndex(index).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('created');
-      return db.createIndex(index2);
-    }).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('bar-index');
-      response.result.should.equal('created');
-      return db.getIndexes();
-    }).then(function (res) {
-      res.indexes.should.have.length(3);
-      var ddoc1 = res.indexes[1].ddoc;
-      var ddoc2 = res.indexes[2].ddoc;
-      ddoc1.should.not.equal(ddoc2,
-        'essentially duplicate indexes are not md5summed to the' +
-        'same ddoc');
-    });
+    const fooResp = await db.createIndex(index);
+    fooResp.id.should.match(/^_design\//);
+    fooResp.name.should.equal('foo-index');
+    fooResp.result.should.equal('created');
+    const barResp = await db.createIndex(index2);
+    barResp.id.should.match(/^_design\//);
+    barResp.name.should.equal('bar-index');
+    barResp.result.should.equal('created');
+    const res = await db.getIndexes();
+    res.indexes.should.have.length(3);
+    const ddoc1 = res.indexes[1].ddoc;
+    const ddoc2 = res.indexes[2].ddoc;
+    ddoc1.should.not.equal(ddoc2,
+      `essentially duplicate indexes are not md5summed to the` +
+      `same ddoc`);
   });
 
-  it.skip('should find existing indexes', function () {
-    var db = context.db;
-    return db.getIndexes().then(function (response) {
-      response.should.deep.equal({
-        "total_rows": 1,
-        indexes: [{
-          ddoc: null,
-          name: '_all_docs',
-          type: 'special',
-          def: {fields: [{_id: 'asc'}]}
-        }]
-      });
-      var index = {
-        "index": {
-          "fields": ["foo"]
-        },
-        "name": "foo-index",
-        "type": "json"
-      };
-      return db.createIndex(index);
-    }).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      var ddoc = resp.indexes[1].ddoc;
-      ddoc.should.match(/_design\/.+/);
-      delete resp.indexes[1].ddoc;
-      console.log(JSON.stringify(resp));
-      resp.should.deep.equal({
-        "total_rows": 2,
-        "indexes": [
-          {
-            "ddoc": null,
-            "name": "_all_docs",
-            "type": "special",
-            "def": {
-              "fields": [
-                {
-                  "_id": "asc"
-                }
-              ]
-            }
-          },
-          {
-            "name": "foo-index",
-            "type": "json",
-            "def": {
-              "fields": [
-                {
-                  "foo": "asc"
-                }
-              ]
-            }
-          }
-        ]
-      });
+  it.skip('should find existing indexes', async () => {
+    const db = context.db;
+    const initialResp = await db.getIndexes();
+    initialResp.should.deep.equal({
+      "total_rows": 1,
+      indexes: [{
+        ddoc: null,
+        name: '_all_docs',
+        type: 'special',
+        def: {fields: [{_id: 'asc'}]}
+      }]
     });
-  });
-
-  it.skip('should create ddocs automatically', function () {
-    var db = context.db;
-    var index = {
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    var ddocId;
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      ddocId = resp.indexes[1].ddoc;
-      return db.get(ddocId);
-    }).then(function (ddoc) {
-      ddoc._id.should.equal(ddocId);
-      should.exist(ddoc._rev);
-      delete ddoc._id;
-      delete ddoc._rev;
-      delete ddoc.views['foo-index'].options.w; // wtf is this?
-      ddoc.should.deep.equal({
-        "language": "query",
-        "views": {
-          "foo-index": {
-            "map": {
-              "fields": {
+    await db.createIndex(index);
+    const resp = await db.getIndexes();
+    const ddoc = resp.indexes[1].ddoc;
+    ddoc.should.match(/_design\/.+/);
+    delete resp.indexes[1].ddoc;
+    console.log(JSON.stringify(resp));
+    resp.should.deep.equal({
+      "total_rows": 2,
+      "indexes": [
+        {
+          "ddoc": null,
+          "name": "_all_docs",
+          "type": "special",
+          "def": {
+            "fields": [
+              {
+                "_id": "asc"
+              }
+            ]
+          }
+        },
+        {
+          "name": "foo-index",
+          "type": "json",
+          "def": {
+            "fields": [
+              {
                 "foo": "asc"
               }
-            },
-            "reduce": "_count",
-            "options": {
-              "def": {
-                "fields": [
-                  "foo"
-                ]
-              }
-            }
+            ]
           }
         }
-      });
+      ]
     });
   });
 
-  it.skip('should create ddocs automatically 2', function () {
-    var db = context.db;
-    var index = {
+  it.skip('should create ddocs automatically', async () => {
+    const db = context.db;
+    const index = {
+      "index": {
+        "fields": ["foo"]
+      },
+      "name": "foo-index",
+      "type": "json"
+    };
+    await db.createIndex(index);
+    const indexesResp = await db.getIndexes();
+    const ddocId = indexesResp.indexes[1].ddoc;
+    const ddoc = await db.get(ddocId);
+    ddoc._id.should.equal(ddocId);
+    should.exist(ddoc._rev);
+    delete ddoc._id;
+    delete ddoc._rev;
+    delete ddoc.views['foo-index'].options.w; // wtf is this?
+    ddoc.should.deep.equal({
+      "language": "query",
+      "views": {
+        "foo-index": {
+          "map": {
+            "fields": {
+              "foo": "asc"
+            }
+          },
+          "reduce": "_count",
+          "options": {
+            "def": {
+              "fields": [
+                "foo"
+              ]
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it.skip('should create ddocs automatically 2', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [{"foo": "asc"}]
       },
       "name": "foo-index",
       "type": "json"
     };
-    var ddocId;
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      ddocId = resp.indexes[1].ddoc;
-      return db.get(ddocId);
-    }).then(function (ddoc) {
-      ddoc._id.should.equal(ddocId);
-      should.exist(ddoc._rev);
-      delete ddoc._id;
-      delete ddoc._rev;
-      delete ddoc.views['foo-index'].options.w; // wtf is this?
-      ddoc.should.deep.equal({
-        "language": "query",
-        "views": {
-          "foo-index": {
-            "map": {
-              "fields": {
-                "foo": "asc"
-              }
-            },
-            "reduce": "_count",
-            "options": {
-              "def": {
-                "fields": [
-                  {"foo": "asc"}
-                ]
-              }
+    await db.createIndex(index);
+    const indexesResp = await db.getIndexes();
+    const ddocId = indexesResp.indexes[1].ddoc;
+    const ddoc = await db.get(ddocId);
+    ddoc._id.should.equal(ddocId);
+    should.exist(ddoc._rev);
+    delete ddoc._id;
+    delete ddoc._rev;
+    delete ddoc.views['foo-index'].options.w; // wtf is this?
+    ddoc.should.deep.equal({
+      "language": "query",
+      "views": {
+        "foo-index": {
+          "map": {
+            "fields": {
+              "foo": "asc"
+            }
+          },
+          "reduce": "_count",
+          "options": {
+            "def": {
+              "fields": [
+                {"foo": "asc"}
+              ]
             }
           }
         }
-      });
+      }
     });
   });
 
-  it.skip('should create ddocs automatically 3', function () {
-    var db = context.db;
-    var index = {
+  it.skip('should create ddocs automatically 3', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": [
           {"foo": "asc"},
@@ -261,232 +242,207 @@ describe('test.basic.js', function () {
       "name": "foo-index",
       "type": "json"
     };
-    var ddocId;
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      ddocId = resp.indexes[1].ddoc;
-      return db.get(ddocId);
-    }).then(function (ddoc) {
-      ddoc._id.should.equal(ddocId);
-      should.exist(ddoc._rev);
-      delete ddoc._id;
-      delete ddoc._rev;
-      delete ddoc.views['foo-index'].options.w; // wtf is this?
-      ddoc.should.deep.equal({
-        "language": "query",
-        "views": {
-          "foo-index": {
-            "map": {
-              "fields": {
-                "foo": "asc",
-                "bar": "asc"
-              }
-            },
-            "reduce": "_count",
-            "options": {
-              "def": {
-                "fields": [
-                  {"foo": "asc"},
-                  "bar"
-                ]
-              }
+    await db.createIndex(index);
+    const indexesResp = await db.getIndexes();
+    const ddocId = indexesResp.indexes[1].ddoc;
+    const ddoc = await db.get(ddocId);
+    ddoc._id.should.equal(ddocId);
+    should.exist(ddoc._rev);
+    delete ddoc._id;
+    delete ddoc._rev;
+    delete ddoc.views['foo-index'].options.w; // wtf is this?
+    ddoc.should.deep.equal({
+      "language": "query",
+      "views": {
+        "foo-index": {
+          "map": {
+            "fields": {
+              "foo": "asc",
+              "bar": "asc"
+            }
+          },
+          "reduce": "_count",
+          "options": {
+            "def": {
+              "fields": [
+                {"foo": "asc"},
+                "bar"
+              ]
             }
           }
         }
-      });
+      }
     });
   });
 
-  it.skip('deletes indexes, callback style', function () {
-    var db = context.db;
-    var index = {
+  it.skip('deletes indexes, callback style', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return new Promise(function (resolve, reject) {
-      db.createIndex(index, function (err) {
+    await new Promise((resolve, reject) => {
+      db.createIndex(index, (err) => {
         if (err) {
           return reject(err);
         }
         resolve();
       });
-    }).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      return new Promise(function (resolve, reject) {
-        db.deleteIndex(resp.indexes[1], function (err, resp) {
-          if (err) {
-            return reject(err);
-          }
-          resolve(resp);
-        });
+    });
+    const getResp = await db.getIndexes();
+    const deleteResp = await new Promise((resolve, reject) => {
+      db.deleteIndex(getResp.indexes[1], (err, resp) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(resp);
       });
-    }).then(function (resp) {
-      resp.should.deep.equal({ok: true});
-      return db.getIndexes();
-    }).then(function (resp) {
-      resp.should.deep.equal({
-        "total_rows": 1,
-        "indexes":[{
-          "ddoc": null,
-          "name":"_all_docs",
-          "type":"special",
-          "def":{ "fields": [{"_id": "asc"}] }
-        }]
-      });
+    });
+    deleteResp.should.deep.equal({ok: true});
+    const finalResp = await db.getIndexes();
+    finalResp.should.deep.equal({
+      "total_rows": 1,
+      "indexes":[{
+        "ddoc": null,
+        "name":"_all_docs",
+        "type":"special",
+        "def":{ "fields": [{"_id": "asc"}] }
+      }]
     });
   });
 
-  it('deletes indexes', function () {
-    var db = context.db;
-    var index = {
+  it('deletes indexes', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function (resp) {
-      resp.should.deep.equal({ok: true});
-      return db.getIndexes();
-    }).then(function (resp) {
-      resp.should.deep.equal({
-        "total_rows": 1,
-          "indexes":[{
-            "ddoc": null,
-            "name":"_all_docs",
-              "type":"special",
-              "def":{ "fields": [{"_id": "asc"}] }
-          }]
-      });
-    });
-  });
-
-  it.skip('deletes indexes, no type', function () {
-    var db = context.db;
-    var index = {
-      "index": {
-        "fields": ["foo"]
-      },
-      "name": "foo-index"
-    };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      delete resp.indexes[1].type;
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function (resp) {
-      resp.should.deep.equal({ok: true});
-      return db.getIndexes();
-    }).then(function (resp) {
-      resp.should.deep.equal({
-        "total_rows": 1,
+    await db.createIndex(index);
+    const getResp = await db.getIndexes();
+    const deleteResp = await db.deleteIndex(getResp.indexes[1]);
+    deleteResp.should.deep.equal({ok: true});
+    const finalResp = await db.getIndexes();
+    finalResp.should.deep.equal({
+      "total_rows": 1,
         "indexes":[{
           "ddoc": null,
           "name":"_all_docs",
-          "type":"special",
-          "def":{ "fields": [{"_id": "asc"}] }
+            "type":"special",
+            "def":{ "fields": [{"_id": "asc"}] }
         }]
-      });
     });
   });
 
-  it('deletes indexes, no ddoc', function () {
-    var db = context.db;
-    var index = {
+  it.skip('deletes indexes, no type', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index"
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      delete resp.indexes[1].ddoc;
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function () {
+    await db.createIndex(index);
+    const getResp = await db.getIndexes();
+    delete getResp.indexes[1].type;
+    const deleteResp = await db.deleteIndex(getResp.indexes[1]);
+    deleteResp.should.deep.equal({ok: true});
+    const finalResp = await db.getIndexes();
+    finalResp.should.deep.equal({
+      "total_rows": 1,
+      "indexes":[{
+        "ddoc": null,
+        "name":"_all_docs",
+        "type":"special",
+        "def":{ "fields": [{"_id": "asc"}] }
+      }]
+    });
+  });
+
+  it('deletes indexes, no ddoc', async () => {
+    const db = context.db;
+    const index = {
+      "index": {
+        "fields": ["foo"]
+      },
+      "name": "foo-index"
+    };
+    await db.createIndex(index);
+    const getResp = await db.getIndexes();
+    delete getResp.indexes[1].ddoc;
+    try {
+      await db.deleteIndex(getResp.indexes[1]);
       throw new Error('expected an error due to no ddoc');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it('deletes indexes, no name', function () {
-    var db = context.db;
-    var index = {
+  it('deletes indexes, no name', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index"
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      delete resp.indexes[1].name;
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function () {
+    await db.createIndex(index);
+    const getResp = await db.getIndexes();
+    delete getResp.indexes[1].name;
+    try {
+      await db.deleteIndex(getResp.indexes[1]);
       throw new Error('expected an error due to no name');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it('deletes indexes, one name per ddoc', function () {
-    var db = context.db;
-    var index = {
+  it('deletes indexes, one name per ddoc', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "myname",
       "ddoc": "myddoc"
     };
-    return db.createIndex(index).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function () {
-      return db.get('_design/myddoc');
-    }).then(function () {
+    await db.createIndex(index);
+    const getResp = await db.getIndexes();
+    await db.deleteIndex(getResp.indexes[1]);
+    try {
+      await db.get('_design/myddoc');
       throw new Error('expected an error');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it('deletes indexes, many names per ddoc', function () {
-    var db = context.db;
-    var index = {
+  it('deletes indexes, many names per ddoc', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "myname",
       "ddoc": "myddoc"
     };
-    var index2 = {
+    const index2 = {
       "index": {
         "fields": ["bar"]
       },
       "name": "myname2",
       "ddoc": "myddoc"
     };
-    return db.createIndex(index).then(function () {
-      return db.createIndex(index2);
-    }).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      return db.deleteIndex(resp.indexes[1]);
-    }).then(function () {
-      return db.get('_design/myddoc');
-    }).then(function (ddoc) {
-      Object.keys(ddoc.views).should.deep.equal(['myname2']);
-    });
+    await db.createIndex(index);
+    await db.createIndex(index2);
+    const getResp = await db.getIndexes();
+    await db.deleteIndex(getResp.indexes[1]);
+    const ddoc = await db.get('_design/myddoc');
+    Object.keys(ddoc.views).should.deep.equal(['myname2']);
   });
 });

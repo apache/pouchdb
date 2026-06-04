@@ -59,7 +59,7 @@
 }
 
 @media (max-width: @screen-sm-min) {
-  .nav-sidebar-wrapper { position: static !important; } /* !important used to override stickyfill */
+  .nav-sidebar-wrapper { position: static; }
   .nav.nav-sidebar { margin-bottom: 25px; }
   .nav-head,
   .nav.nav-sidebar { text-align: center; }
@@ -88,6 +88,7 @@
   color: #eee;
   padding-bottom: 15px;
   margin-bottom: -15px;
+  z-index: 1;
 }
 .nav-code > li > a:hover {
   border-color: transparent;

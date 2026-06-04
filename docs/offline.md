@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: default.html
 title: Looks like you're offline...
 edit: false
 ---

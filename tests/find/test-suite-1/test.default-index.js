@@ -1,9 +1,9 @@
 'use strict';
 
-describe('test.default-index.js', function () {
-  it('uses all_docs with warning if no index found simple query 1', function () {
-    var db = context.db;
-    return db.bulkDocs([
+describe('test.default-index.js', () => {
+  it('uses all_docs with warning if no index found simple query 1', async () => {
+    const db = context.db;
+    await db.bulkDocs([
       { name: 'mario', _id: 'mario', rank: 5, series: 'mario', debut: 1981 },
       { name: 'jigglypuff', _id: 'puff', rank: 8, series: 'pokemon', debut: 1996 },
       { name: 'link', rank: 10, _id: 'link', series: 'zelda', debut: 1986 },
@@ -16,27 +16,25 @@ describe('test.default-index.js', function () {
       { name: 'samus', rank: 12, _id: 'samus', series: 'metroid', debut: 1986 },
       { name: 'yoshi', _id: 'yoshi', rank: 6, series: 'mario', debut: 1990 },
       { name: 'kirby', _id: 'kirby', series: 'kirby', rank: 2, debut: 1992 }
-    ]).then(function () {
-      return db.find({
-          selector: {
-            series: 'mario'
-          },
-        fields: ["_id"],
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([
-        {_id: 'dk'},
-        {_id: 'luigi'},
-        {_id: 'mario'},
-        {_id: 'yoshi'}
-      ]);
+    ]);
+    const resp =  await db.find({
+        selector: {
+          series: 'mario'
+        },
+      fields: ["_id"],
     });
+    resp.docs.should.deep.equal([
+      {_id: 'dk'},
+      {_id: 'luigi'},
+      {_id: 'mario'},
+      {_id: 'yoshi'}
+    ]);
   });
 
 
-  it('uses all_docs with warning if no index found simple query 2', function () {
-    var db = context.db;
-    return db.bulkDocs([
+  it('uses all_docs with warning if no index found simple query 2', async () => {
+    const db = context.db;
+    await db.bulkDocs([
       { name: 'mario', _id: 'mario', rank: 5, series: 'mario', debut: 1981 },
       { name: 'jigglypuff', _id: 'puff', rank: 8, series: 'pokemon', debut: 1996 },
       { name: 'link', rank: 10, _id: 'link', series: 'zelda', debut: 1986 },
@@ -49,135 +47,127 @@ describe('test.default-index.js', function () {
       { name: 'samus', rank: 12, _id: 'samus', series: 'metroid', debut: 1986 },
       { name: 'yoshi', _id: 'yoshi', rank: 6, series: 'mario', debut: 1990 },
       { name: 'kirby', _id: 'kirby', series: 'kirby', rank: 2, debut: 1992 }
-    ]).then(function () {
-      return db.find({
-          selector: {
-            debut: {
-              $gt: 1992,
-              $lte: 1996
-            },
-            rank: {
-              $gte: 3,
-              $lte: 8
-            }
+    ]);
+    const resp =  await db.find({
+        selector: {
+          debut: {
+            $gt: 1992,
+            $lte: 1996
           },
-        fields: ["_id"],
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([{_id: 'fox'}, {_id: 'puff'}]);
+          rank: {
+            $gte: 3,
+            $lte: 8
+          }
+        },
+      fields: ["_id"],
     });
+    resp.docs.should.deep.equal([{_id: 'fox'}, {_id: 'puff'}]);
   });
 
-  it('works with complex query', function () {
-    var db = context.db;
-    return db.bulkDocs([
+  it('works with complex query', async () => {
+    const db = context.db;
+    await db.bulkDocs([
       { _id: '1', age: 75, name: {first: 'Nancy', surname: 'Sinatra'}},
       { _id: '2', age: 40, name: {first: 'Eddie', surname: 'Vedder'}},
       { _id: '3', age: 80, name: {first: 'John', surname: 'Fogerty'}},
       { _id: '4', age: 76, name: {first: 'Mick', surname: 'Jagger'}},
-    ]).then(function () {
-      return db.find({
-        selector: {
-          $and: [
-            {age:{$gte: 40}},
-            {$not:{age: {$eq: 75}}},
-          ]
-        },
-        fields: ["_id"],
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([
-        { _id: '2'},
-        { _id: '3'},
-        { _id: '4'}
-      ]);
+    ]);
+    const resp = await db.find({
+      selector: {
+        $and: [
+          {age:{$gte: 40}},
+          {$not:{age: {$eq: 75}}},
+        ]
+      },
+      fields: ["_id"],
     });
+    resp.docs.should.deep.equal([
+      { _id: '2'},
+      { _id: '3'},
+      { _id: '4'}
+    ]);
   });
 
-  it('throws an error if a sort is required', function () {
-    var db = context.db;
+  it('throws an error if a sort is required', async () => {
+    const db = context.db;
 
-    return db.bulkDocs([
+    await db.bulkDocs([
       { _id: '1', foo: 'eyo'},
       { _id: '2', foo: 'ebb'},
       { _id: '3', foo: 'eba'},
       { _id: '4', foo: 'abo'}
-    ]).then(function () {
-      return db.find({
+    ]);
+    try {
+      await db.find({
         selector: {foo: {$ne: "eba"}},
         fields: ["_id", "foo"],
         sort: [{"foo": "asc"}]
       });
-    }).then(function () {
       throw new Error('should have thrown an error');
-    }, function (err) {
+    } catch (err) {
       should.exist(err);
-    });
+    }
   });
 
-  it.skip('sorts ok if _id used', function () {
-    var db = context.db;
+  it.skip('sorts ok if _id used', async () => {
+    const db = context.db;
 
-    return db.bulkDocs([
+    await db.bulkDocs([
       { _id: '1', foo: 'eyo'},
       { _id: '2', foo: 'ebb'},
       { _id: '3', foo: 'eba'},
       { _id: '4', foo: 'abo'}
-    ]).then(function () {
-      return db.find({
-        selector: {foo: {$ne: "eba"}},
-        fields: ["_id"],
-        sort: ["_id"]
-      });
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([
-        { _id: '1'},
-        { _id: '2'},
-        { _id: '4'}
-      ]);
+    ]);
+    const resp = await db.find({
+      selector: {foo: {$ne: "eba"}},
+      fields: ["_id"],
+      sort: ["_id"]
     });
+    resp.docs.should.deep.equal([
+      { _id: '1'},
+      { _id: '2'},
+      { _id: '4'}
+    ]);
   });
 });
 
-it('$in works with default operator', function () {
-  var db = context.db;
+it('$in works with default operator', async () => {
+  const db = context.db;
 
-  return db.bulkDocs([
+  await db.bulkDocs([
     { _id: '1', foo: 'eyo'},
     { _id: '2', foo: 'ebb'},
     { _id: '3', foo: 'eba'},
     { _id: '4', foo: 'abo'}
-  ]).then(function () {
-    return db.find({
-      selector: {foo: {$in: ["eba", "ebb"]}},
-      fields: ["_id"],
-    });
-  }).then(function (resp) {
-    // console.log(resp);
-    // resp.should.deep.equal({
-    //   warning: 'No matching index found, create an index to optimize query time.',
-    //   docs: [
-    //     { _id: '2'},
-    //     { _id: '3'}
-    //   ]
-    // });
-    resp.warning.should.be.oneOf(
-      [
-        'no matching index found, create an index to optimize query time',
-        'No matching index found, create an index to optimize query time.'
-      ]
-    );
-    resp.docs.should.deep.equal([
-      { _id: '2'},
-      { _id: '3'}
-    ]);
+  ]);
+  const resp = await db.find({
+    selector: {foo: {$in: ["eba", "ebb"]}},
+    fields: ["_id"],
   });
+  // console.log(resp);
+  // resp.should.deep.equal({
+  //   warning: 'No matching index found, create an index to optimize query time.',
+  //   docs: [
+  //     { _id: '2'},
+  //     { _id: '3'}
+  //   ]
+  // });
+  resp.warning.should.be.oneOf(
+    [
+      'no matching index found, create an index to optimize query time',
+      'No matching index found, create an index to optimize query time.'
+    ]
+  );
+  resp.docs.should.deep.equal([
+    { _id: '2'},
+    { _id: '3'}
+  ]);
 });
 
 //bug in mango its not sorting this on Foo but actually sorting on _id
-it.skip('ne query will work and sort', function () {
-  var db = context.db;
-  var index = {
+it.skip('ne query will work and sort', async () => {
+  const db = context.db;
+  const index = {
     "index": {
       "fields": ["foo"]
     },
@@ -185,304 +175,274 @@ it.skip('ne query will work and sort', function () {
     "type": "json"
   };
 
-  return db.createIndex(index).then(function () {
-    return db.bulkDocs([
-      { _id: '1', foo: 4},
-      { _id: '2', foo: 3},
-      { _id: '3', foo: 2},
-      { _id: '4', foo: 1}
-    ]);
-  }).then(function () {
-    return db.find({
-      selector: {foo: {$ne: "eba"}},
-      fields: ["_id", "foo"],
-      sort: [{foo: "desc"}]
-    });
-  }).then(function (resp) {
-    resp.warning.should.be.oneOf(
-      [
-        'no matching index found, create an index to optimize query time',
-        'No matching index found, create an index to optimize query time.'
-      ]
-    );
-    resp.docs.should.deep.equal(
-      [
-        { _id: '4' },
-        { _id: '2' },
-        { _id: '1' }
-      ]
-    );
+  await db.createIndex(index);
+  await db.bulkDocs([
+    { _id: '1', foo: 4},
+    { _id: '2', foo: 3},
+    { _id: '3', foo: 2},
+    { _id: '4', foo: 1}
+  ]);
+  const resp = await db.find({
+    selector: {foo: {$ne: "eba"}},
+    fields: ["_id", "foo"],
+    sort: [{foo: "desc"}]
   });
+  resp.warning.should.be.oneOf(
+    [
+      'no matching index found, create an index to optimize query time',
+      'No matching index found, create an index to optimize query time.'
+    ]
+  );
+  resp.docs.should.deep.equal(
+    [
+      { _id: '4' },
+      { _id: '2' },
+      { _id: '1' }
+    ]
+  );
 });
 
 //need to find out what the correct response for this is
-it.skip('$and empty selector returns empty docs', function () {
-  var db = context.db;
+it.skip('$and empty selector returns empty docs', async () => {
+  const db = context.db;
 
-  return db.createIndex({
+  await db.createIndex({
     index: {
       fields: ['foo']
     }
-  }).then(function () {
-    return db.bulkDocs([
-      {_id: '1', foo: 1},
-      {_id: '2', foo: 2},
-      {_id: '3', foo: 3},
-      {_id: '4', foo: 4}
-    ]);
-  }).then(function () {
-    return db.find({
-      selector: {
-        $and: [{}, {}]
-      },
-      fields: ['_id']
-    }).then(function (resp) {
-      resp.warning.should.be.oneOf(
-        [
-          'no matching index found, create an index to optimize query time',
-          'No matching index found, create an index to optimize query time.'
-        ]
-      );
-      resp.docs.should.deep.equal([]
-      );
-    });
   });
+  await db.bulkDocs([
+    {_id: '1', foo: 1},
+    {_id: '2', foo: 2},
+    {_id: '3', foo: 3},
+    {_id: '4', foo: 4}
+  ]);
+  const resp = await db.find({
+    selector: {
+      $and: [{}, {}]
+    },
+    fields: ['_id']
+  });
+  resp.warning.should.be.oneOf(
+    [
+      'no matching index found, create an index to optimize query time',
+      'No matching index found, create an index to optimize query time.'
+    ]
+  );
+  resp.docs.should.deep.equal([]);
 });
 
-it.skip('empty selector returns empty docs', function () {
-  var db = context.db;
+it.skip('empty selector returns empty docs', async () => {
+  const db = context.db;
 
-  return db.createIndex({
+  await db.createIndex({
     index: {
       fields: ['foo']
     }
-  }).then(function () {
-    return db.bulkDocs([
-      {_id: '1', foo: 1},
-      {_id: '2', foo: 2},
-      {_id: '3', foo: 3},
-      {_id: '4', foo: 4}
-    ]);
-  }).then(function () {
-    return db.find({
-      selector: {
-      },
-      fields: ['_id']
-    }).then(function (resp) {
-      resp.warning.should.be.oneOf(
-        [
-          'no matching index found, create an index to optimize query time',
-          'No matching index found, create an index to optimize query time.'
-        ]
-      );
-      resp.docs.should.deep.equal([
-          {_id: '1'},
-          {_id: '2'},
-          {_id: '3'},
-          {_id: '4'}
-        ]
-      );
-    });
   });
+  await db.bulkDocs([
+    {_id: '1', foo: 1},
+    {_id: '2', foo: 2},
+    {_id: '3', foo: 3},
+    {_id: '4', foo: 4}
+  ]);
+  const resp = await db.find({
+    selector: {
+    },
+    fields: ['_id']
+  });
+  resp.warning.should.be.oneOf(
+    [
+      'no matching index found, create an index to optimize query time',
+      'No matching index found, create an index to optimize query time.'
+    ]
+  );
+  resp.docs.should.deep.equal([
+      {_id: '1'},
+      {_id: '2'},
+      {_id: '3'},
+      {_id: '4'}
+    ]
+  );
 });
 
-it('$elemMatch works with no other index', function () {
-  var db = context.db;
+it('$elemMatch works with no other index', async () => {
+  const db = context.db;
 
-  return db.createIndex({
+  await db.createIndex({
     index: {
       fields: ['foo']
     }
-  }).then(function () {
-    return db.bulkDocs([
-      {_id: '1', foo: [1]},
-      {_id: '2', foo: [2]},
-      {_id: '3', foo: [3]},
-      {_id: '4', foo: [4]}
-    ]);
-  }).then(function () {
-    return db.find({
-      selector: {
-        foo: {$elemMatch: {$gte: 3}}
-      },
-      fields: ['_id']
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([
-        { _id: "3" },
-        { _id: "4" }
-      ]);
-    });
   });
+  await db.bulkDocs([
+    {_id: '1', foo: [1]},
+    {_id: '2', foo: [2]},
+    {_id: '3', foo: [3]},
+    {_id: '4', foo: [4]}
+  ]);
+  const resp = await db.find({
+    selector: {
+      foo: {$elemMatch: {$gte: 3}}
+    },
+    fields: ['_id']
+  });
+  resp.docs.should.deep.equal([
+    { _id: "3" },
+    { _id: "4" }
+  ]);
 });
 
-it.skip('error - no usable index', function () {
-  var db = context.db;
-  var index = {
+it.skip('error - no usable index', async () => {
+  const db = context.db;
+  const index = {
     "index": {
       "fields": ["foo"]
     },
     "name": "foo-index",
     "type": "json"
   };
-  return db.createIndex(index).then(function () {
-    return db.find({
+  await db.createIndex(index);
+  try {
+    await db.find({
       "selector": {"foo": "$exists"},
       "fields": ["_id", "foo"],
       "sort": [{"bar": "asc"}]
     });
-  }).then(function () {
     throw new Error('shouldnt be here');
-  }, function (err) {
+  } catch (err) {
     should.exist(err);
-  });
+  }
 });
 
-it('handles just regex selector', function () {
-  var db = context.db;
-    return db.bulkDocs([
+it('handles just regex selector', async () => {
+  const db = context.db;
+  await db.bulkDocs([
       {_id: '1', foo: 1},
       {_id: '2', foo: 2},
       {_id: '3', foo: 3},
       {_id: '4', foo: 4}
-    ]).then(function () {
-    return db.find({
+    ]);
+    const resp = await db.find({
       selector: {
         _id: {$regex: "1"}
       },
       fields: ['_id']
-    }).then(function (resp) {
-      resp.docs.should.deep.equal([{ _id: "1" }]);
     });
-  });
+    resp.docs.should.deep.equal([{ _id: "1" }]);
 });
 
-it('handles zero as a valid index value', function () {
-  var db = context.db;
-  return db.createIndex({
+it('handles zero as a valid index value', async () => {
+  const db = context.db;
+  await db.createIndex({
       index: {
           fields: ['foo']
       }
-  }).then(function () {
-      return db.bulkDocs([
-          {_id: '1', foo: 0},
-          {_id: '2', foo: 1},
-          {_id: '3', foo: 2},
-          {_id: '4', foo: 3}
-      ]).then(function () {
-          return db.find({
-              selector: {
-                  foo: {$eq: 0}
-              },
-              fields: ['_id']
-          }).then(function (resp) {
-              resp.docs.should.deep.equal([{_id: "1"}]);
-          });
-      });
   });
+  await db.bulkDocs([
+      {_id: '1', foo: 0},
+      {_id: '2', foo: 1},
+      {_id: '3', foo: 2},
+      {_id: '4', foo: 3}
+  ]);
+  const resp = await db.find({
+      selector: {
+          foo: {$eq: 0}
+      },
+      fields: ['_id']
+  });
+  resp.docs.should.deep.equal([{_id: "1"}]);
 });
 
-it('handles null as a valid index value', function () {
-    var db = context.db;
-    return db.createIndex({
+it('handles null as a valid index value', async () => {
+    const db = context.db;
+    await db.createIndex({
         index: {
             fields: ['foo']
         }
-    }).then(function () {
-        return db.bulkDocs([
-            {_id: '1', foo: null},
-            {_id: '2', foo: 1},
-            {_id: '3', foo: 2},
-            {_id: '4', foo: 3}
-        ]).then(function () {
-            return db.find({
-                selector: {
-                    foo: {$eq: null}
-                },
-                fields: ['_id']
-            }).then(function (resp) {
-                resp.docs.should.deep.equal([{_id: "1"}]);
-            });
-        });
     });
+    await db.bulkDocs([
+        {_id: '1', foo: null},
+        {_id: '2', foo: 1},
+        {_id: '3', foo: 2},
+        {_id: '4', foo: 3}
+    ]);
+    const resp = await db.find({
+        selector: {
+            foo: {$eq: null}
+        },
+        fields: ['_id']
+    });
+    resp.docs.should.deep.equal([{_id: "1"}]);
 });
 
-it('null values are indexed', function () {
-    var db = context.db;
-    return db.createIndex({
+it('null values are indexed', async () => {
+    const db = context.db;
+    await db.createIndex({
         index: {
             fields: ['foo']
         }
-    }).then(function () {
-        return db.bulkDocs([
-            {_id: '1', foo: null},
-            {_id: '2', foo: 1},
-            {_id: '3', foo: 2},
-            {_id: '4', foo: 3}
-        ]).then(function () {
-            return db.find({
-                selector: {
-                    foo: {$lt: 2}
-                },
-                fields: ['_id']
-            }).then(function (resp) {
-                resp.docs.should.deep.equal([
-                  {_id: "1"},
-                  {_id: "2"},
-                ]);
-            });
-        });
     });
+    await db.bulkDocs([
+        {_id: '1', foo: null},
+        {_id: '2', foo: 1},
+        {_id: '3', foo: 2},
+        {_id: '4', foo: 3}
+    ]);
+    const resp = await db.find({
+        selector: {
+            foo: {$lt: 2}
+        },
+        fields: ['_id']
+    });
+    resp.docs.should.deep.equal([
+      {_id: "1"},
+      {_id: "2"},
+    ]);
 });
 
-it('handles booleans as a valid index value', function () {
-    var db = context.db;
-    return db.createIndex({
+it('handles booleans as a valid index value', async () => {
+    const db = context.db;
+    await db.createIndex({
         index: {
             fields: ['foo']
         }
-    }).then(function () {
-        return db.bulkDocs([
-            {_id: '1', foo: true},
-            {_id: '2', foo: false},
-            {_id: '3', foo: 2},
-            {_id: '4', foo: 3}
-        ]).then(function () {
-            return db.find({
-                selector: {
-                    foo: {$eq: true}
-                },
-                fields: ['_id']
-            }).then(function (resp) {
-                resp.docs.should.deep.equal([{_id: '1'}]);
-            });
-        });
     });
+    await db.bulkDocs([
+        {_id: '1', foo: true},
+        {_id: '2', foo: false},
+        {_id: '3', foo: 2},
+        {_id: '4', foo: 3}
+    ]);
+    const resp = await db.find({
+        selector: {
+            foo: {$eq: true}
+        },
+        fields: ['_id']
+    });
+    resp.docs.should.deep.equal([{_id: '1'}]);
 });
 
-it('boolean values are indexed', function () {
-    var db = context.db;
-    return db.createIndex({
+it('boolean values are indexed', async () => {
+    const db = context.db;
+    await db.createIndex({
         index: {
             fields: ['foo']
         }
-    }).then(function () {
-        return db.bulkDocs([
-            {_id: '1', foo: true},
-            {_id: '2', foo: false},
-            {_id: '3', foo: 2},
-            {_id: '4', foo: 3}
-        ]).then(function () {
-            return db.find({
-                selector: {
-                    foo: {$lt: 2}
-                },
-                fields: ['_id']
-            }).then(function (resp) {
-                resp.docs.should.deep.equal([
-                  {_id: '2'},
-                  {_id: '1'}
-                ]);
-            });
-        });
     });
+    await db.bulkDocs([
+        {_id: '1', foo: true},
+        {_id: '2', foo: false},
+        {_id: '3', foo: 2},
+        {_id: '4', foo: 3}
+    ]);
+    const resp = await db.find({
+        selector: {
+            foo: {$lt: 2}
+        },
+        fields: ['_id']
+    });
+    resp.docs.should.deep.equal([
+      {_id: '2'},
+      {_id: '1'}
+    ]);
 });

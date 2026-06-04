@@ -1,0 +1,105 @@
+---
+permalink: /serviceWorker.js
+---
+
+// Useful resources:
+// - https://eduardoboucas.com/blog/2015/06/04/supercharging-jekyll-with-a-serviceworker.html
+// - https://jakearchibald.com/2014/offline-cookbook
+
+var newCacheName = 'pouchdb-assets-cache-v{{ site.time }}';
+
+var criticalAssets = [
+  '{{ site.baseurl }}/offline.html',
+  '{{ site.baseurl }}/static/css/pouchdb.min.css',
+  '{{ site.baseurl }}/static/fonts/LatoLatin-Medium.woff2',
+  '{{ site.baseurl }}/static/fonts//open-sans-v44-latin_latin-ext-regular.woff2',
+  '{{ site.baseurl }}/static/fonts//open-sans-v44-latin_latin-ext-700.woff2'
+];
+
+{%- assign pages = collections.pages | where_exp: "page", "page.url != '/manifest.appcache'" -%}
+{% assign guides = collections.guides %}
+
+var pages = [
+  {% for page in pages %}'{{ site.baseurl }}{{ page.url | replace:'index.html','' }}',
+  {% endfor %}{% for page in guides %}'{{ site.baseurl }}{{ page.url | replace:'index.html','' }}'{% unless forloop.last %},{% endunless %}
+  {% endfor %}];
+
+var blogPosts = [{% for page in collections.posts %}
+  '{{ site.baseurl }}{{ page.url | replace:'index.html','' }}',{% endfor %}
+];
+
+// Only cache the first blog page
+var nonCriticalAssets =
+  [
+    '{{ site.baseurl }}/static/favicon.ico',
+    '{{ site.baseurl }}/static/js/code.min.js',
+    '{{ site.baseurl }}/static/js/jquery.min.js',
+    '{{ site.baseurl }}/static/js/bootstrap.min.js',
+    '{{ site.baseurl }}/static/js/pouchdb.min.js',
+  ]
+  .concat(pages)
+  .filter(function (file) {
+    return file.indexOf('/blog/page') === -1;
+  })
+  .concat(blogPosts.slice(0, 5)); // Let's only cache the first five by default
+
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches.open(newCacheName)
+      .then(function (cache) {
+        cache.addAll(nonCriticalAssets);
+        // Only return the criticalAssets to waitUntil
+        // This will allow the noncritical assets to fail
+        return cache.addAll(criticalAssets);
+      })
+      .then(function () {
+        return self.skipWaiting();
+      })
+  );
+});
+
+self.addEventListener('activate', function (event) {
+  // remove caches beginning "pouchdb-" that aren't the new cache
+  event.waitUntil(
+    caches.keys()
+      .then(function (cacheNames) {
+        return Promise.all(
+          cacheNames.map(function (cacheName) {
+            if (!/^pouchdb-/.test(cacheName)) {
+              return;
+            }
+            if (newCacheName !== cacheName) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(function () {
+        return self.clients.claim();
+      })
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  // Ignore POST etc, which will happen when using PouchDB
+  // in the browser console
+  if (event.request.method === "GET") {
+    // Ignore requests from browser extensions etc
+    if ((event.request.url.indexOf('http') === 0)) {
+      // Try the cache, if it's not in there try the network, then cache that response
+      // if that network request fails show the offline.html page.
+      event.respondWith(
+        caches.open(newCacheName).then(function (cache) {
+          return cache.match(event.request).then(function (response) {
+            return response || fetch(event.request).then(function (response) {
+              cache.put(event.request, response.clone());
+              return response;
+            }).catch(function () {
+              return cache.match('{{ site.baseurl }}/offline.html');
+            });
+          });
+      })
+      );
+    }
+  }
+});

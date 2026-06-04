@@ -1,9 +1,9 @@
 'use strict';
 
-describe('test.issue66.js', function () {
+describe('test.issue66.js', () => {
 
-  beforeEach(function () {
-    return context.db.bulkDocs([
+  beforeEach(async () => {
+    await context.db.bulkDocs([
       {
         name: 'Mario',
         _id: 'mario',
@@ -111,675 +111,582 @@ describe('test.issue66.js', function () {
     ]);
   });
 
-  it('should query all docs with $gt: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gt: null}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gt: null}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $lt: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lt: false}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lt: false}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lt: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lt: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lt: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lte: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lte: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: []', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: []', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lte: []}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lte: []}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lte: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lte: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lt: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lt: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lt: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $gt: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gt: false}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gt: false}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gte: 0}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gte: 0}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gt: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gt: 0}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gt: 0}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gte: false}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gte: false}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gt: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gt: {}}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gt: {}}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gte: {}}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gte: {}}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $eq: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$eq: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$eq: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$eq: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$eq: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$eq: 0}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$eq: 0}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$eq: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$eq: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$lte: 0}
-          }
-        }).then(function (response) {
-          response.docs = response.docs.map(function (doc) {
-            return doc._id;
-          });
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$lte: 0}
+      }
+    });
+    response.docs = response.docs.map((doc) => doc._id);
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $gte: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          selector: {
-            _id: {$gte: null}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      selector: {
+        _id: {$gte: null}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gt: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gt: null}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gt: null}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $lt: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lt: false}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lt: false}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lt: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lt: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lt: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lte: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lte: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: []', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: []', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lte: []}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lte: []}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lte: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lte: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lt: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lt: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lt: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lt: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $gt: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gt: false}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gt: false}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gte: 0}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gte: 0}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gt: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gt: 0}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gt: 0}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: false', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: false', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gte: false}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gte: false}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gt: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gt: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gt: {}}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gt: {}}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $gte: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gte: {}}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gte: {}}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 
-  it('should query all docs with $eq: {}', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: {}', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$eq: {}}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$eq: {}}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$eq: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$eq: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$eq: 0}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$eq: 0}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $eq: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $eq: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$eq: null}
-          }
-        }).then(function (response) {
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$eq: null}
+      }
+    });
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $lte: 0', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $lte: 0', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$lte: 0}
-          }
-        }).then(function (response) {
-          response.docs = response.docs.map(function (doc) {
-            return doc._id;
-          });
-          response.docs.should.deep.equal([]);
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$lte: 0}
+      }
+    });
+    response.docs = response.docs.map((doc) => doc._id);
+    response.docs.should.deep.equal([]);
   });
 
-  it('should query all docs with $gte: null', function () {
-    var db = context.db;
-    return db.bulkDocs(
+  it('should query all docs with $gte: null', async () => {
+    const db = context.db;
+    await db.bulkDocs(
       [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}]
-    ).then(function () {
-        return db.find({
-          sort: [{_id: 'desc'}], selector: {
-            _id: {$gte: null}
-          }
-        }).then(function (response) {
-          response.docs.map(function (doc) {
-            return doc._id;
-          }).sort().should.deep.equal(
-            ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
-              'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
-              'yoshi']
-          );
-        });
-      });
+    );
+    const response = await db.find({
+      sort: [{_id: 'desc'}],
+      selector: {
+        _id: {$gte: null}
+      }
+    });
+    response.docs.map((doc) => doc._id).sort().should.deep.equal(
+      ['a', 'b', 'c', 'dk', 'falcon', 'fox', 'kirby', 'link', 'luigi',
+        'mario', 'master_hand', 'ness', 'pikachu', 'puff', 'samus',
+        'yoshi']
+    );
   });
 });

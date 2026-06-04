@@ -1,102 +1,97 @@
 'use strict';
 
-describe('test.callbacks.js', function () {
-  it('should create an index', function () {
-    var db = context.db;
-    var index = {
+describe('test.callbacks.js', () => {
+  it('should create an index', async () => {
+    const db = context.db;
+    const index = {
       "index": {
         "fields": ["foo"]
       },
       "name": "foo-index",
       "type": "json"
     };
-    return new Promise(function (resolve, reject) {
-      return db.createIndex(index, function (err, res) {
+    const createResp = await new Promise((resolve, reject) => {
+      db.createIndex(index, (err, res) => {
         if (err) {
           return reject(err);
         }
-        return resolve(res);
+        resolve(res);
       });
-    }).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('created');
-      return new Promise(function (resolve, reject) {
-        db.createIndex(index, function (err, res) {
-          if (err) {
-            return reject(err);
-          }
-          return resolve(res);
-        });
-      });
-    }).then(function (response) {
-      response.id.should.match(/^_design\//);
-      response.name.should.equal('foo-index');
-      response.result.should.equal('exists');
     });
+    createResp.id.should.match(/^_design\//);
+    createResp.name.should.equal('foo-index');
+    createResp.result.should.equal('created');
+    const existsResp = await new Promise((resolve, reject) => {
+      db.createIndex(index, (err, res) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(res);
+      });
+    });
+    existsResp.id.should.match(/^_design\//);
+    existsResp.name.should.equal('foo-index');
+    existsResp.result.should.equal('exists');
   });
 
-  it.skip('should find existing indexes', function () {
-    var db = context.db;
-    return new Promise(function (resolve, reject) {
-      db.getIndexes(function (err, response) {
+  it.skip('should find existing indexes', async () => {
+    const db = context.db;
+    const initialResp = await new Promise((resolve, reject) => {
+      db.getIndexes((err, response) => {
         if (err) {
           return reject(err);
         }
         resolve(response);
       });
-    }).then(function (response) {
-      response.should.deep.equal({
-        "total_rows": 1,
-        indexes: [{
-          ddoc: null,
-          name: '_all_docs',
-          type: 'special',
-          def: {fields: [{_id: 'asc'}]}
-        }]
-      });
-      var index = {
-        "index": {
-          "fields": ["foo"]
-        },
-        "name": "foo-index",
-        "type": "json"
-      };
-      return db.createIndex(index);
-    }).then(function () {
-      return db.getIndexes();
-    }).then(function (resp) {
-      var ddoc = resp.indexes[1].ddoc;
-      ddoc.should.match(/_design\/.+/);
-      delete resp.indexes[1].ddoc;
-      resp.should.deep.equal({
-        "total_rows": 2,
-        "indexes": [
-          {
-            "ddoc": null,
-            "name": "_all_docs",
-            "type": "special",
-            "def": {
-              "fields": [
-                {
-                  "_id": "asc"
-                }
-              ]
-            }
-          },
-          {
-            "name": "foo-index",
-            "type": "json",
-            "def": {
-              "fields": [
-                {
-                  "foo": "asc"
-                }
-              ]
-            }
+    });
+    initialResp.should.deep.equal({
+      "total_rows": 1,
+      indexes: [{
+        ddoc: null,
+        name: '_all_docs',
+        type: 'special',
+        def: {fields: [{_id: 'asc'}]}
+      }]
+    });
+    const index = {
+      "index": {
+        "fields": ["foo"]
+      },
+      "name": "foo-index",
+      "type": "json"
+    };
+    await db.createIndex(index);
+    const resp = await db.getIndexes();
+    const ddoc = resp.indexes[1].ddoc;
+    ddoc.should.match(/_design\/.+/);
+    delete resp.indexes[1].ddoc;
+    resp.should.deep.equal({
+      "total_rows": 2,
+      "indexes": [
+        {
+          "ddoc": null,
+          "name": "_all_docs",
+          "type": "special",
+          "def": {
+            "fields": [
+              {
+                "_id": "asc"
+              }
+            ]
           }
-        ]
-      });
+        },
+        {
+          "name": "foo-index",
+          "type": "json",
+          "def": {
+            "fields": [
+              {
+                "foo": "asc"
+              }
+            ]
+          }
+        }
+      ]
     });
   });
 });
