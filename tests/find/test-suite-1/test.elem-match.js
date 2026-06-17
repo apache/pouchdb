@@ -80,6 +80,26 @@ describe('test.elem-match.js', () => {
     }).should.deep.equal(['2', '3']);
   });
 
+  it('with null element in object array', async () => {
+    const db = context.db;
+    const docs = [
+      {_id: 'null-after-object', test: [{foo: 'blub'}, null]},
+      {_id: 'only-null', test: [null]},
+      {_id: 'no-match', test: [{foo: 'nope'}, null]}
+    ];
+
+    await db.bulkDocs(docs);
+    const resp = await db.find({
+      selector: {
+        test: {$elemMatch: {foo: 'blub'}},
+      },
+      fields: ['_id']
+    });
+    resp.docs.map((doc) => {
+      return doc._id;
+    }).should.deep.equal(['null-after-object']);
+  });
+
   it('should error for non-object query value', async () => {
     const db = context.db;
     try {
