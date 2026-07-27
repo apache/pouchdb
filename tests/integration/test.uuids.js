@@ -41,4 +41,17 @@ describe('test.uuid.js', function () {
 
     _rev.should.match(/^[0-9a-fA-F]{32}$/);
   });
+
+  it('polyfill UUID RFC4122 test', function () {
+    // remove native randomUUID to mimic behaviour of insecure context (non https or localhost)
+    const originalRandomUUID = crypto.randomUUID;
+    crypto.randomUUID = undefined;
+
+    rfcRegexp.test(testUtils.uuid()).should
+      .equal(true,
+        'Single UUID through Pouch.utils.uuid complies with RFC4122.');
+
+    // restore crypto.randomUUID.
+    crypto.randomUUID = originalRandomUUID;
+  });
 });
