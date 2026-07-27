@@ -1,0 +1,13 @@
+---
+pagination:
+  data: collections.stable
+  size: 1
+  alias: doc
+permalink: "{{ doc.data.page.url | makeURLForStable }}/"
+eleventyComputed:
+  layout: "{{ doc.data.layout }}"
+  title: "{{ doc.data.title }}"
+  sidebar: "{{ doc.data.sidebar }}"
+  edit: {{ doc.data.edit | boolean }}
+---
+{{ doc.templateContent }}

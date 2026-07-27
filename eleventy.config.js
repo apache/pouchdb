@@ -50,6 +50,52 @@ module.exports = eleventyConfig => {
     return collectionApi.getFilteredByTag('guides').sort((a, b) => a.data.index - b.data.index);
   });
 
+  // Used to filter a collection of guides by version
+  eleventyConfig.addFilter("byVersion", (collection, version) => {
+    const result = collection.filter(item => {
+      const targetVersion = version || item.data.versions.stable;
+        return item.data.version === targetVersion;
+      }
+    );
+    return result;
+  });
+
+  // Used to convert a versioned URL to a stable URL, e.g:
+  // from http://localhost:4000/version/8.0.0/api.html
+  //   to http://localhost:4000/api.html/
+  // This is used for the sidebar navigation items, the version switcher,
+  // and the old version warning block, and helps to build links to the `root`
+  // stable docs when the source is a versioned doc.
+  // The `version` prop is the page prop from wherever this is called,
+  // it determines whether we’re displaying versioned or stable docs.
+  eleventyConfig.addFilter("makeURLForStable", (content, version) => {
+    // if version is undefined, we’re in the root, so displaying `stable` docs.
+    // This means we need to strip the `/versions/[versionNumber]` fragment
+    // out of the URL
+    if (!version) {
+      return content.replace(/^\/version\/[^/]*/, '');
+    }
+    return content;
+  });
+
+  // Transforms any doc URL into the same URL for any other version.
+  // from http://localhost:4000/version/8.0.0/api.html
+  //   to http://localhost:4000/version/7.3.0/api.html
+  // You can also go from `stable` to versioned or vice versa.
+  // Used in the version switcher component
+  eleventyConfig.addFilter("transformDocURL", (content, targetVersion) => {
+    if (!targetVersion) {
+      return content;
+    }
+    if (content.includes('/version/')) {
+      // replace the version in a URL
+      return content.replace(/^\/version\/[^/]*/, `/version/${targetVersion}`);
+    } else {
+      // Prepend the version to the URL if it doesn‘t have one
+      return `/version/${targetVersion}${content}`;
+    }
+  });
+
   eleventyConfig.addCollection('pages', collectionApi => {
     // zero-indexed, but skip page 1, as it's served at /blog/
     const pageCount = Math.ceil(collectionApi.getFilteredByTag('posts').length / 5) - 1;
@@ -70,6 +116,32 @@ module.exports = eleventyConfig => {
     return collectionApi
         .getFilteredByTag('posts')
         .sort((a, b) => b.date - a.date || b.inputPath.localeCompare(a.inputPath));
+  });
+
+  // Make a `stable` collection out of the most recent release files
+  // The stable release does not exist as actual files on disk, it is
+  // basically a copy of the versioned docs in
+  // _docs/versions/<versions.stable>,
+  // where versions.stable is defined in `_/docs/data/versions.js`
+  eleventyConfig.addCollection("stable", (collectionApi) => {
+    const stable = collectionApi.getAll().filter(item => {
+      const filePath = item.data.page.filePathStem;
+      const version = filePath.split('/')[2];
+      return version === item.data.versions.stable;
+      }
+    );
+    return stable;
+  });
+
+  // Filter to compute a frontmatter boolean from a frontmatter
+  // boolean. No idea why this is necessary, and it’s only used
+  // in stable.liquid to make sure a boolean taken from another
+  // file’s frontmatter stays a boolean and doesn’t become a string
+  eleventyConfig.addFilter('boolean', function (content) {
+    if (content === "true" || content === true) {
+      return true;
+    }
+    return false;
   });
 
   eleventyConfig.addFilter('first_paragraph', function (content) {

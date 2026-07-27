@@ -1,0 +1,27 @@
+<!-- 
+ `version` only exists if we’re on a /version/<versionnumber> URL 
+  Currently still uses Bootstrap 3.1.1 dropdowns, see:
+  https://bootstrapdocs.com/v3.1.1/docs/components/#btn-dropdowns
+  https://bootstrapdocs.com/v3.1.1/docs/javascript/#dropdowns
+-->
+{% if version %}
+  {% assign currentVersion = version %}
+{% else %}
+  {% assign currentVersion = "Stable (" | append: versions.stable | append: ")" %}
+{% endif %}
+<div class="version-switcher">
+  <div class="btn-group dropdown dropup">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Version: {{currentVersion}} <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li class="stable"><a href="{{ page.url | makeURLForStable }}">Stable ({{versions.stable}})</a></li>
+      <li role="separator" class="divider"></li>
+      {% for v in versions.all reversed %}
+        <li><a href="{{ page.url | transformDocURL: v }}">{{v}}</a></li>
+      {% endfor %}
+      <li role="separator" class="divider"></li>
+      <li><a href="{{ page.url | transformDocURL: 'latest' }}">Latest</a></li>
+    </ul>
+  </div>
+</div>
