@@ -22,6 +22,7 @@ help fixing them though.
   - [Test options](#test-options)
 - [Other sets of tests](#other-sets-of-tests)
   - [`find` and `mapreduce`](#find-and-mapreduce)
+  - [multi-tab tests](#multi-tab-tests)
   - ["Fuzzy" tests](#fuzzy-tests)
   - [Performance tests](#performance-tests)
   - [Running tests in the browser](#running-tests-in-the-browser)
@@ -234,6 +235,24 @@ like so:
 
 Note that the default choice for the `SERVER` value (`pouchdb-express-router`)
 does not support `find` or `mapreduce` and does not need to pass these tests.
+
+### Multi-tab tests
+
+We have a few tests to check that interactions with backing stores like
+IndexedDB are synchronized across tabs where multiple PouchDB instances are
+connected to the same database. These have to be scripted via Playwright rather
+than being run inside the normal unit test suite. To run them:
+
+    $ npm run test-multitab
+
+Two environment variables can be used to control how these are run:
+
+- `CLIENT`: may be `firefox`, `chromium` or `webkit` to select the browser where
+  the tests will be run.
+- `ADAPTERS`: may be `idb` or `indexeddb` to set which backend adapter PouchDB
+  will use.
+
+All combinations of these should be tested on CI.
 
 ### "Fuzzy" tests
 
