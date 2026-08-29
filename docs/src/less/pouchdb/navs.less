@@ -30,11 +30,14 @@
 }
 
 .nav-sidebar {
+  > li > a {
+    border-right: 2px solid transparent;
+    padding-right: 10px;
+  }
   > li.active > a,
   > li > a:hover {
     color: darken(@brand-primary, 10%);
     border-right: 2px solid lighten(@brand-primary, 10%);
-    padding-right: 10px;
   }
 }
 
@@ -66,7 +69,7 @@
 }
 
 @media (max-width: @screen-sm-min) {
-  .nav-sidebar-wrapper { position: static; }
+  .nav-sidebar-wrapper { position: static !important; } /* !important used to override stickyfill */
   .nav.nav-sidebar { margin-bottom: 25px; }
   .nav-head,
   .nav.nav-sidebar { text-align: center; }
@@ -95,7 +98,6 @@
   color: #eee;
   padding-bottom: 15px;
   margin-bottom: -15px;
-  z-index: 1;
 }
 .nav-code > li > a:hover {
   border-color: transparent;
