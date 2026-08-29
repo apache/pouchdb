@@ -54,7 +54,7 @@
     "readable-stream": "1.1.14",
     "spark-md5": "3.0.2",
     "through2": "3.0.2",
-    "uuid": "8.3.2",
+    "uuid": "11.1.1",
     "vuvuzela": "1.0.3"
   },
   "devDependencies": {
