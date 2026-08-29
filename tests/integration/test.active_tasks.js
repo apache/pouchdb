@@ -1,26 +1,26 @@
 'use strict';
 
-describe('test.active_tasks.js', function () {
+describe('test.active_tasks.js', () => {
 
-  afterEach(function (done) {
+  afterEach((done) => {
     PouchDB.activeTasks.tasks = {};
     return done();
   });
 
-  it('Can add a task', function () {
+  it('Can add a task', () => {
     const task1 = {name: 'lol', total_items: 12};
     const id1 = PouchDB.activeTasks.add(task1);
     id1.should.be.a('string');
   });
 
-  it('Can get tasks by id', function () {
+  it('Can get tasks by id', () => {
     const task2 = {name: 'wat', total_items: 546};
     const id2 = PouchDB.activeTasks.add(task2);
     const got2 = PouchDB.activeTasks.get(id2);
     got2['id'].should.equal(id2);
   });
 
-  it('Can get all tasks', function () {
+  it('Can get all tasks', () => {
     const task1 = {name: 'lol', total_items: 12};
     const task2 = {name: 'wat', total_items: 546};
     const id1 = PouchDB.activeTasks.add(task1);
@@ -33,7 +33,7 @@ describe('test.active_tasks.js', function () {
     tasks[1].id.should.equal(id2);
   });
 
-  it('Can update a task', function () {
+  it('Can update a task', () => {
     const task1 = {name: 'lol', total_items: 12};
     const task2 = {name: 'wat', total_items: 546};
     const id1 = PouchDB.activeTasks.add(task1);
@@ -47,7 +47,7 @@ describe('test.active_tasks.js', function () {
     got2['updated_at'].should.be.a('string');
   });
 
-  it('Can remove a task', function () {
+  it('Can remove a task', () => {
     const task1 = {name: 'lol', total_items: 12};
     const task2 = {name: 'wat', total_items: 546};
     const id1 = PouchDB.activeTasks.add(task1);

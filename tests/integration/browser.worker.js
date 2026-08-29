@@ -9,82 +9,76 @@
 // skipped everywhere, as they weren't being run anyway.
 // See: https://github.com/pouchdb/pouchdb/issues/8680
 // TODO re-introduce these tests in environments where they are appropriate.
-describe.skip('browser.worker.js', function () {
+describe.skip('browser.worker.js', () => {
 
-  var worker;
-  var dbs = {};
+  let worker;
+  const dbs = {};
 
-  before(function () {
+  before(() => {
     worker = new Worker('worker.js');
 
     worker.postMessage(['source', testUtils.pouchdbSrc()]);
   });
 
   function workerPromise(message) {
-    return new Promise(function (resolve, reject) {
-      worker.onerror = function (e) {
-        reject(new Error(e.message + ": " + e.filename + ': ' + e.lineno));
+    return new Promise((resolve, reject) => {
+      worker.onerror = (e) => {
+        reject(new Error(`${e.message}: ${e.filename}: ${e.lineno}`));
       };
-      worker.onmessage = function (e) {
+      worker.onmessage = (e) => {
         resolve(e.data);
       };
       worker.postMessage(message);
     });
   }
 
-  beforeEach(function (done) {
+  beforeEach((done) => {
     dbs.name = testUtils.adapterUrl('local', 'testdb');
     dbs.remote = testUtils.adapterUrl('http', 'test_repl_remote');
     testUtils.cleanup([dbs.name, dbs.remote], done);
   });
 
-  after(function (done) {
+  after((done) => {
     worker.terminate();
     testUtils.cleanup([dbs.name, dbs.remote], done);
   });
 
-  it('create it', function () {
-    return workerPromise('ping').then(function (data) {
-      data.should.equal('pong');
-    });
+  it('create it', async () => {
+    const data = await workerPromise('ping');
+    data.should.equal('pong');
   });
 
-  it('check pouch version', function () {
-    return workerPromise('version').then(function (data) {
-      PouchDB.version.should.equal(data);
-    });
+  it('check pouch version', async () => {
+    const data = await workerPromise('version');
+    PouchDB.version.should.equal(data);
   });
 
-  it('create remote db', function () {
-    return workerPromise(['create', dbs.remote]).then(function (data) {
-      data.should.equal('lala');
-    });
+  it('create remote db', async () => {
+    const data = await workerPromise(['create', dbs.remote]);
+    data.should.equal('lala');
   });
 
-  it('create local db', function () {
-    return workerPromise(['create', dbs.name]).then(function (data) {
-      data.should.equal('lala');
-    });
+  it('create local db', async () => {
+    const data = await workerPromise(['create', dbs.name]);
+    data.should.equal('lala');
   });
 
-  it('add doc with blob attachment', function () {
-    return workerPromise(['postAttachmentThenAllDocs', dbs.name]).then(function (data) {
-      data.title.should.equal('lalaa');
-    });
+  it('add doc with blob attachment', async () => {
+    const data = await workerPromise(['postAttachmentThenAllDocs', dbs.name]);
+    data.title.should.equal('lalaa');
   });
 
-  it('put an attachment', function () {
-    var blob = new Blob(['foobar'], {type: 'text/plain'});
-    var message = ['putAttachment', dbs.name, 'doc', 'att.txt', blob,
+  it('put an attachment', async () => {
+    const blob = new Blob(['foobar'], {type: 'text/plain'});
+    const message = ['putAttachment', dbs.name, 'doc', 'att.txt', blob,
       'text/plain'];
-    return workerPromise(message).then(function (blob) {
-      blob.type.should.equal('text/plain');
-      blob.size.should.equal(6);
-    });
+    const result = await workerPromise(message);
+    result.type.should.equal('text/plain');
+    result.size.should.equal(6);
   });
 
-  it('total_rows consistent between worker and main thread', function () {
-    var db = new PouchDB(dbs.name);
+  it('total_rows consistent between worker and main thread', async () => {
+    const db = new PouchDB(dbs.name);
 
     // this test only makes sense for idb
     if (db.adapter !== 'idb') {
@@ -92,26 +86,22 @@ describe.skip('browser.worker.js', function () {
     }
 
     // both threads agree the count is 0
-    return Promise.all([
-      db.allDocs().then(function (res) {
-        res.total_rows.should.equal(0);
-      }),
-      workerPromise(['allDocs', dbs.name]).then(function (res) {
-        res.total_rows.should.equal(0);
-      })
-    ]).then(function () {
-      // post a doc
-      return db.post({});
-    }).then(function () {
-      // both threads agree the count is 1
-      return Promise.all([
-        db.allDocs().then(function (res) {
-          res.total_rows.should.equal(1);
-        }),
-        workerPromise(['allDocs', dbs.name]).then(function (res) {
-          res.total_rows.should.equal(1);
-        })
-      ]);
-    });
+    const [res1, workerRes1] = await Promise.all([
+      db.allDocs(),
+      workerPromise(['allDocs', dbs.name])
+    ]);
+    res1.total_rows.should.equal(0);
+    workerRes1.total_rows.should.equal(0);
+
+    // post a doc
+    await db.post({});
+
+    // both threads agree the count is 1
+    const [res2, workerRes2] = await Promise.all([
+      db.allDocs(),
+      workerPromise(['allDocs', dbs.name])
+    ]);
+    res2.total_rows.should.equal(1);
+    workerRes2.total_rows.should.equal(1);
   });
 });

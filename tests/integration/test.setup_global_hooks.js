@@ -1,18 +1,17 @@
 "use strict";
 
-var currentListener = null;
-var currentError = null;
+let currentListener = null;
+let currentError = null;
 
-beforeEach(function (done) {
+beforeEach(() => {
   currentError = null;
-  currentListener = function (error) {
+  currentListener = (error) => {
     currentError = error;
   };
   testUtils.addUnhandledRejectionListener(currentListener);
-  done();
 });
 
-afterEach(function (done) {
+afterEach(async () => {
   testUtils.removeUnhandledRejectionListener(currentListener);
   if (currentError) {
     if (typeof PromiseRejectionEvent !== 'undefined' &&
@@ -21,6 +20,6 @@ afterEach(function (done) {
     }
 
     console.error(currentError);
+    throw currentError;
   }
-  done(currentError);
 });

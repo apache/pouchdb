@@ -1,42 +1,41 @@
 'use strict';
 
-var adapters = [
+const adapters = [
   ['local', 'http'],
   ['http', 'http'],
   ['http', 'local'],
   ['local', 'local']
 ];
 
-adapters.forEach(function (adapters) {
-  var title = 'test.sync_events.js-' + adapters[0] + '-' + adapters[1];
-  describe('suite2 ' + title, function () {
+adapters.forEach((adapters) => {
+  const title = `test.sync_events.js-${adapters[0]}-${adapters[1]}`;
+  describe(`suite2 ${title}`, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapters[0], 'testdb');
       dbs.remote = testUtils.adapterUrl(adapters[1], 'test_repl_remote');
     });
 
-    afterEach(function (done) {
+    afterEach((done) => {
       testUtils.cleanup([dbs.name, dbs.remote], done);
     });
 
-    it('#4251 Should fire paused and active on sync', function (done) {
+    it('#4251 Should fire paused and active on sync', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
 
-      db.bulkDocs([{_id: 'a'}, {_id: 'b'}]).then(function () {
+      await db.bulkDocs([{_id: 'a'}, {_id: 'b'}]);
 
-        var repl = db.sync(remote, {retry: true, live: true});
-        var counter = 0;
+      await new Promise((resolve) => {
+        const repl = db.sync(remote, {retry: true, live: true});
+        let counter = 0;
 
-        repl.on('complete', function () {
-          done();
-        });
+        repl.on('complete', resolve);
 
-        repl.on('active', function () {
+        repl.on('active', () => {
           counter++;
           if (counter === 1) {
             // We are good, initial replication
@@ -45,7 +44,7 @@ adapters.forEach(function (adapters) {
           }
         });
 
-        repl.on('paused', function () {
+        repl.on('paused', () => {
           counter++;
           if (counter === 1) {
             // Maybe a bug, if we have data should probably
@@ -61,27 +60,30 @@ adapters.forEach(function (adapters) {
 
     });
 
-    it('#5710 Test pending property support', function (done) {
+    it('#5710 Test pending property support', async () => {
 
-      var db = new PouchDB(dbs.name);
-      var remote = new PouchDB(dbs.remote);
-      var docId = 0;
-      var numDocs = 10;
+      const db = new PouchDB(dbs.name);
+      const remote = new PouchDB(dbs.remote);
+      let docId = 0;
+      const numDocs = 10;
 
-      function generateDocs(n) {
-        return Array.apply(null, new Array(n)).map(function () {
+      const generateDocs = (n) => {
+        return Array.apply(null, new Array(n)).map(() => {
           docId += 1;
           return {
             _id: docId.toString(),
             foo: Math.random().toString()
           };
         });
-      }
-      remote.bulkDocs(generateDocs(numDocs)).then(function () {
-        var repl = db.sync(remote, { retry: true, live: false, batch_size: 4 });
-        var pendingSum = 0;
+      };
 
-        repl.on('change', function (info) {
+      await remote.bulkDocs(generateDocs(numDocs));
+
+      await new Promise((resolve) => {
+        const repl = db.sync(remote, { retry: true, live: false, batch_size: 4 });
+        let pendingSum = 0;
+
+        repl.on('change', (info) => {
           if (typeof info.change.pending === 'number') {
             pendingSum += info.change.pending;
             if (info.change.pending === 0) {
@@ -90,11 +92,11 @@ adapters.forEach(function (adapters) {
           }
         });
 
-        repl.on('complete', function () {
+        repl.on('complete', () => {
           if (pendingSum > 0) {
             pendingSum.should.equal(numDocs);
           }
-          done();
+          resolve();
         });
       });
     });

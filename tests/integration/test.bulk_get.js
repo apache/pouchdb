@@ -1,151 +1,107 @@
 'use strict';
 
-var adapters = ['http', 'local'];
+const adapters = ['http', 'local'];
 
-adapters.forEach(function (adapter) {
-  describe('test.bulk_get.js-' + adapter, function () {
+adapters.forEach((adapter) => {
+  describe(`test.bulk_get.js-${adapter}`, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapter, 'testdb');
     });
 
-    afterEach(function (done) {
+    afterEach((done) => {
       testUtils.cleanup([dbs.name], done);
     });
 
-    it('test bulk get with rev specified', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'foo', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'foo', rev}
-          ]
-        }).then(function (response) {
-          var result = response.results[0];
-          result.id.should.equal("foo");
-          result.docs[0].ok._rev.should.equal(rev);
-          done();
-        });
+    it('test bulk get with rev specified', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'foo', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo', rev}]
       });
+      const result = response.results[0];
+      result.id.should.equal("foo");
+      result.docs[0].ok._rev.should.equal(rev);
     });
 
-    it('test bulk get with latest=true', function () {
-      var db = new PouchDB(dbs.name);
-      var first;
-
-      return db.post({ version: 'first' })
-        .then(function (info) {
-          first = info.rev;
-          return db.put({
-          _id: info.id,
-          _rev: info.rev,
-          version: 'second'
-        }).then(function (info) {
-          return db.bulkGet({
-            docs: [
-              {id: info.id, rev: first }
-            ],
-            latest: true
-          });
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok.version.should.equal('second');
-        });
+    it('test bulk get with latest=true', async () => {
+      const db = new PouchDB(dbs.name);
+      const info = await db.post({ version: 'first' });
+      const first = info.rev;
+      const info2 = await db.put({
+        _id: info.id, _rev: info.rev, version: 'second'
       });
+      const response = await db.bulkGet({
+        docs: [{id: info2.id, rev: first }], latest: true
+      });
+      const result = response.results[0];
+      result.docs[0].ok.version.should.equal('second');
     });
 
-    it('test bulk get with no rev specified', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'foo', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'foo'}
-          ]
-        }).then(function (response) {
-          var result = response.results[0];
-          result.id.should.equal("foo");
-          result.docs[0].ok._rev.should.equal(rev);
-          done();
-        });
+    it('test bulk get with no rev specified', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'foo', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo'}]
       });
+      const result = response.results[0];
+      result.id.should.equal("foo");
+      result.docs[0].ok._rev.should.equal(rev);
     });
 
-    it('_revisions is not returned by default', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'foo', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'foo', rev}
-          ]
-        }).then(function (response) {
-          var result = response.results[0];
-          should.not.exist(result.docs[0].ok._revisions);
-          done();
-        });
+    it('_revisions is not returned by default', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'foo', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo', rev}]
       });
+      const result = response.results[0];
+      should.not.exist(result.docs[0].ok._revisions);
     });
 
-    it('#5886 bulkGet with reserved id', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'constructor', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'constructor', rev}
-          ]
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._id.should.equal('constructor');
-          should.not.exist(result.docs[0].ok._revisions);
-          done();
-        });
+    it('#5886 bulkGet with reserved id', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'constructor', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'constructor', rev}]
       });
+      const result = response.results[0];
+      result.docs[0].ok._id.should.equal('constructor');
+      should.not.exist(result.docs[0].ok._revisions);
     });
 
-    it('_revisions is returned when specified', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'foo', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'foo', rev}
-          ],
-          revs: true
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._revisions.ids[0].should.equal(rev.substring(2));
-          done();
-        });
+    it('_revisions is returned when specified', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'foo', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo', rev}], revs: true
       });
+      const result = response.results[0];
+      result.docs[0].ok._revisions.ids[0].should.equal(rev.substring(2));
     });
 
     it('_revisions is returned when specified, using implicit rev',
-    function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({_id: 'foo', val: 1}).then(function (response) {
-        var rev = response.rev;
-        db.bulkGet({
-          docs: [
-            {id: 'foo'}
-          ],
-          revs: true
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._revisions.ids[0].should.equal(rev.substring(2));
-          done();
-        });
+    async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({_id: 'foo', val: 1});
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo'}], revs: true
       });
+      const result = response.results[0];
+      result.docs[0].ok._revisions.ids[0].should.equal(rev.substring(2));
     });
 
-    it('attachments are not included by default', function (done) {
-      var db = new PouchDB(dbs.name);
-
-      db.put({
+    it('attachments are not included by default', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({
         _id: 'foo',
         _attachments: {
           'foo.txt': {
@@ -153,25 +109,18 @@ adapters.forEach(function (adapter) {
             data: 'VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ='
           }
         }
-      }).then(function (response) {
-        var rev = response.rev;
-
-        db.bulkGet({
-          docs: [
-            {id: 'foo', rev}
-          ]
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._attachments['foo.txt'].stub.should.equal(true);
-          done();
-        });
       });
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo', rev}]
+      });
+      const result = response.results[0];
+      result.docs[0].ok._attachments['foo.txt'].stub.should.equal(true);
     });
 
-    it('attachments are included when specified', function (done) {
-      var db = new PouchDB(dbs.name);
-
-      db.put({
+    it('attachments are included when specified', async () => {
+      const db = new PouchDB(dbs.name);
+      const putResponse = await db.put({
         _id: 'foo',
         _attachments: {
           'foo.txt': {
@@ -179,28 +128,20 @@ adapters.forEach(function (adapter) {
             data: 'VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ='
           }
         }
-      }).then(function (response) {
-        var rev = response.rev;
-
-        db.bulkGet({
-          docs: [
-            {id: 'foo', rev}
-          ],
-          attachments: true
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._attachments['foo.txt'].data
-            .should.equal("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=");
-          done();
-        });
       });
+      const rev = putResponse.rev;
+      const response = await db.bulkGet({
+        docs: [{id: 'foo', rev}], attachments: true
+      });
+      const result = response.results[0];
+      result.docs[0].ok._attachments['foo.txt'].data
+        .should.equal("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=");
     });
 
     it('attachments are included when specified, using implicit rev',
-    function (done) {
-      var db = new PouchDB(dbs.name);
-
-      db.put({
+    async () => {
+      const db = new PouchDB(dbs.name);
+      await db.put({
         _id: 'foo',
         _attachments: {
           'foo.txt': {
@@ -208,19 +149,13 @@ adapters.forEach(function (adapter) {
             data: 'VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ='
           }
         }
-      }).then(function () {
-        db.bulkGet({
-          docs: [
-            {id: 'foo'}
-          ],
-          attachments: true
-        }).then(function (response) {
-          var result = response.results[0];
-          result.docs[0].ok._attachments['foo.txt'].data
-            .should.equal("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=");
-          done();
-        });
       });
+      const response = await db.bulkGet({
+        docs: [{id: 'foo'}], attachments: true
+      });
+      const result = response.results[0];
+      result.docs[0].ok._attachments['foo.txt'].data
+        .should.equal("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=");
     });
   });
 });

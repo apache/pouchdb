@@ -1,162 +1,135 @@
 'use strict';
 
-var adapters = ['http', 'local'];
+const adapters = ['http', 'local'];
 
-adapters.forEach(function (adapter) {
-  describe('test.revs_diff.js-' + adapter, function () {
+adapters.forEach((adapter) => {
+  describe(`test.revs_diff.js-${adapter}`, () => {
 
-    var dbs = {};
+    const dbs = {};
 
-    beforeEach(function () {
+    beforeEach(() => {
       dbs.name = testUtils.adapterUrl(adapter, 'testdb');
     });
 
-    afterEach(function (done) {
-      testUtils.cleanup([dbs.name], done);
+    afterEach(async () => {
+      await new Promise(resolve => testUtils.cleanup([dbs.name], resolve));
     });
 
-    it('Test revs diff', function (done) {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var revs = [];
-      db.post({
+    it('Test revs diff', async () => {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const revs = [];
+      const info = await db.post({
         test: 'somestuff',
         _id: 'somestuff'
-      }, function (err, info) {
-        revs.push(info.rev);
-        db.put({
-          _id: info.id,
-          _rev: info.rev,
-          another: 'test'
-        }, function (err, info2) {
-          revs.push(info2.rev);
-          db.revsDiff({ 'somestuff': revs }, function (err, results) {
-            results.should.not.include.keys('somestuff');
-            revs.push('2-randomid');
-            db.revsDiff({ 'somestuff': revs }, function (err, results) {
-              results.should.include.keys('somestuff');
-              results.somestuff.missing.should.have.length(1);
-              done();
-            });
-          });
-        });
       });
+      revs.push(info.rev);
+      const info2 = await db.put({
+        _id: info.id,
+        _rev: info.rev,
+        another: 'test'
+      });
+      revs.push(info2.rev);
+      let results = await db.revsDiff({ 'somestuff': revs });
+      results.should.not.include.keys('somestuff');
+      revs.push('2-randomid');
+      results = await db.revsDiff({ 'somestuff': revs });
+      results.should.include.keys('somestuff');
+      results.somestuff.missing.should.have.length(1);
     });
 
-    it('Test revs diff with opts object', function (done) {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var revs = [];
-      db.post({
+    it('Test revs diff with opts object', async () => {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const revs = [];
+      const info = await db.post({
         test: 'somestuff',
         _id: 'somestuff'
-      }, function (err, info) {
-        revs.push(info.rev);
-        db.put({
-          _id: info.id,
-          _rev: info.rev,
-          another: 'test'
-        }, function (err, info2) {
-          revs.push(info2.rev);
-          db.revsDiff({ 'somestuff': revs }, {}, function (err, results) {
-            results.should.not.include.keys('somestuff');
-            revs.push('2-randomid');
-            db.revsDiff({ 'somestuff': revs }, function (err, results) {
-              results.should.include.keys('somestuff');
-              results.somestuff.missing.should.have.length(1);
-              done();
-            });
-          });
-        });
       });
+      revs.push(info.rev);
+      const info2 = await db.put({
+        _id: info.id,
+        _rev: info.rev,
+        another: 'test'
+      });
+      revs.push(info2.rev);
+      let results = await db.revsDiff({ 'somestuff': revs }, {});
+      results.should.not.include.keys('somestuff');
+      revs.push('2-randomid');
+      results = await db.revsDiff({ 'somestuff': revs });
+      results.should.include.keys('somestuff');
+      results.somestuff.missing.should.have.length(1);
     });
 
-    it('Missing docs should be returned with all revisions', function (done) {
-      var db = new PouchDB(dbs.name);
-      var revs = ['1-a', '2-a', '2-b'];
-      db.revsDiff({'foo': revs }, function (err, results) {
-        results.should.include.keys('foo');
-        results.foo.missing.should.deep.equal(revs, 'listed all revs');
-        done();
-      });
+    it('Missing docs should be returned with all revisions', async () => {
+      const db = new PouchDB(dbs.name);
+      const revs = ['1-a', '2-a', '2-b'];
+      const results = await db.revsDiff({'foo': revs });
+      results.should.include.keys('foo');
+      results.foo.missing.should.deep.equal(revs, 'listed all revs');
     });
 
-    it('Conflicting revisions that are available', function (done) {
-      var doc = {_id: '939', _rev: '1-a'};
-      function createConflicts(db, callback) {
-        db.put(doc, { new_edits: false }, function () {
-          testUtils.putAfter(db, {
-            _id: '939',
-            _rev: '2-a'
-          }, '1-a', function () {
-            testUtils.putAfter(db, {
-              _id: '939',
-              _rev: '2-b'
-            }, '1-a', callback);
-          });
-        });
-      }
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      createConflicts(db, function () {
-        db.revsDiff({'939': ['1-a', '2-a', '2-b']}, function (err, results) {
-          results.should.not.include.keys('939');
-          done();
-        });
-      });
+    it('Conflicting revisions that are available', async () => {
+      const doc = {_id: '939', _rev: '1-a'};
+      const createConflicts = async (db) => {
+        await db.put(doc, { new_edits: false });
+        await new Promise((resolve) => testUtils.putAfter(db, {
+          _id: '939',
+          _rev: '2-a'
+        }, '1-a', resolve));
+        await new Promise((resolve) => testUtils.putAfter(db, {
+          _id: '939',
+          _rev: '2-b'
+        }, '1-a', resolve));
+      };
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      await createConflicts(db);
+      const results = await db.revsDiff({'939': ['1-a', '2-a', '2-b']});
+      results.should.not.include.keys('939');
     });
 
-    it('Deleted revisions that are available', function (done) {
-      function createDeletedRevision(db, callback) {
-        db.put({
+    it('Deleted revisions that are available', async () => {
+      const createDeletedRevision = async (db) => {
+        await db.put({
           _id: '935',
           _rev: '1-a'
-        }, { new_edits: false }, function () {
-          testUtils.putAfter(db, {
-            _id: '935',
-            _rev: '2-a',
-            _deleted: true
-          }, '1-a', callback);
-        });
-      }
-      var db = new PouchDB(dbs.name);
-      createDeletedRevision(db, function () {
-        db.revsDiff({'935': ['1-a', '2-a']}, function (err, results) {
-          results.should.not.include.keys('939');
-          done();
-        });
-      });
+        }, { new_edits: false });
+        await new Promise((resolve) => testUtils.putAfter(db, {
+          _id: '935',
+          _rev: '2-a',
+          _deleted: true
+        }, '1-a', resolve));
+      };
+      const db = new PouchDB(dbs.name);
+      await createDeletedRevision(db);
+      const results = await db.revsDiff({'935': ['1-a', '2-a']});
+      results.should.not.include.keys('939');
     });
 
-    it('Revs diff with empty revs', function () {
-      var db = new PouchDB(dbs.name);
-      return db.revsDiff({}).then(function (res) {
-        should.exist(res);
-      });
+    it('Revs diff with empty revs', async () => {
+      const db = new PouchDB(dbs.name);
+      const res = await db.revsDiff({});
+      should.exist(res);
     });
 
-    it('Test revs diff with reserved ID', function (done) {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var revs = [];
-      db.post({
+    it('Test revs diff with reserved ID', async () => {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const revs = [];
+      const info = await db.post({
         test: 'constructor',
         _id: 'constructor'
-      }, function (err, info) {
-        revs.push(info.rev);
-        db.put({
-          _id: info.id,
-          _rev: info.rev,
-          another: 'test'
-        }, function (err, info2) {
-          revs.push(info2.rev);
-          db.revsDiff({ 'constructor': revs }, function (err, results) {
-            results.should.not.include.keys('constructor');
-            revs.push('2-randomid');
-            db.revsDiff({ 'constructor': revs }, function (err, results) {
-              results.should.include.keys('constructor');
-              results.constructor.missing.should.have.length(1);
-              done();
-            });
-          });
-        });
       });
+      revs.push(info.rev);
+      const info2 = await db.put({
+        _id: info.id,
+        _rev: info.rev,
+        another: 'test'
+      });
+      revs.push(info2.rev);
+      let results = await db.revsDiff({ 'constructor': revs });
+      results.should.not.include.keys('constructor');
+      revs.push('2-randomid');
+      results = await db.revsDiff({ 'constructor': revs });
+      results.should.include.keys('constructor');
+      results.constructor.missing.should.have.length(1);
     });
 
   });
