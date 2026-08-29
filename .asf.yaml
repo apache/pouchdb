@@ -7,3 +7,79 @@
 github:
   pull_requests:
     allow_update_branch: true
+    master:
+      # Requires specific CI checks before merge/update.
+      required_status_checks:
+        # strict means "Require branches to be up to date before merging".
+        strict: true
+        checks:
+          # Required status checks that must pass
+          # Note: These contexts match the exact job names in GitHub
+          # Actions workflows. They do not include the workflow name as a
+          # prefix
+          - contexts: 
+            - browser-adapter (chromium, idb, npm test) 
+            - browser-adapter (chromium, idb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (chromium, idb, TYPE=mapreduce npm test) 
+            - browser-adapter (chromium, indexeddb, npm test) 
+            - browser-adapter (chromium, indexeddb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (chromium, indexeddb, TYPE=mapreduce npm test) 
+            - browser-adapter (chromium, memory, npm test)
+            - browser-adapter (chromium, memory, TYPE=find PLUGINS=pouchdb-find npm test)
+            - browser-adapter (chromium, memory, TYPE=mapreduce npm test)
+            - browser-adapter (firefox, idb, npm test) 
+            - browser-adapter (firefox, idb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (firefox, idb, TYPE=mapreduce npm test) 
+            - browser-adapter (firefox, indexeddb, npm test) 
+            - browser-adapter (firefox, indexeddb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (firefox, indexeddb, TYPE=mapreduce npm test) 
+            - browser-adapter (firefox, memory, npm test)
+            - browser-adapter (firefox, memory, TYPE=find PLUGINS=pouchdb-find npm test)
+            - browser-adapter (firefox, memory, TYPE=mapreduce npm test)
+            - browser-adapter (webkit, idb, npm test) 
+            - browser-adapter (webkit, idb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (webkit, idb, TYPE=mapreduce npm test) 
+            - browser-adapter (webkit, indexeddb, npm test) 
+            - browser-adapter (webkit, indexeddb, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - browser-adapter (webkit, indexeddb, TYPE=mapreduce npm test) 
+            - couchdb-browser (2.3, chromium, npm test) 
+            - couchdb-browser (2.3, chromium, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (2.3, chromium, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-browser (2.3, firefox, npm test) 
+            - couchdb-browser (2.3, firefox, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (2.3, firefox, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-browser (2.3, webkit, npm test) 
+            - couchdb-browser (2.3, webkit, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (2.3, webkit, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, chromium, npm test) 
+            - couchdb-browser (3.1, chromium, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, chromium, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, firefox, npm test) 
+            - couchdb-browser (3.1, firefox, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, firefox, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, webkit, npm test) 
+            - couchdb-browser (3.1, webkit, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-browser (3.1, webkit, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-nodejs (2.3, 22, npm test) 
+            - couchdb-nodejs (2.3, 22, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-nodejs (2.3, 22, TYPE=mapreduce ADAPTERS=http npm test) 
+            - couchdb-nodejs (3.1, 22, npm test) 
+            - couchdb-nodejs (3.1, 22, TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test) 
+            - couchdb-nodejs (3.1, 22, TYPE=mapreduce ADAPTERS=http npm test) 
+            - lint 
+            - nodejs (22, AUTO_COMPACTION=true npm test) 
+            - nodejs (22, CLIENT=firefox npm run test-webpack) 
+            - nodejs (22, npm run test-component) 
+            - nodejs (22, npm run test-fuzzy) 
+            - nodejs (22, npm run test-unit) 
+            - nodejs (22, npm run verify-build) 
+            - nodejs-perf (22, TYPE=performance npm test) 
+            - nodejs-sqlite-adapter (22, nodesqlite, npm test) 
+            - nodejs-sqlite-adapter (22, nodesqlite, TYPE=find PLUGINS=pouchdb-find npm test) 
+            - nodejs-sqlite-adapter (22, nodesqlite, TYPE=mapreduce npm test) 
+            - package-lock 
+            - shellcheck 
+            - test-docs 
+      # At least one review
+      required_pull_request_reviews:
+        required_approving_review_count: 1
