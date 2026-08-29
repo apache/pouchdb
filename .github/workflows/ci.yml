@@ -158,6 +158,30 @@ jobs:
         if: steps.retry.outcome == 'failure'
         run: ${{ matrix.cmd }}
 
+  # Run the multitab tests in every supported browser
+
+  multitab:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        client: ['firefox', 'chromium', 'webkit']
+        adapter: ['idb', 'indexeddb']
+    runs-on: ubuntu-latest
+    env:
+      CLIENT: ${{ matrix.client }}
+      ADAPTERS: ${{ matrix.adapter }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-node-package
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: ./.github/actions/build-pouchdb
+      - run: npx playwright install --with-deps ${{ matrix.client }}
+      - run: npm run test-multitab
+
   # Run the integration, find and mapreduce tests against all the Node.js
   # PouchDB adapters. This should be run for every adapter on every version of
   # Node.js we support.
