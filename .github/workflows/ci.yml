@@ -25,7 +25,7 @@ jobs:
   # Check style compliance of JavaScript code.
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,7 +38,7 @@ jobs:
   # Check shell scripts.
 
   shellcheck:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,7 +49,7 @@ jobs:
   # Check package-lock.json is up-to-date
 
   package-lock:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,7 +74,7 @@ jobs:
           - npm test
           - TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test
           - TYPE=mapreduce ADAPTERS=http npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       couchdb:
         image: couchdb:${{ matrix.couchdb }}
@@ -123,7 +123,7 @@ jobs:
           - npm test
           - TYPE=find PLUGINS=pouchdb-find ADAPTERS=http npm test
           - TYPE=mapreduce ADAPTERS=http npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       couchdb:
         image: couchdb:${{ matrix.couchdb }}
@@ -173,7 +173,7 @@ jobs:
           - npm test
           - TYPE=find PLUGINS=pouchdb-find npm test
           - TYPE=mapreduce npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       couchdb:
         image: couchdb:3.1
@@ -227,7 +227,7 @@ jobs:
           - npm test
           - TYPE=find PLUGINS=pouchdb-find npm test
           - TYPE=mapreduce npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       couchdb:
         image: couchdb:3.1
@@ -283,7 +283,7 @@ jobs:
           - npm run test-component
           - npm run test-fuzzy
           - npm run verify-build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SERVER: couchdb-master
       COUCH_HOST: http://admin:password@127.0.0.1:5984
@@ -327,7 +327,7 @@ jobs:
         node: [20, 22]
         cmd:
           - TYPE=performance npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -359,7 +359,7 @@ jobs:
           - npm test
           - TYPE=find PLUGINS=pouchdb-find npm test
           - TYPE=mapreduce npm test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       couchdb:
         image: couchdb:3.1
