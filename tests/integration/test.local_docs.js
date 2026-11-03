@@ -25,6 +25,43 @@ adapters.forEach(function (adapter) {
       });
     });
 
+    it('local docs - revisions use the 0-N scheme', function () {
+      var db = new PouchDB(dbs.name);
+      var doc = {_id: '_local/foo'};
+      return db.put(doc).then(function (res) {
+        res.rev.should.equal('0-1');
+        doc._rev = res.rev;
+        return db.put(doc);
+      }).then(function (res) {
+        res.rev.should.equal('0-2');
+        return db.get('_local/foo');
+      }).then(function (doc) {
+        doc._rev.should.equal('0-2');
+        return db.remove(doc);
+      }).then(function (res) {
+        res.rev.should.equal('0-0');
+      });
+    });
+
+    it('local docs - bulkDocs revisions use the 0-N scheme', function () {
+      // The http adapter sends local documents to CouchDB's _bulk_docs
+      // endpoint, which is not part of this contract.
+      if (testUtils.adapters().indexOf('http') !== -1) {
+        return;
+      }
+      var db = new PouchDB(dbs.name);
+      return db.bulkDocs([{_id: '_local/foo', v: 1}]).then(function (res) {
+        res[0].rev.should.equal('0-1');
+        return db.bulkDocs([{_id: '_local/foo', v: 2, _rev: res[0].rev}]);
+      }).then(function (res) {
+        res[0].rev.should.equal('0-2');
+        return db.get('_local/foo');
+      }).then(function (doc) {
+        doc._rev.should.equal('0-2');
+        doc.v.should.equal(2);
+      });
+    });
+
     it('local docs - put then get w/ revisions', function () {
       var db = new PouchDB(dbs.name);
       var doc = {
