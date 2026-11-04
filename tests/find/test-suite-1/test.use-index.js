@@ -99,4 +99,20 @@ describe('test.use-index.js', () => {
       err.error.should.equal("no_usable_index");
     }
   });
+
+  it('returns the same docs with a named index as without', async () => {
+    const db = context.db;
+    const selector = { name: { $gte: 'l' }, series: 'mario' };
+    const withIndex = await db.find({
+      selector,
+      use_index: ["index-1"],
+      fields: ["_id"]
+    });
+    const withoutIndex = await db.find({
+      selector,
+      fields: ["_id"]
+    });
+    withIndex.docs.should.deep.equal(withoutIndex.docs);
+    withIndex.docs.map(d => d._id).should.deep.equal(['luigi', 'mario', 'yoshi']);
+  });
 });
