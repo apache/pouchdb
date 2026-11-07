@@ -34,18 +34,18 @@ By default, SW will only cache the pages you’ve seen plus `offline.html`, whic
 
 To test the "Content updated, reload now?" toast that indicates that a new version of the site is available, run the dev server, make a change to the site (e.g. change some text somewhere), then navigate once or reload the page with a normal (not hard) reload. The update toast should show. When you click it, the page and the serviceworker cache will be updated.
 
-## PouchDB Version Updates
+## PouchDB Version Update Checklist
 
 If you’re releasing a new PouchDB version, the site also needs some updates:
 
-1. Replace `docs/static/js/pouchdb.min.js` with your newly built version of the same file (this is the PouchDB that is hosted by the website itself and available in the browser dev console).
-2. Update the `version` key in `docs/_data/site.js` to the new PouchDB version.
+- [ ] Replace `docs/static/js/pouchdb.min.js` with your newly built version of the same file (this is the PouchDB that is hosted by the website itself and available in the browser dev console).
+- [ ] Update the `version` key in `docs/_data/site.js` to the new PouchDB version.
 
 Then deploy the webite.
 
 ## Website Deployment
 
-Currently, the website is deployed manually by members of the team. In the near future, any website changes merged into `master` will be deployed automatically.
+Any website changes merged into `master` will be deployed to https://pouchdb.apache.org automatically.
 
 ## Technology Choices
 

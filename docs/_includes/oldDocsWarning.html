@@ -1,0 +1,13 @@
+<!-- `version` only exists if we’re on a /version/<versionnumber> URL -->
+{% if version and version != versions.stable %}
+  <div class="old-docs-warning">
+    <div class="alert alert-warning">
+      {% assign upToDateURL = page.url | makeURLForStable %}
+      <div class="alert-text"><p>✋ These are the docs for PouchDB version <code>{{version}}</code>. The current stable release is <a href="{{upToDateURL}}">{{versions.stable}}</a>.</p>
+      {% if version == 'latest'%}
+        <p>These docs are only relevant if you are building from source.</p>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}

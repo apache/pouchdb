@@ -1,4 +1,5 @@
-{% for guide in collections.guides %}
+{% assign guides = collections.guides | byVersion: version %}
+{% for guide in guides %}
     {% assign title = guide.data.title %}
     {% if guide.data.nav %}
         {% assign title = guide.data.nav %}

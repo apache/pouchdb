@@ -4,7 +4,8 @@ layout: 2ColLeft.html
 
 {{ content }}
 
-{% assign guides = collections.guides | sort: 'data.index' %}
+{% assign guidesForVersion = collections.guides | byVersion: version %}
+{% assign guides = guidesForVersion | sort: 'data.index' %}
 {% for guide in guides %}
     {% if title == guide.data.title %}
         {% assign prev = guide.data.index | minus: 2 %}
@@ -13,12 +14,12 @@ layout: 2ColLeft.html
         <ul class="pager">
             {% unless prev == -1 %}
                 <li class="previous">
-                    <a href="{{ guides[prev].url }}">&larr; {{ guides[prev].data.title }}</a>
+                    <a href="{{ guides[prev].url | makeURLForStable: version}}">&larr; {{ guides[prev].data.title }}</a>
                 </li>
             {% endunless %}
             {% if guides[next] %}
                 <li class="next">
-                    <a href="{{ guides[next].url }}">{{ guides[next].data.title }} &rarr;</a>
+                    <a href="{{ guides[next].url | makeURLForStable: version}}">{{ guides[next].data.title }} &rarr;</a>
                 </li>
             {% endif %}
         </ul>
