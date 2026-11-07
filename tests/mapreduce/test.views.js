@@ -1,10 +1,10 @@
 'use strict';
 
 describe('test.views.js', function () {
-  var dbType = testUtils.adapterType();
+  const dbType = testUtils.adapterType();
   if (dbType === 'http') { return; }
 
-  var dbs = {};
+  const dbs = {};
 
   beforeEach(function (done) {
     dbs.name = testUtils.adapterUrl(dbType, 'testdb');
@@ -18,7 +18,7 @@ describe('test.views.js', function () {
 
 
   it('Test basic view', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { foo: 'bar' },
@@ -28,7 +28,7 @@ describe('test.views.js', function () {
         }
       ]
     }, {}, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.foo, doc);
         }
@@ -55,7 +55,7 @@ describe('test.views.js', function () {
   });
 
   it('Test passing just a function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { foo: 'bar' },
@@ -65,7 +65,7 @@ describe('test.views.js', function () {
         }
       ]
     }, {}, function () {
-      var queryFun = function (doc) {
+      const queryFun = function (doc) {
         emit(doc.foo, doc);
       };
       db.get('volatile', function (_, doc) {
@@ -89,7 +89,7 @@ describe('test.views.js', function () {
   });
 
   it('Test opts.startkey/opts.endkey', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { key: 'key1' },
@@ -99,7 +99,7 @@ describe('test.views.js', function () {
         { key: 'key5' }
       ]
     }, {}, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.key, doc);
         }
@@ -135,7 +135,7 @@ describe('test.views.js', function () {
   });
 
   it('Test opts.key', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { key: 'key1' },
@@ -144,7 +144,7 @@ describe('test.views.js', function () {
         { key: 'key3' }
       ]
     }, {}, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.key, doc);
         }
@@ -166,7 +166,7 @@ describe('test.views.js', function () {
   });
 
   it.skip('Test basic view collation', function (done) {
-    var values = [];
+    const values = [];
     // special values sort before all other types
     values.push(null);
     values.push(false);
@@ -227,15 +227,15 @@ describe('test.views.js', function () {
       b: 2,
       c: 2
     });
-    var db = new PouchDB(dbs.name);
-    var docs = values.map(function (x, i) {
+    const db = new PouchDB(dbs.name);
+    const docs = values.map(function (x, i) {
       return {
-        _id: i.toString(),
+        _id: `${i}`,
         foo: x
       };
     });
     db.bulkDocs({ docs }, {}, function (err) {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.foo, null);
         }
@@ -269,7 +269,7 @@ describe('test.views.js', function () {
   });
 
   it('Test joins', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         {
@@ -279,7 +279,7 @@ describe('test.views.js', function () {
         { doc_id: 'mydoc' }
       ]
     }, {}, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           if (doc.doc_id) {
             emit(doc._id, { _id: doc.doc_id });
@@ -298,9 +298,9 @@ describe('test.views.js', function () {
   });
 
   it('No reduce function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.post({ foo: 'bar' }, function () {
-      var queryFun = {
+      const queryFun = {
         map: function () {
           emit('key', 'val');
         }
@@ -312,7 +312,7 @@ describe('test.views.js', function () {
   });
 
   it('Built in _sum reduce function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { val: 'bar' },
@@ -320,7 +320,7 @@ describe('test.views.js', function () {
         { val: 'baz' }
       ]
     }, null, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.val, 1);
         },
@@ -339,7 +339,7 @@ describe('test.views.js', function () {
   });
 
   it('Built in _count reduce function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { val: 'bar' },
@@ -347,7 +347,7 @@ describe('test.views.js', function () {
         { val: 'baz' }
       ]
     }, null, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.val, doc.val);
         },
@@ -366,7 +366,7 @@ describe('test.views.js', function () {
   });
 
   it('Built in _stats reduce function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { val: 'bar' },
@@ -374,7 +374,7 @@ describe('test.views.js', function () {
         { val: 'baz' }
       ]
     }, null, function () {
-      var queryFun = {
+      const queryFun = {
         map: function (doc) {
           emit(doc.val, 1);
         },
@@ -384,7 +384,7 @@ describe('test.views.js', function () {
         reduce: true,
         group_level: 999
       }, function (err, res) {
-        var stats = res.rows[0].value;
+        const stats = res.rows[0].value;
         stats.sum.should.equal(2);
         stats.count.should.equal(2);
         stats.min.should.equal(1);
@@ -396,9 +396,9 @@ describe('test.views.js', function () {
   });
 
   it('No reduce function, passing just a  function', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.post({ foo: 'bar' }, function () {
-      var queryFun = function () {
+      const queryFun = function () {
         emit('key', 'val');
       };
       db.query(queryFun, function () {
@@ -408,19 +408,19 @@ describe('test.views.js', function () {
   });
 
   it('Views should include _conflicts', function (done) {
-    var doc1 = {
+    const doc1 = {
       _id: '1',
       foo: 'bar'
     };
-    var doc2 = {
+    const doc2 = {
       _id: '1',
       foo: 'baz'
     };
-    var queryFun = function (doc) {
+    const queryFun = function (doc) {
       emit(doc._id, !!doc._conflicts);
     };
-    var db = new PouchDB(dbs.name);
-    var remote = new PouchDB(dbs.remote);
+    const db = new PouchDB(dbs.name);
+    const remote = new PouchDB(dbs.remote);
     db.post(doc1, function () {
       remote.post(doc2, function () {
         db.replicate.from(remote, function () {
@@ -437,7 +437,7 @@ describe('test.views.js', function () {
   });
 
   it('Map only documents with _conflicts (#1000)', function (done) {
-    var docs1 = [
+    const docs1 = [
       {
         _id: '1',
         foo: 'bar'
@@ -447,25 +447,25 @@ describe('test.views.js', function () {
         name: 'two'
       }
     ];
-    var doc2 = {
+    const doc2 = {
       _id: '1',
       foo: 'baz'
     };
-    var queryFun = function (doc) {
+    const queryFun = function (doc) {
       if (doc._conflicts) {
         emit(doc._id, doc._conflicts);
       }
     };
-    var db = new PouchDB(dbs.name);
-    var remote = new PouchDB(dbs.remote);
+    const db = new PouchDB(dbs.name);
+    const remote = new PouchDB(dbs.remote);
     db.bulkDocs({ docs: docs1 }, function (err, res) {
-      var revId1 = res[0].rev;
+      const revId1 = res[0].rev;
       remote.post(doc2, function (err, res) {
-        var revId2 = res.rev;
+        const revId2 = res.rev;
         db.replicate.from(remote, function () {
           db.get(docs1[0]._id, { conflicts: true }, function (err, res) {
-            var winner = res._rev;
-            var looser = winner === revId1 ? revId2 : revId1;
+            const winner = res._rev;
+            const looser = winner === revId1 ? revId2 : revId1;
             should.exist(res._conflicts);
             db.query(queryFun, function (err, res) {
               res.rows.should.have.length(1, 'One doc with conflicts');
@@ -482,7 +482,7 @@ describe('test.views.js', function () {
   });
 
   it('Test view querying with limit option', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { foo: 'bar' },
@@ -503,8 +503,8 @@ describe('test.views.js', function () {
   });
 
   it('Query non existing view returns error', function (done) {
-    var db = new PouchDB(dbs.name);
-    var doc = {
+    const db = new PouchDB(dbs.name);
+    const doc = {
       _id: '_design/barbar',
       views:
         { scores:
@@ -525,7 +525,7 @@ describe('test.views.js', function () {
   });
 
   it('Special document member _doc_id_rev', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({ docs: [{ foo: 'bar' }] }, null, function () {
       db.query(function (doc) {
         if (doc.foo === 'bar') {
@@ -539,7 +539,7 @@ describe('test.views.js', function () {
   });
 
   it('If reduce function returns 0', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({ docs: [{ foo: 'bar' }] }, null, function () {
       db.query({
         map: function (doc) {
@@ -556,7 +556,7 @@ describe('test.views.js', function () {
   });
 
   it('Testing skip with a view', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { foo: 'bar' },
@@ -575,7 +575,7 @@ describe('test.views.js', function () {
   });
 
   it('Testing skip with allDocs', function (done) {
-    var db = new PouchDB(dbs.name);
+    const db = new PouchDB(dbs.name);
     db.bulkDocs({
       docs: [
         { foo: 'bar' },
@@ -592,8 +592,8 @@ describe('test.views.js', function () {
   });
 
   it('Destroy view when db created with {name: foo}', function () {
-    var db = new PouchDB({name: dbs.name});
-    var doc = {
+    const db = new PouchDB({name: dbs.name});
+    const doc = {
       _id: '_design/index',
       views: {
         index:
@@ -608,8 +608,8 @@ describe('test.views.js', function () {
   });
 
   it('Map documents on 0/null/undefined/empty string', function (done) {
-    var db = new PouchDB(dbs.name);
-    var docs = [
+    const db = new PouchDB(dbs.name);
+    const docs = [
       {
         _id: 'doc0',
         num: 0
@@ -629,7 +629,7 @@ describe('test.views.js', function () {
       }
     ];
     db.bulkDocs({ docs }, function () {
-      var mapFunction = function (doc) {
+      const mapFunction = function (doc) {
         emit(doc.num, null);
       };
       db.query(mapFunction, {
@@ -665,10 +665,10 @@ describe('test.views.js', function () {
     });
   });
   if (typeof window === 'undefined' && !process.browser) {
-    var fs = require('fs');
+    const fs = require('fs');
     it.skip("destroy using prototype", function () {
-      var db = new PouchDB(dbs.name + 1);
-      var doc = {
+      const db = new PouchDB(dbs.name + 1);
+      const doc = {
         _id: '_design/barbar',
         views: {
           scores: {
